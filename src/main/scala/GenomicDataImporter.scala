@@ -5,7 +5,15 @@ import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
 import org.slf4j.{Logger, LoggerFactory}
 
 object GenomicDataImporter extends App {
-  val Array(task) = args
+  // Parse program arguments
+  val (task:String, batchId:Option[String]) = args match {
+    case Array(task) => (task, None)
+    case Array(task, batchId) => (task, Some(batchId))
+    case _ => {
+      LOGGER.error("Usage: GenomicDataImporter task_name [batch_id]")
+      System.exit(-1)
+    }
+  }
 
   val LOGGER: Logger = LoggerFactory.getLogger(GenomicDataImporter.getClass)
 
@@ -18,14 +26,21 @@ object GenomicDataImporter extends App {
   LOGGER.info(s"Executing task : $task")
 
   var returnCode: Int = task match {
-    //Soit fichier success pour trigger batch
-
-    case "check-new-files-on-s3" => {
+    case "validate-files-on-s3" => {
       try{
-        val files:List[String] = CheckS3DataTask.run(Configuration.bucket, s3Client)
-        LOGGER.info(s"Found ${files.size} files on S3 bucket 'clin'")
 
-        if (files.nonEmpty) 0 else -1
+        val files:List[String] = if (!batchId.isEmpty)
+                                    CheckS3DataTask.run(Configuration.bucket, batchId.get, s3Client)
+                                 else
+                                    CheckS3DataTask.run(Configuration.bucket, s3Client)
+
+        if (CheckS3DataTask.validateFiles(files)){
+          // Since all required files are present, suppress the _SUCCESS
+          // in order to prevent the next Airflow run to process this same batch a second time
+          LOGGER.info(s"Deleting _SUCCESS for batch ${batchId.get}")
+          s3Client.deleteObject(Configuration.bucket, s"${batchId.get}_SUCCESS")
+          0
+        } else -1
       }catch{
         case e: AmazonS3Exception =>
           e.getErrorCode match {
@@ -42,16 +57,18 @@ object GenomicDataImporter extends App {
       }
     }
     case "load-metadata-in-fhir" => {
-      LOGGER.info(s"Done loading specimens in HAPI Fhir")
-      0
+      try{
+        LoadHapiFhirDataTask.run(Configuration.fhirServerBase)
+        LOGGER.info(s"Done loading specimens in HAPI Fhir")
+        0
+      }catch{
+        case _ => -1
+      }
     }
     case "extract-fhir-data-for-etl" => {
       LOGGER.info(s"Done exporting patients and specimens from HAPI Fhir")
       0
     }
-    /*case "launch-etl" => {
-      // This will be done directly from Airflow
-    }*/
     case _ => {
       LOGGER.error(s"No such task: $task\n Available options are :\n \t[ check-new-files-on-s3 | load-metadata-in-fhir | extract-fhir-data-for-etl ]")
       -1
