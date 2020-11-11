@@ -3,8 +3,12 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
 import org.slf4j.{Logger, LoggerFactory}
+import task.{CheckS3DataTask, Configuration, LoadHapiFhirDataTask}
 
 object GenomicDataImporter extends App {
+
+  val LOGGER: Logger = LoggerFactory.getLogger(GenomicDataImporter.getClass)
+
   // Parse program arguments
   val (task:String, batchId:Option[String]) = args match {
     case Array(task) => (task, None)
@@ -14,8 +18,6 @@ object GenomicDataImporter extends App {
       System.exit(-1)
     }
   }
-
-  val LOGGER: Logger = LoggerFactory.getLogger(GenomicDataImporter.getClass)
 
   val credentials: BasicAWSCredentials = new BasicAWSCredentials(Configuration.accessKey, Configuration.secretKey)
 
@@ -62,7 +64,7 @@ object GenomicDataImporter extends App {
         LOGGER.info(s"Done loading specimens in HAPI Fhir")
         0
       }catch{
-        case _ => -1
+        case _ : Throwable => -1
       }
     }
     case "extract-fhir-data-for-etl" => {

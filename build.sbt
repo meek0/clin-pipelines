@@ -13,8 +13,12 @@ libraryDependencies ++= Seq(
   "ca.uhn.hapi.fhir" % "hapi-fhir-structures-r4" % "5.0.2",
   "ca.uhn.hapi.fhir" % "org.hl7.fhir.r4" % "5.0.0",
   "com.softwaremill.sttp.client3" %% "core" % "3.0.0-RC5",
-  "com.google.code.gson" % "gson" % "2.8.6"
+  "com.google.code.gson" % "gson" % "2.8.6",
+  "org.scalatest" %% "scalatest" % "3.0.8" % Test,
+  "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.38.5" % "test"
 )
+
+Test / fork := true
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
