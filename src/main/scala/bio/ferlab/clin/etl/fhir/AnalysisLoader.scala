@@ -1,11 +1,11 @@
-package fhir
+package bio.ferlab.clin.etl.fhir
 
 import java.util.Date
 
 import org.hl7.fhir.r4.model.{CodeableConcept, Coding, DocumentManifest, DocumentReference, Extension, IdType, Patient, Reference, StringType}
 import org.hl7.fhir.r4.model.Enumerations._
 import org.hl7.fhir.r4.model.DocumentManifest._
-import fhir.Model._
+import bio.ferlab.clin.etl.fhir.Model._
 
 import scala.collection.JavaConverters._
 import scala.util.Try

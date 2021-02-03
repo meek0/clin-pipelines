@@ -1,8 +1,8 @@
-package fhir
+package bio.ferlab.clin.etl.fhir
 
 import java.util.{Collections, Date}
 
-import fhir.Model.Terminology
+import bio.ferlab.clin.etl.fhir.Model.Terminology
 import org.hl7.fhir.r4.model._
 
 import scala.util.Try

@@ -1,4 +1,4 @@
-package fhir
+package bio.ferlab.clin.etl.fhir
 
 import java.util.{Date, Locale}
 

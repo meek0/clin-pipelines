@@ -1,11 +1,11 @@
-package fhir
+package bio.ferlab.clin.etl.fhir
 
 import java.util.{Collections, Date}
 
 import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.parser.IParser
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
-import fhir.Model.{AnalysisType, _}
+import bio.ferlab.clin.etl.fhir.Model.{AnalysisType, _}
 import org.hl7.fhir.instance.model.api.{IBaseResource, IIdType}
 import org.hl7.fhir.r4.model.Identifier.IdentifierUse
 import org.hl7.fhir.r4.model._

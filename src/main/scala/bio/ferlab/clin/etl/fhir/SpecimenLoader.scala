@@ -1,8 +1,8 @@
-package fhir
+package bio.ferlab.clin.etl.fhir
 
 import java.util.Date
 
-import fhir.Model.{ClinSpecimenType, Terminology}
+import bio.ferlab.clin.etl.fhir.Model.{ClinSpecimenType, Terminology}
 import org.hl7.fhir.r4.model._
 
 package object SpecimenLoader {

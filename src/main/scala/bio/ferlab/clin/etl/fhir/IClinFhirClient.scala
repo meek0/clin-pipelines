@@ -1,4 +1,4 @@
-package fhir
+package bio.ferlab.clin.etl.fhir
 
 import ca.uhn.fhir.rest.annotation.{IdParam, Read}
 import ca.uhn.fhir.rest.client.api.IBasicClient

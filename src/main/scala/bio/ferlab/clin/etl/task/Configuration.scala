@@ -1,4 +1,4 @@
-package task
+package bio.ferlab.clin.etl.task
 
 import scala.util.Properties
 

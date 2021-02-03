@@ -1,4 +1,4 @@
-package task
+package bio.ferlab.clin.etl.task
 
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ObjectListing

@@ -1,4 +1,4 @@
-package fhir
+package bio.ferlab.clin.etl.fhir
 
 import java.time.Duration
 
@@ -26,14 +26,14 @@ class HapiFhirDataLoadersTest extends FreeSpec with Matchers with BeforeAndAfter
     "JAVA_OPTS" -> "-Dhibernate.dialect=org.hibernate.dialect.H2Dialect"
   )
 
-  val container = FixedHostPortGenericContainer("chusj/clin-fhir-server:972a893",
+  val container = FixedHostPortGenericContainer("chusj/clin-bio.ferlab.clin.etl.fhir-server:972a893",
     waitStrategy = Wait.forHttp("/").withStartupTimeout(Duration.ofSeconds(60)),
     exposedHostPort = exposedPort,
     exposedContainerPort = 8080,
     env = fhirEnv
   )
 
-  val testUtil: FhirTestUtils = new FhirTestUtils(s"http://localhost:${exposedPort}/fhir")
+  val testUtil: FhirTestUtils = new FhirTestUtils(s"http://localhost:${exposedPort}/bio.ferlab.clin.etl.fhir")
 
   override def beforeAll() = {
     LOGGER.info("Preparing test.  Loading referential data.")

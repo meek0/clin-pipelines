@@ -1,9 +1,9 @@
-package fhir
+package bio.ferlab.clin.etl.fhir
 
 import java.nio.charset.StandardCharsets
 import java.util.{Collections, Date}
 
-import fhir.Model.{ClinExtension, FileInfo, Terminology}
+import bio.ferlab.clin.etl.fhir.Model.{ClinExtension, FileInfo, Terminology}
 import org.hl7.fhir.r4.model.DocumentReference._
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus
 import org.hl7.fhir.r4.model._

@@ -1,6 +1,6 @@
-package fhir
+package bio.ferlab.clin.etl.fhir
 
-import fhir.Model.{ClinExtension, ClinExtensionValueType}
+import bio.ferlab.clin.etl.fhir.Model.{ClinExtension, ClinExtensionValueType}
 import org.hl7.fhir.r4.model.{BooleanType, CodeType, DateType, DecimalType, Extension, IntegerType, StringType}
 
 package object Utils {

@@ -1,12 +1,12 @@
-package task
+package bio.ferlab.clin.etl.task
 
 import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.parser.IParser
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException
 import com.google.gson.{JsonObject, JsonParser}
-import fhir._
-import interceptor.AuthTokenInterceptor
+import bio.ferlab.clin.etl.fhir._
+import bio.ferlab.clin.etl.interceptor.AuthTokenInterceptor
 import org.hl7.fhir.r4.model.{Bundle, ServiceRequest, Specimen}
 import org.slf4j.{Logger, LoggerFactory}
 import sttp.model.{MediaType, StatusCode}

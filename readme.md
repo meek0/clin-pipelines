@@ -2,11 +2,11 @@
 ## Package
 ```sbt assembly```
 ## Execute
-```scala /path/to/clin-pipelines.jar task-name```
+```scala /path/to/clin-pipelines.jar bio.ferlab.clin.etl.task-name```
 
 or
 
-```java -jar /path/to/clin-pipelines.jar task-name```
+```java -jar /path/to/clin-pipelines.jar bio.ferlab.clin.etl.task-name```
 
 ## Local Development
 
