@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl.fhir
 
-import ca.uhn.fhir.rest.annotation.{IdParam, Read}
+import ca.uhn.fhir.rest.annotation.{IdParam, Read, Search}
 import ca.uhn.fhir.rest.client.api.IBasicClient
 import org.hl7.fhir.r4.model._
 

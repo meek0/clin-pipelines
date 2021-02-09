@@ -4,11 +4,11 @@ import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.parser.IParser
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException
-import com.google.gson.{JsonObject, JsonParser}
 import bio.ferlab.clin.etl.fhir._
 import bio.ferlab.clin.etl.interceptor.AuthTokenInterceptor
 import org.hl7.fhir.r4.model.{Bundle, ServiceRequest, Specimen}
 import org.slf4j.{Logger, LoggerFactory}
+import play.api.libs.json.Json
 import sttp.model.{MediaType, StatusCode}
 import sttp.client3._
 
@@ -105,8 +105,10 @@ object LoadHapiFhirDataTask {
     backend.close
 
     if (StatusCode.Ok == response.code && response.body.toString.trim.length > 0) {
-      val jsonResponse: JsonObject = JsonParser.parseString(response.body.right.get).getAsJsonObject
-      jsonResponse.get("access_token").getAsString
+       (Json.parse(response.body.right.get) \ "access_token").as[String]
+
+//     Ø val jsonResponse: JsonObject = JsonParser.parseString(response.body.right.get).getAsJsonObject
+//      jsonResponse.get("access_token").getAsString
     } else {
       throw new RuntimeException(s"Failed to obtain access token from Keycloak.\n${response.body.left.get}")
     }

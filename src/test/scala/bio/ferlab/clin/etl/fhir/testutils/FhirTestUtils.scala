@@ -1,42 +1,33 @@
-package bio.ferlab.clin.etl.fhir
+package bio.ferlab.clin.etl.fhir.testutils
 
-import java.util.{Collections, Date}
-
-import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
-import ca.uhn.fhir.parser.IParser
-import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
-import bio.ferlab.clin.etl.fhir.Model.{AnalysisType, _}
+import bio.ferlab.clin.etl.fhir.Model._
+import bio.ferlab.clin.etl.fhir.{AnalysisLoader, FileLoader, SpecimenLoader}
 import org.hl7.fhir.instance.model.api.{IBaseResource, IIdType}
+import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender
 import org.hl7.fhir.r4.model.Identifier.IdentifierUse
 import org.hl7.fhir.r4.model._
 import org.slf4j.{Logger, LoggerFactory}
-import org.testcontainers.shaded.org.apache.commons.lang.time.DateUtils
 
-class FhirTestUtils(val fhirBaseUrl: String) {
+import java.time.{LocalDate, ZoneId}
+import java.util.{Collections, Date}
 
+object FhirTestUtils {
+  val DEFAULT_ZONE_ID = ZoneId.of("UTC")
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
-  val fhirContext: FhirContext = FhirContext.forR4()
-  fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING)
-  fhirContext.getRestfulClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER)
-
-  val clinClient: IClinFhirClient = fhirContext.newRestfulClient(classOf[IClinFhirClient], fhirBaseUrl)
-  val fhirClient: IGenericClient = fhirContext.newRestfulGenericClient(fhirBaseUrl)
-
-  val parser: IParser = fhirContext.newJsonParser().setPrettyPrint(true)
-
-  def loadOrganizations() = {
+  def loadOrganizations()(implicit fhirServer: FhirServerContainer) = {
     val org: Organization = new Organization()
     org.setId("111")
     org.setName("CHU Ste-Justine")
     org.setAlias(Collections.singletonList(new StringType("CHUSJ")))
 
-    val id:IIdType = fhirClient.create().resource(org).execute().getId()
+    val id: IIdType = fhirServer.fhirClient.create().resource(org).execute().getId()
     LOGGER.info("Organization created with id : " + id.getValue())
+    id.getValue()
   }
 
-  def loadPractitioners() = {
-    val pr:Practitioner = new Practitioner()
+  def loadPractitioners()(implicit fhirServer: FhirServerContainer) = {
+    val pr: Practitioner = new Practitioner()
     pr.setId("222")
 
     val cc: CodeableConcept = new CodeableConcept()
@@ -55,55 +46,56 @@ class FhirTestUtils(val fhirBaseUrl: String) {
 
     pr.addName().setFamily("Afritt").addGiven("Barack").addPrefix("Dr.")
 
-    val id:IIdType = fhirClient.create().resource(pr).execute().getId()
+    val id: IIdType = fhirServer.fhirClient.create().resource(pr).execute().getId()
     LOGGER.info("Practitioner created with id : " + id.getValue())
+    id.getValue()
   }
 
-  def loadPatients() = {
-    val pt:Patient = new Patient()
-    pt.setId("333")
+
+  def loadPatients(lastName: String = "Doe", firstName: String = "John", identifier: String = "PT-000001", isActive: Boolean = true, birthDate: LocalDate = LocalDate.of(2000, 12, 21), gender: AdministrativeGender = Enumerations.AdministrativeGender.MALE)(implicit fhirServer: FhirServerContainer): String = {
+    val pt: Patient = new Patient()
+    val id1: Resource = pt.setId(identifier)
     pt.addIdentifier()
       .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-      .setValue("PT-000001")
-    pt.setBirthDate(DateUtils.addDays(new Date(), -8000))
-    pt.setActive(true)
-    pt.addName().setFamily("Bambois").addGiven("Jean")
-    pt.setIdElement(IdType.newRandomUuid())
-    pt.setGender(Enumerations.AdministrativeGender.MALE)
+      .setValue(identifier)
+    pt.setBirthDate(Date.from(birthDate.atStartOfDay(DEFAULT_ZONE_ID).toInstant))
+    pt.setActive(isActive)
+    pt.addName().setFamily(lastName).addGiven(firstName)
+    pt.setIdElement(IdType.of(id1))
+    pt.setGender(gender)
 
-    val id:IIdType = fhirClient.create().resource(pt).execute().getId()
-    LOGGER.info("Patient created with id : " + id.getValue())
+    val id: IIdType = fhirServer.fhirClient.create().resource(pt).execute().getId()
+
+    LOGGER.info("Patient created with id : " + id.getIdPart)
+    id.getIdPart
   }
 
-  def loadSpecimens(): Seq[Specimen] = {
-    val org: Organization = clinClient.getOrganizationById(new IdType("1"))
-    val pt: Patient = clinClient.getPatientById(new IdType("3"))
+  def loadSpecimens(patientId: String, organisationId: String)(implicit fhirServer: FhirServerContainer): Seq[Specimen] = {
+
 
     val bodySite: Terminology = new Terminology("http://snomed.info/sct", "21483005", "Structure of central nervous system", Some("Central Nervous System"))
-    val specimen: Specimen = SpecimenLoader.createSpecimen(clinClient, "1", "3", ClinSpecimenType.BLOOD, bodySite)
+    val specimen: Specimen = SpecimenLoader.createSpecimen(fhirServer.clinClient, organisationId, patientId, ClinSpecimenType.BLOOD, bodySite)
 
-    val saved: Specimen = fhirClient.create().resource(specimen).execute().getResource.asInstanceOf[Specimen]
+    val saved: Specimen = fhirServer.fhirClient.create().resource(specimen).execute().getResource.asInstanceOf[Specimen]
     LOGGER.info("Specimen created with id : " + saved.getId())
 
     Seq(saved)
   }
 
-  def loadSamples(parents: Map[String, Specimen]): Seq[Specimen] = {
-    val org: Organization = clinClient.getOrganizationById(new IdType("1"))
-    val pt: Patient = clinClient.getPatientById(new IdType("3"))
+  def loadSamples(patientId: String, organisationId: String, parents: Map[String, Specimen])(implicit fhirServer: FhirServerContainer): Seq[Specimen] = {
 
     val bodySite: Terminology = new Terminology("http://snomed.info/sct", "21483005", "Structure of central nervous system", Some("Central Nervous System"))
-    val sample: Specimen = SpecimenLoader.createSpecimen(clinClient, "1", "3", ClinSpecimenType.BLOOD, bodySite)
+    val sample: Specimen = SpecimenLoader.createSpecimen(fhirServer.clinClient, organisationId, patientId, ClinSpecimenType.BLOOD, bodySite)
     val (key, value) = parents.head
     sample.setParent(Collections.singletonList(new Reference(value)))
 
-    val saved: Specimen = fhirClient.create().resource(sample).execute().getResource.asInstanceOf[Specimen]
+    val saved: Specimen = fhirServer.fhirClient.create().resource(sample).execute().getResource.asInstanceOf[Specimen]
     LOGGER.info("Sample created with id : " + saved.getId())
 
     Seq(saved)
   }
 
-  def loadFiles(specimens: Seq[Specimen]): Seq[DocumentReference] = {
+  def loadFiles(patientId: String, organisationId: String, specimens: Seq[Specimen])(implicit fhirServer: FhirServerContainer): Seq[DocumentReference] = {
     //CRAM
     val cramUUID: String = IdType.newRandomUuid().toString
     val craiUUID: String = IdType.newRandomUuid().toString
@@ -118,10 +110,10 @@ class FhirTestUtils(val fhirBaseUrl: String) {
       ClinExtension("%PassFilterUniqueReads", "0.76", ClinExtensionValueType.DECIMAL)
     )
 
-    val cram: DocumentReference = FileLoader.createFile(clinClient, "https://objectstore.cqgc.ca/", cramUUID, "current", "final",
-      cramType, cramCategory, "3", "1", cramFormat, cramInfo, Some(specimens), Some(alignmentMetrics), None)
+    val cram: DocumentReference = FileLoader.createFile(fhirServer.clinClient, "https://objectstore.cqgc.ca/", cramUUID, "current", "final",
+      cramType, cramCategory, patientId, organisationId, cramFormat, cramInfo, Some(specimens), Some(alignmentMetrics), None)
 
-    val savedCRAM: DocumentReference = fhirClient.create().resource(cram).execute().getResource.asInstanceOf[DocumentReference]
+    val savedCRAM: DocumentReference = fhirServer.fhirClient.create().resource(cram).execute().getResource.asInstanceOf[DocumentReference]
     LOGGER.info("CRAM created with id : " + savedCRAM.getId())
 
     //CRAI
@@ -130,16 +122,16 @@ class FhirTestUtils(val fhirBaseUrl: String) {
     val craiFormat: Terminology = new Terminology("http://fhir.cqgc.ferlab.bio/CodeSystem/document-formats", "CRAI", "CRAI", None)
     val craiInfo: FileInfo = new FileInfo("application/binary", s"http://objectstore.cqgc.ca/${craiUUID}", 2423234, "96e8b17925cal23jf23529efecc8f2", "pt1.crai", new Date())
 
-    val crai: DocumentReference = FileLoader.createFile(clinClient, "https://objectstore.cqgc.ca/", craiUUID, "current", "final",
+    val crai: DocumentReference = FileLoader.createFile(fhirServer.clinClient, "https://objectstore.cqgc.ca/", craiUUID, "current", "final",
       craiType, craiCategory, "3", "1", craiFormat, craiInfo, None, None, Some(Map(savedCRAM -> "transform")))
 
-    val savedCRAI: DocumentReference = fhirClient.create().resource(crai).execute().getResource.asInstanceOf[DocumentReference]
+    val savedCRAI: DocumentReference = fhirServer.fhirClient.create().resource(crai).execute().getResource.asInstanceOf[DocumentReference]
     LOGGER.info("CRAI created with id : " + savedCRAI.getId())
 
     Seq(savedCRAM, savedCRAI)
   }
 
-  def loadAnalyses(content: Seq[DocumentReference]): Seq[DocumentManifest] = {
+  def loadAnalyses(content: Seq[DocumentReference])(implicit fhirServer: FhirServerContainer): Seq[DocumentManifest] = {
     val workflows: Seq[ClinExtension] = Seq(
       ClinExtension("workflowName", "Dragen", ClinExtensionValueType.STRING),
       ClinExtension("workflowVersion", "1.1.0", ClinExtensionValueType.STRING),
@@ -157,27 +149,39 @@ class FhirTestUtils(val fhirBaseUrl: String) {
       ClinExtension("experimentalStrategy", "WXS", ClinExtensionValueType.CODE)
     )
 
-    val analysisWithoutRelatedAnalysis: DocumentManifest = AnalysisLoader.createAnalysis(clinClient, "3", "current", AnalysisType.SEQUENCING_ALIGNMENT, content, workflows, sequencingExperiments, Some("Json Text"), None)
-    val savedAnalysisWithoutRelatedAnalysis: DocumentManifest = fhirClient.create().resource(analysisWithoutRelatedAnalysis).execute().getResource.asInstanceOf[DocumentManifest]
+    val analysisWithoutRelatedAnalysis: DocumentManifest = AnalysisLoader.createAnalysis(fhirServer.clinClient, "3", "current", AnalysisType.SEQUENCING_ALIGNMENT, content, workflows, sequencingExperiments, Some("Json Text"), None)
+    val savedAnalysisWithoutRelatedAnalysis: DocumentManifest = fhirServer.fhirClient.create().resource(analysisWithoutRelatedAnalysis).execute().getResource.asInstanceOf[DocumentManifest]
     LOGGER.info("Analysis created with id : " + savedAnalysisWithoutRelatedAnalysis.getId())
 
-    val analysisWithRelatedAnalysis: DocumentManifest = AnalysisLoader.createAnalysis(clinClient, "3", "current", AnalysisType.SEQUENCING_ALIGNMENT, content, workflows, sequencingExperiments, Some("Json Text"), Some(Map(savedAnalysisWithoutRelatedAnalysis -> AnalysisRelationship.PARENT)))
-    val savedAnalysisWithRelatedAnalysis: DocumentManifest = fhirClient.create().resource(analysisWithRelatedAnalysis).execute().getResource.asInstanceOf[DocumentManifest]
+    val analysisWithRelatedAnalysis: DocumentManifest = AnalysisLoader.createAnalysis(fhirServer.clinClient, "3", "current", AnalysisType.SEQUENCING_ALIGNMENT, content, workflows, sequencingExperiments, Some("Json Text"), Some(Map(savedAnalysisWithoutRelatedAnalysis -> AnalysisRelationship.PARENT)))
+    val savedAnalysisWithRelatedAnalysis: DocumentManifest = fhirServer.fhirClient.create().resource(analysisWithRelatedAnalysis).execute().getResource.asInstanceOf[DocumentManifest]
     LOGGER.info("Analysis with related analysis created with id : " + savedAnalysisWithRelatedAnalysis.getId())
 
     Seq(savedAnalysisWithoutRelatedAnalysis, savedAnalysisWithRelatedAnalysis)
   }
 
-  def findById[A <: IBaseResource](id: String, resourceType: Class[A]):Option[A] = {
+  def findById[A <: IBaseResource](id: String, resourceType: Class[A])(implicit fhirServer: FhirServerContainer): Option[A] = {
     Option(
-      fhirClient.read()
-      .resource(resourceType)
-      .withId(id)
-      .execute()
+      fhirServer.fhirClient.read()
+        .resource(resourceType)
+        .withId(id)
+        .execute()
     )
   }
 
-  def printJson[A <: IBaseResource](resource: A) = {
-    LOGGER.info(parser.encodeResourceToString(resource))
+  def clearAll()(implicit fhirServer: FhirServerContainer) = {
+    val inParams = new Parameters()
+    inParams.addParameter.setName("expungeEverything").setValue(new BooleanType(true))
+    fhirServer.fhirClient
+      .operation()
+      .onServer()
+      .named("$expunge")
+      .withParameters(inParams)
+      .execute()
+
+  }
+
+  def printJson[A <: IBaseResource](resource: A)(implicit fhirServer: FhirServerContainer) = {
+    LOGGER.info(fhirServer.parser.encodeResourceToString(resource))
   }
 }
