@@ -35,32 +35,11 @@
       "serviceRequestId": "clin_prescription_id",
       "labAliquotId": "nanuq_sample_id",
       "files": {
-        "SA": [
-          {
-            "title": "file1.cram",
-            "fileType": "CRAM"
-          },
-          {
-            "title": "file1.crai",
-            "fileType": "CRAI"
-          }
-        ],
-        "VC": [
-          {
-            "title": "file1.gVCF",
-            "fileType": "GVCF"
-          },
-          {
-            "title": "file1.tbi",
-            "fileType": "TBI"
-          }
-        ],
-        "QC": [
-          {
-            "title": "file1.tar.gz",
-            "fileType": "TGZ"
-          }
-        ]
+        "cram": "file1.cram",
+        "crai": "file1.crai",
+        "vcf": "file2.vcf",
+        "tbi": "file2.tbi",
+        "qc": "file3.json"
       }
     }
   ]

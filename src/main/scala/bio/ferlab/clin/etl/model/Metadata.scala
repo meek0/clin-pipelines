@@ -41,40 +41,33 @@ case class Analysis(
                      ldm: String,
                      sampleId: String,
                      specimenId: String,
-                     specimenType: Option[String],
+                     specimenType: String,
                      sampleType: Option[String],
-                     bodySite: Option[String],
+                     bodySite: String,
                      serviceRequestId: String,
                      labAliquotId: Option[String],
-                     patient: Patient,
-                     files: FileAnalyses
+                     patient: InputPatient,
+                     files: FilesAnalysis
                    )
 
 object Analysis {
   implicit val reads: Reads[Analysis] = Json.reads[Analysis]
 }
 
-case class Patient(
+case class InputPatient(
                     id: String,
                     firstName: String,
                     lastName: String,
                     sex: String
                   )
 
-object Patient {
-  implicit val reads: Reads[Patient] = Json.reads[Patient]
+object InputPatient {
+  implicit val reads: Reads[InputPatient] = Json.reads[InputPatient]
 }
 
-case class FileAnalyses(SA: Seq[FileAnalysis], VC: Seq[FileAnalysis], QC: Seq[FileAnalysis])
+case class FilesAnalysis(cram: String, crai: String, vcf: String, tbi: String, qc: String)
 
-object FileAnalyses {
-  implicit val reads: Reads[FileAnalyses] = Json.reads[FileAnalyses]
+object FilesAnalysis {
+  implicit val reads: Reads[FilesAnalysis] = Json.reads[FilesAnalysis]
 }
 
-case class FileAnalysis(
-                         title: String,
-                         fileType: String
-                       )
-object FileAnalysis {
-  implicit val reads: Reads[FileAnalysis] = Json.reads[FileAnalysis]
-}

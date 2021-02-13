@@ -64,6 +64,8 @@ trait WithFhirServer extends TestSuite with BeforeAndAfterAll {
 
   val port = FhirServerContainer.start()
   implicit val fhirServer = new FhirServerContainer(s"http://localhost:${port}/fhir")
+  implicit val clinFhirClient = fhirServer.clinClient
+  implicit val fhirClient = fhirServer.fhirClient
 
   override def afterAll() = {
     FhirTestUtils.clearAll()

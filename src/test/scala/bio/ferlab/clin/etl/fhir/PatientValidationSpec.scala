@@ -2,143 +2,120 @@ package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils._
 import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, WithFhirServer}
-import bio.ferlab.clin.etl.model._
-import bio.ferlab.clin.etl.task.PatientValidation.validate
-import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender._
+import bio.ferlab.clin.etl.task.PatientValidation.validatePatient
+import cats.data.NonEmptyList
+import cats.data.Validated.{Invalid, Valid}
+import org.hl7.fhir.r4.model.IdType
 import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}
 
 class PatientValidationSpec extends FlatSpec with Matchers with GivenWhenThen with WithFhirServer {
 
-  "validate" should "not return any error if patients match fhir resources" in {
-    Given("A fhir server with some patients resources")
+  "validate" should "not return any error if patient match fhir resource" in {
+    Given("A fhir server with a patient resource")
     val ptId1 = FhirTestUtils.loadPatients()
-    val ptId2 = FhirTestUtils.loadPatients(firstName = "Jane", gender = FEMALE)
 
-    And("A metadata object containing some patients that match fhir resources")
-    val metadata = defaultMetadata.copy(analyses = Seq(
-      defaultAnalysis.copy(patient = defaultPatient(ptId1)),
-      defaultAnalysis.copy(patient = Patient(ptId2, "Jane", "Doe", "female"))
-    ))
+    And("A patient that match fhir resource")
+    val patient = defaultPatient(ptId1.getIdPart)
 
+    When("Validate patient")
+    val res = validatePatient(patient)
 
-    When("Validate patients")
-    val res = validate(metadata)(fhirServer.clinClient)
-
-    Then("An empty list is returned")
-    res shouldBe empty
+    Then("A valid patient is returned")
+    res shouldBe Valid(ptId1)
   }
 
-  it should "return errors if patients does not match fhir resources" in {
-    Given("A fhir server with the same patients than metadata")
-    val ptId1 = FhirTestUtils.loadPatients()
+  it should "return errors if patients does not match fhir resource" in {
+    Given("A fhir server with a patient resource")
+    FhirTestUtils.loadPatients()
 
+    And("A patient that does not match fhir resource")
+    val patient = defaultPatient("unknown_1")
 
-    And("A metadata object containing some patients")
-    val metadata = defaultMetadata.copy(analyses = Seq(
-      defaultAnalysis.copy(patient = defaultPatient(ptId1)),
-      defaultAnalysis.copy(patient = defaultPatient("unknown_1")),
-      defaultAnalysis.copy(patient = defaultPatient("unknown_2"))
-    ))
+    When("Validate patient")
 
-
-    When("Validate patients")
-    val res = validate(metadata)(fhirServer.clinClient)
-
-    Then("A list containing missing resources")
-    res shouldBe Seq("Patient unknown_1 does not exist", "Patient unknown_2 does not exist")
+    val res = validatePatient(patient)
+    Then("An error is returned")
+    res shouldBe Invalid(NonEmptyList.one("Patient unknown_1 does not exist"))
   }
 
 
   it should "return an error if patient first name does not match fhir resource" in {
-    Given("A fhir server with patients")
-    val ptId1 = FhirTestUtils.loadPatients()
+    Given("A fhir server with a patient resource")
+    val ptIdPart = FhirTestUtils.loadPatients().getIdPart
 
     And("A metadata object containing the same patient than fhir resource, except for first name ")
-    val metadata = defaultMetadata.copy(analyses = Seq(
-      defaultAnalysis.copy(patient = defaultPatient(ptId1, firstName = "Robert"))
-    ))
+    val patient = defaultPatient(ptIdPart, firstName = "Robert")
 
-    When("Validate patients")
-    val res = validate(metadata)(fhirServer.clinClient)
+    When("Validate patient")
+    val res = validatePatient(patient)
 
-    Then("A list containing patient with first name mismatch is returned")
-    res shouldBe Seq(s"Patient id=$ptId1 : First Name are not the same (Robert <-> John)")
+    Then("An error is returned")
+    res shouldBe Invalid(NonEmptyList.one(s"Patient id=$ptIdPart : First Name are not the same (Robert <-> John)"))
+
   }
 
   it should "return an error if patients last name does not match fhir resource" in {
-    Given("A fhir server with patients")
-    val ptId1 = FhirTestUtils.loadPatients()
+    Given("A fhir server with a patient resource")
+    val ptIdPart = FhirTestUtils.loadPatients().getIdPart
 
     And("A metadata object containing the same patient than fhir resource, except for last name ")
-    val metadata = defaultMetadata.copy(analyses = Seq(
-      defaultAnalysis.copy(patient = defaultPatient(ptId1, lastName = "River"))
-    ))
+    val patient = defaultPatient(ptIdPart, lastName = "River")
 
-    When("Validate patients")
-    val res = validate(metadata)(fhirServer.clinClient)
+    When("Validate patient")
+    val res = validatePatient(patient)
 
-    Then("A list containing patient with last name mismatch is returned")
-    res shouldBe Seq(s"Patient id=$ptId1 : Last Name are not the same (River <-> Doe)")
+    Then("An error is returned")
+    res shouldBe Invalid(NonEmptyList.one(s"Patient id=$ptIdPart : Last Name are not the same (River <-> Doe)"))
   }
 
   it should "return an error if patients is inactive in fhir resource" in {
     Given("A fhir server with inactive patient")
-    val ptId1 = FhirTestUtils.loadPatients(isActive = false)
+    val ptIdPart = FhirTestUtils.loadPatients(isActive = false).getIdPart
 
     And("A metadata object containing patients thant match inactive patient in fhir")
-    val metadata = defaultMetadata.copy(analyses = Seq(
-      defaultAnalysis.copy(patient = defaultPatient(ptId1))
-    ))
-
+    val patient = defaultPatient(ptIdPart)
 
     When("Validate patients")
-    val res = validate(metadata)(fhirServer.clinClient)
+    val res = validatePatient(patient)
 
-    Then("A list containing inactive patient is returned")
-    res shouldBe Seq(s"Patient id=$ptId1 : patient is inactive")
+    Then("An error is returned")
+    res shouldBe Invalid(NonEmptyList.one((s"Patient id=$ptIdPart : patient is inactive")))
 
   }
 
-  it should "return an error if patients sex does not match with fhir resource" in {
-    Given("A fhir server with patients")
-    val ptId1 = FhirTestUtils.loadPatients()
+    it should "return an error if patients sex does not match with fhir resource" in {
+      Given("A fhir server with patient")
+      val ptIdPart = FhirTestUtils.loadPatients().getIdPart
 
-    And("A metadata object containing the same patient than fhir resource, except for sex")
-    val metadata = defaultMetadata.copy(analyses = Seq(
-      defaultAnalysis.copy(patient = defaultPatient(ptId1, sex = "female"))
-    ))
+      And("A metadata object containing the same patient than fhir resource, except for sex")
+      val patient = defaultPatient(ptIdPart, sex = "female")
 
-    When("Validate patients")
-    val res = validate(metadata)(fhirServer.clinClient)
+      When("Validate patient")
+      val res = validatePatient(patient)
 
-    Then("A list containing patient with sex mismatch is returned")
-    res shouldBe Seq(s"Patient id=$ptId1 : Sex are not the same (female <-> male)")
+      Then("A list containing patient with sex mismatch is returned")
+      res shouldBe Invalid(NonEmptyList.one((s"Patient id=$ptIdPart : Sex are not the same (female <-> male)")))
 
-  }
+    }
 
-  //Like an integration test
-  it should "return multiple errors if many entries dont match fhir resources" in {
-    Given("A fhir server with patients")
-    val ptId1 = FhirTestUtils.loadPatients()
-    val ptId2 = FhirTestUtils.loadPatients()
+    //Like an integration test
+    it should "return multiple errors if many entries dont match fhir resources" in {
+      Given("A fhir server with patient")
+      val ptIdPart = FhirTestUtils.loadPatients().getIdPart
 
-    And("A metadata object containing a mix of mismatch patients")
-    val metadata = defaultMetadata.copy(analyses = Seq(
-      defaultAnalysis.copy(patient = defaultPatient(ptId1)),
-      defaultAnalysis.copy(patient = defaultPatient("unknown")),
-      defaultAnalysis.copy(patient = defaultPatient(ptId2, firstName="Jane", sex = "female"))
-    ))
+      And("A patient that does not match fhir resources attributes")
+      val patient = defaultPatient(ptIdPart, firstName="Jane", lastName="River", sex = "female")
 
-    When("Validate patients")
-    val res = validate(metadata)(fhirServer.clinClient)
+      When("Validate patient")
+      val res = validatePatient(patient)
 
-    Then("A list containing patient with sex mismatch is returned")
-    res shouldBe Seq(
-      "Patient unknown does not exist",
-      s"Patient id=$ptId2 : First Name are not the same (Jane <-> John)",
-      s"Patient id=$ptId2 : Sex are not the same (female <-> male)"
-    )
+      Then("A list of many errors is returned")
+      res shouldBe Invalid(NonEmptyList.of(
+        s"Patient id=$ptIdPart : First Name are not the same (Jane <-> John)",
+        s"Patient id=$ptIdPart : Last Name are not the same (River <-> Doe)",
+        s"Patient id=$ptIdPart : Sex are not the same (female <-> male)"
+      ))
 
-  }
+    }
 
 }

@@ -1,9 +1,9 @@
 package bio.ferlab.clin.etl.fhir
 
-import java.util.Date
-
 import bio.ferlab.clin.etl.fhir.Model.{ClinSpecimenType, Terminology}
 import org.hl7.fhir.r4.model._
+
+import java.util.Date
 
 package object SpecimenLoader {
 
@@ -49,4 +49,5 @@ package object SpecimenLoader {
     specimenCollectionComponent.setBodySite(bodySiteCC)
     specimen.setCollection(specimenCollectionComponent)
   }
+
 }

@@ -22,8 +22,8 @@ object FhirTestUtils {
     org.setAlias(Collections.singletonList(new StringType("CHUSJ")))
 
     val id: IIdType = fhirServer.fhirClient.create().resource(org).execute().getId()
-    LOGGER.info("Organization created with id : " + id.getValue())
-    id.getValue()
+    LOGGER.info("Organization created with id : " + id.getIdPart())
+    id.getIdPart()
   }
 
   def loadPractitioners()(implicit fhirServer: FhirServerContainer) = {
@@ -47,12 +47,12 @@ object FhirTestUtils {
     pr.addName().setFamily("Afritt").addGiven("Barack").addPrefix("Dr.")
 
     val id: IIdType = fhirServer.fhirClient.create().resource(pr).execute().getId()
-    LOGGER.info("Practitioner created with id : " + id.getValue())
-    id.getValue()
+    LOGGER.info("Practitioner created with id : " + id.getIdPart())
+    id.getIdPart()
   }
 
 
-  def loadPatients(lastName: String = "Doe", firstName: String = "John", identifier: String = "PT-000001", isActive: Boolean = true, birthDate: LocalDate = LocalDate.of(2000, 12, 21), gender: AdministrativeGender = Enumerations.AdministrativeGender.MALE)(implicit fhirServer: FhirServerContainer): String = {
+  def loadPatients(lastName: String = "Doe", firstName: String = "John", identifier: String = "PT-000001", isActive: Boolean = true, birthDate: LocalDate = LocalDate.of(2000, 12, 21), gender: AdministrativeGender = Enumerations.AdministrativeGender.MALE)(implicit fhirServer: FhirServerContainer): IIdType = {
     val pt: Patient = new Patient()
     val id1: Resource = pt.setId(identifier)
     pt.addIdentifier()
@@ -64,14 +64,46 @@ object FhirTestUtils {
     pt.setIdElement(IdType.of(id1))
     pt.setGender(gender)
 
-    val id: IIdType = fhirServer.fhirClient.create().resource(pt).execute().getId()
+    val id = fhirServer.fhirClient.create().resource(pt).execute().getId
 
     LOGGER.info("Patient created with id : " + id.getIdPart)
+
+    id
+  }
+
+  def loadServiceRequest(patientId: String)(implicit fhirServer: FhirServerContainer): String = {
+    val sr = new ServiceRequest()
+    sr.setSubject(new Reference(s"Patient/$patientId"))
+    sr.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE)
+    sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER)
+    val id: IIdType = fhirServer.fhirClient.create().resource(sr).execute().getId
+
+    LOGGER.info("ServiceRequest created with id : " + id.getIdPart)
     id.getIdPart
+
+  }
+
+  def loadSpecimens2(patientId: String, lab: String = "CHUSJ", submitterId: String = "1", specimenType: String = "BLD", parent: Option[String] = None)(implicit fhirServer: FhirServerContainer): String = {
+    val sp = new Specimen()
+    sp.setSubject(new Reference(s"Patient/$patientId"))
+
+    sp.getAccessionIdentifier.setSystem(s"https://cqgc.qc.ca/labs/$lab").setValue(submitterId)
+
+    sp.getType.addCoding()
+      .setSystem("http://terminology.hl7.org/CodeSystem/v2-0487")
+      .setCode(specimenType)
+    parent.foreach { p =>
+
+      sp.addParent(new Reference(s"Specimen/$p"))
+    }
+    val id: IIdType = fhirServer.fhirClient.create().resource(sp).execute().getId
+
+    LOGGER.info("Specimen created with id : " + id.getIdPart)
+    id.getIdPart
+
   }
 
   def loadSpecimens(patientId: String, organisationId: String)(implicit fhirServer: FhirServerContainer): Seq[Specimen] = {
-
 
     val bodySite: Terminology = new Terminology("http://snomed.info/sct", "21483005", "Structure of central nervous system", Some("Central Nervous System"))
     val specimen: Specimen = SpecimenLoader.createSpecimen(fhirServer.clinClient, organisationId, patientId, ClinSpecimenType.BLOOD, bodySite)

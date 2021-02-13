@@ -1,8 +1,12 @@
 package bio.ferlab.clin.etl.fhir
 
-import ca.uhn.fhir.rest.annotation.{IdParam, Read, Search}
+import ca.uhn.fhir.rest.annotation.{IdParam, Read}
 import ca.uhn.fhir.rest.client.api.IBasicClient
+import ca.uhn.fhir.rest.param.StringParam
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException
 import org.hl7.fhir.r4.model._
+
+import scala.util.Try
 
 //https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-structures-r4/src/test/java/ca/uhn/fhir/rest/client/ITestClient.java
 trait IClinFhirClient extends IBasicClient {
@@ -17,4 +21,24 @@ trait IClinFhirClient extends IBasicClient {
 
   @Read(`type` = classOf[ServiceRequest])
   def getServiceRequestById(@IdParam id: IdType): ServiceRequest
+
+  import ca.uhn.fhir.rest.annotation.{RequiredParam, Search}
+  import ca.uhn.fhir.rest.param.TokenParam
+
+  @Search(`type` = classOf[Specimen])
+  def findSpecimenByAccession(@RequiredParam(name = Specimen.SP_ACCESSION) theId: TokenParam): Specimen
+
+  @Search(`type` = classOf[Organization])
+  def findByNameOrAlias(@RequiredParam(name = Organization.SP_NAME) alias: StringParam): Organization
+
+
+}
+
+object IClinFhirClient {
+  def opt[T](f: => T): Option[T] = {
+    Try(Option(f)).recover {
+      case _: ResourceNotFoundException => None
+    }.get
+
+  }
 }

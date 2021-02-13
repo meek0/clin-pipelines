@@ -13,34 +13,34 @@ class HapiFhirDataLoadersTest extends FreeSpec with Matchers with WithFhirServer
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
-
-  "Specimen and samples" - {
-    "Specimen" in {
-      val organisationId = FhirTestUtils.loadOrganizations()
-      val patientId = FhirTestUtils.loadPatients("Bambois", "Jean")
-      val specimens = FhirTestUtils.loadSpecimens(patientId, organisationId)
-      specimens.isEmpty shouldBe false
-
-      // Search Hapi Fhir for a specimen we just created
-      val specimen: Option[Specimen] = FhirTestUtils.findById(specimens.head.getId, classOf[Specimen])
-
-      specimen.isDefined shouldBe true
-      specimen.get.getId should not be empty
-    }
-    "Samples" in {
-      val organisationId = FhirTestUtils.loadOrganizations()
-      val patientId = FhirTestUtils.loadPatients("Bambois", "Jean")
-      val specimens = FhirTestUtils.loadSpecimens(patientId, organisationId)
-      val samples: Seq[Specimen] = FhirTestUtils.loadSamples(patientId, organisationId, specimens.map(s => s.getId -> s)(collection.breakOut))
-      samples.isEmpty shouldBe false
-
-      // Search Hapi Fhir for a sample we just created
-      val sample: Option[Specimen] = FhirTestUtils.findById(samples.head.getId, classOf[Specimen])
-
-      sample.isDefined shouldBe true
-      sample.get.getId should not be empty
-    }
-  }
+//
+//  "Specimen and samples" - {
+//    "Specimen" in {
+//      val organisationId = FhirTestUtils.loadOrganizations()
+//      val patientId = FhirTestUtils.loadPatients("Bambois", "Jean")
+//      val specimens = FhirTestUtils.loadSpecimens(patientId, organisationId)
+//      specimens.isEmpty shouldBe false
+//
+//      // Search Hapi Fhir for a specimen we just created
+//      val specimen: Option[Specimen] = FhirTestUtils.findById(specimens.head.getId, classOf[Specimen])
+//
+//      specimen.isDefined shouldBe true
+//      specimen.get.getId should not be empty
+//    }
+//    "Samples" in {
+//      val organisationId = FhirTestUtils.loadOrganizations()
+//      val patientId = FhirTestUtils.loadPatients("Bambois", "Jean")
+//      val specimens = FhirTestUtils.loadSpecimens(patientId, organisationId)
+//      val samples: Seq[Specimen] = FhirTestUtils.loadSamples(patientId, organisationId, specimens.map(s => s.getId -> s)(collection.breakOut))
+//      samples.isEmpty shouldBe false
+//
+//      // Search Hapi Fhir for a sample we just created
+//      val sample: Option[Specimen] = FhirTestUtils.findById(samples.head.getId, classOf[Specimen])
+//
+//      sample.isDefined shouldBe true
+//      sample.get.getId should not be empty
+//    }
+//  }
 
   /*
   "Files" - {

@@ -4,26 +4,27 @@ import bio.ferlab.clin.etl.model._
 
 object MetadataTestUtils {
 
-  def defaultPatient(ptId1: String, firstName: String = "John", lastName: String = "Doe", sex: String = "male"): Patient = {
-    Patient(ptId1, firstName, lastName, sex)
+  def defaultPatient(ptId1: String, firstName: String = "John", lastName: String = "Doe", sex: String = "male"): InputPatient = {
+    InputPatient(ptId1, firstName, lastName, sex)
   }
 
   val defaultAnalysis: Analysis = Analysis(
     patient = defaultPatient("clin_id"),
-    ldm = "ICM",
+    ldm = "CHUSJ",
     sampleId = "submitted_sample_id",
     specimenId = "submitted_specimen_id",
-    specimenType = Some("Normal blood"),
+    specimenType = "BLD",
     sampleType = Some("DNA"),
-    bodySite = Some("can be null"),
+    bodySite = "can be null",
     serviceRequestId = "clin_prescription_id",
     labAliquotId = Some("nanuq_sample_id"),
-    files = FileAnalyses(
-      SA = Seq(FileAnalysis("file1.cram", "CRAM")),
-      VC = Seq(FileAnalysis("file1.vcf", "VCF")),
-      QC = Seq(FileAnalysis("file1.json", "QC"))
+    files = FilesAnalysis(
+      cram = "file1.cram",
+      crai = "file1.crai",
+      vcf = "file2.vcf",
+      tbi = "file2.tbi",
+      qc = "file3.tgz"
     )
-
   )
   val defaultMetadata: Metadata = Metadata(
     Experiment(
