@@ -3,7 +3,7 @@ package bio.ferlab.clin.etl.fhir
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils.{defaultAnalysis, defaultPatient}
 import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, WithFhirServer}
 import bio.ferlab.clin.etl.model
-import bio.ferlab.clin.etl.model.ExistingSpecimen
+import bio.ferlab.clin.etl.model.TExistingSpecimen
 import bio.ferlab.clin.etl.task.SpecimenValidation.{SampleType, validateOneSpecimen, validateSample, validateSpecimen}
 import cats.data.Validated.Invalid
 import cats.data._

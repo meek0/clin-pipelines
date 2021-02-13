@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.IdType
 
 object BuildBundle {
 
-  def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[Bundle] = {
+  def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[TBundle] = {
     val mapFiles = files.map(f => (f.name, f)).toMap
     val allResources = metadata.analyses.toList.map { a =>
 
@@ -31,12 +31,12 @@ object BuildBundle {
 
     }.combineAll
 
-    allResources.map(Bundle)
+    allResources.map(TBundle)
 
 
   }
 
-  def createResources(m: Metadata)(organization: IdType, patient: IdType, serviceRequest: ServiceRequest, specimen: Specimen, sample: Specimen, files: DocumentReferences, tasks: Tasks): List[BundleEntryComponent] = {
+  def createResources(m: Metadata)(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: DocumentReferences, tasks: Tasks): List[BundleEntryComponent] = {
     val specimenResource = specimen.buildResource(patient.toReference(), serviceRequest.sr.toReference())
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), Some(specimenResource.toReference()))
     val documentReferencesResources = files.buildResources(patient.toReference(), organization.toReference(), sampleResource.toReference())
@@ -69,11 +69,11 @@ object BuildBundle {
 
   }
 
-  def validateServiceRequest(a: Analysis)(implicit client: IClinFhirClient): ValidatedNel[String, ServiceRequest] = {
+  def validateServiceRequest(a: Analysis)(implicit client: IClinFhirClient): ValidatedNel[String, TServiceRequest] = {
     val fhirServiceRequest = opt(client.getServiceRequestById(new IdType(a.serviceRequestId)))
     fhirServiceRequest match {
-      case None => s"ServiceRequest ${a.serviceRequestId} does not exist".invalidNel[ServiceRequest]
-      case Some(fsr) => ServiceRequest(fsr).validNel[String]
+      case None => s"ServiceRequest ${a.serviceRequestId} does not exist".invalidNel[TServiceRequest]
+      case Some(fsr) => TServiceRequest(fsr).validNel[String]
     }
   }
 
@@ -88,8 +88,8 @@ object BuildBundle {
   def validateFiles(files: Map[String, FileEntry], a: Analysis): ValidationResult[DocumentReferences] = {
 
     def validateOneFile(f: String) = files.get(f) match {
-      case Some(file) => DocumentReference(objectStoreId = file.id, title = f, md5 = file.md5).validNel[String]
-      case None => s"File ${f} does not exist".invalidNel[DocumentReference]
+      case Some(file) => TDocumentReference(objectStoreId = file.id, title = f, md5 = file.md5).validNel[String]
+      case None => s"File ${f} does not exist".invalidNel[TDocumentReference]
     }
 
     (
@@ -102,6 +102,6 @@ object BuildBundle {
 
   }
 
-  def validateTasks(a: Analysis): ValidationResult[Tasks] = Tasks(Task(), Task(), Task()).validNel[String]
+  def validateTasks(a: Analysis): ValidationResult[Tasks] = Tasks(TTask(), TTask(), TTask()).validNel[String]
 
 }

@@ -1,11 +1,11 @@
 package bio.ferlab.clin.etl.model
 
-import bio.ferlab.clin.etl.model.Fhir.FhirResource
-import org.hl7.fhir.r4.model.{IdType, Reference}
 
-case class DocumentReferences(cram: DocumentReference, crai: DocumentReference, vcf: DocumentReference, tbi: DocumentReference, qc: DocumentReference) {
+import org.hl7.fhir.r4.model.{Reference, Resource}
 
-  def buildResources(subject: Reference, custodian: Reference, sample: Reference) = {
+case class DocumentReferences(cram: TDocumentReference, crai: TDocumentReference, vcf: TDocumentReference, tbi: TDocumentReference, qc: TDocumentReference) {
+
+  def buildResources(subject: Reference, custodian: Reference, sample: Reference): DocumentReferencesResources = {
     val cramR = cram.buildResource(subject, custodian, sample, None)
     val craiR = crai.buildResource(subject, custodian, sample, Some(cramR))
     val vcfR = vcf.buildResource(subject, custodian, sample, None)
@@ -16,6 +16,6 @@ case class DocumentReferences(cram: DocumentReference, crai: DocumentReference, 
 
 }
 
-case class DocumentReferencesResources(cram: FhirResource, crai: FhirResource, vcf: FhirResource, tbi: FhirResource, qc: FhirResource) {
+case class DocumentReferencesResources(cram: Resource, crai: Resource, vcf: Resource, tbi: Resource, qc: Resource) {
   def resources() = Seq(cram, crai, vcf, tbi, qc)
 }
