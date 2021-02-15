@@ -4,7 +4,7 @@ import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils.{defaultAnalysis, de
 import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, WithFhirServer}
 import bio.ferlab.clin.etl.model
 import bio.ferlab.clin.etl.model.TExistingSpecimen
-import bio.ferlab.clin.etl.task.SpecimenValidation.{SampleType, validateOneSpecimen, validateSample, validateSpecimen}
+import bio.ferlab.clin.etl.task.validation.SpecimenValidation.{SampleType, validateOneSpecimen, validateSample, validateSpecimen}
 import cats.data.Validated.Invalid
 import cats.data._
 import cats.implicits.catsSyntaxValidatedId

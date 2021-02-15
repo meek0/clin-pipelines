@@ -23,7 +23,7 @@ object FhirServerContainer {
     "HAPI_LOGGING_INTERCEPTOR_SERVER_ENABLED" -> "false",
     "HAPI_LOGGING_INTERCEPTOR_CLIENT_ENABLED" -> "false",
     "HAPI_SERVER_ADDRESS" -> s"http://localhost:$exposedPort/fhir/",
-    "HAPI_VALIDATION_REQUESTS_ENABLED" -> "false",
+    "HAPI_VALIDATE_RESPONSES_ENABLED" -> "false",
     "JAVA_OPTS" -> "-Dhibernate.dialect=org.hibernate.dialect.H2Dialect"
   )
   private var isStarted = false

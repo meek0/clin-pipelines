@@ -1,21 +1,20 @@
-package bio.ferlab.clin.etl.task
+package bio.ferlab.clin.etl.task.validation
 
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.model.{Analysis, TExistingSpecimen, TNewSpecimen, TSpecimen}
-import bio.ferlab.clin.etl.{ValidationResult, allValid}
+import bio.ferlab.clin.etl.{ValidationResult, allValid, isValid}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import ca.uhn.fhir.rest.param.TokenParam
 import cats.data.Validated.Valid
 import cats.data.ValidatedNel
 import cats.implicits._
+import scala.collection.JavaConverters._
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode
 import org.hl7.fhir.r4.model.Specimen.{ACCESSION, INCLUDE_PARENT}
-import org.hl7.fhir.r4.model.{Bundle, IdType, Specimen}
-
-import scala.collection.JavaConverters._
+import org.hl7.fhir.r4.model.{Bundle, IdType, OperationOutcome, Specimen}
 
 object SpecimenValidation {
-  def validateSpecimen(a: Analysis)(implicit client: IClinFhirClient): ValidationResult[TSpecimen] = {
+  def validateSpecimen(a: Analysis)(implicit client: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[TSpecimen] = {
     val sp = Option(client.findSpecimenByAccession(new TokenParam(s"https://cqgc.qc.ca/labs/${a.ldm}", a.specimenId)))
     validateOneSpecimen(a, sp, SpecimenType)
   }
@@ -44,8 +43,20 @@ object SpecimenValidation {
     sampleValidation.appendErrors(parentValidation)
   }
 
-  private def validateOneSpecimen(a: Analysis, specimen: Option[Specimen], label: SpecimenSampleType) = specimen match {
-    case None => TNewSpecimen(a.ldm, a.specimenId, a.specimenType, a.bodySite).validNel[String]
+  private def validateOneSpecimen(a: Analysis, specimen: Option[Specimen], label: SpecimenSampleType)(implicit client: IGenericClient): ValidatedNel[String, TSpecimen] = specimen match {
+    case None =>
+      val s = TNewSpecimen(a.ldm, a.specimenId, a.specimenType, a.bodySite)
+      val outcome = s.validateBaseResource
+      val issues = outcome.getIssue.asScala
+      val errors = issues.collect {
+        case o if o.getSeverity.ordinal() <= OperationOutcome.IssueSeverity.ERROR.ordinal =>
+          val diag = o.getDiagnostics
+          val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
+            .replace("Parameters.parameter[0].resource.ofType(Specimen).", "")
+            .replace(".coding[0]", "")
+          s"Error $label : $loc - $diag"
+      }.toSeq
+      isValid(s, errors)
     case Some(sp) => allValid(
       validatePatient(sp, a, label),
       validateSpecimenType(sp, a, label)

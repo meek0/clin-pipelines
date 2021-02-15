@@ -1,9 +1,9 @@
 package bio.ferlab.clin.etl.fhir
 
 import ca.uhn.fhir.rest.annotation.{IdParam, Read}
-import ca.uhn.fhir.rest.client.api.IBasicClient
+import ca.uhn.fhir.rest.client.api.{IBasicClient, IGenericClient}
 import ca.uhn.fhir.rest.param.StringParam
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException
+import ca.uhn.fhir.rest.server.exceptions.{PreconditionFailedException, ResourceNotFoundException}
 import org.hl7.fhir.r4.model._
 
 import scala.util.Try
@@ -12,9 +12,6 @@ import scala.util.Try
 trait IClinFhirClient extends IBasicClient {
   @Read(`type` = classOf[Patient])
   def getPatientById(@IdParam id: IdType): Patient
-
-  @Read(`type` = classOf[Organization])
-  def getOrganizationById(@IdParam id: IdType): Organization
 
   @Read(`type` = classOf[Practitioner])
   def getPractitionerById(@IdParam id: IdType): Practitioner
@@ -41,4 +38,5 @@ object IClinFhirClient {
     }.get
 
   }
+
 }

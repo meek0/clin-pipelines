@@ -2,7 +2,7 @@ package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils._
 import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, WithFhirServer}
-import bio.ferlab.clin.etl.task.PatientValidation.validatePatient
+import bio.ferlab.clin.etl.task.validation.PatientValidation.validatePatient
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
 import org.hl7.fhir.r4.model.IdType

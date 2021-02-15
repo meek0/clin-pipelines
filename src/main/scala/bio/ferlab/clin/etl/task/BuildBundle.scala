@@ -1,14 +1,14 @@
 package bio.ferlab.clin.etl.task
 
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
-import bio.ferlab.clin.etl.fhir.IClinFhirClient.opt
 import bio.ferlab.clin.etl.model._
-import bio.ferlab.clin.etl.task.PatientValidation.validatePatient
-import bio.ferlab.clin.etl.task.SpecimenValidation.{validateSample, validateSpecimen}
+import bio.ferlab.clin.etl.task.validation.DocumentReferencesValidation.validateFiles
+import bio.ferlab.clin.etl.task.validation.OrganizationValidation.validateOrganization
+import bio.ferlab.clin.etl.task.validation.PatientValidation.validatePatient
+import bio.ferlab.clin.etl.task.validation.ServiceRequestValidation.validateServiceRequest
+import bio.ferlab.clin.etl.task.validation.SpecimenValidation.{validateSample, validateSpecimen}
 import bio.ferlab.clin.etl.{EitherResourceExtension, IdTypeExtension, ResourceExtension, ValidationResult}
 import ca.uhn.fhir.rest.client.api.IGenericClient
-import ca.uhn.fhir.rest.param.StringParam
-import cats.data.ValidatedNel
 import cats.implicits._
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
 import org.hl7.fhir.r4.model.IdType
@@ -32,18 +32,22 @@ object BuildBundle {
     }.combineAll
 
     allResources.map(TBundle)
-
-
   }
 
-  def createResources(m: Metadata)(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: DocumentReferences, tasks: Tasks): List[BundleEntryComponent] = {
+  def createResources(m: Metadata)(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, tasks: TTasks): List[BundleEntryComponent] = {
     val specimenResource = specimen.buildResource(patient.toReference(), serviceRequest.sr.toReference())
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), Some(specimenResource.toReference()))
-    val documentReferencesResources = files.buildResources(patient.toReference(), organization.toReference(), sampleResource.toReference())
+    val documentReferencesResources: DocumentReferencesResources = files.buildResources(patient.toReference(), organization.toReference(), sampleResource.toReference())
+    val serviceRequestResource = serviceRequest.buildResource(specimenResource.toReference(), sampleResource.toReference())
+    val taskResources = tasks.buildResources(serviceRequestResource.toReference(), patient.toReference(), organization.toReference(), sampleResource.toReference(), documentReferencesResources)
 
-    val resourcesToCreate = (Seq(specimenResource.toOption, sampleResource.toOption).flatten ++ documentReferencesResources.resources()).toList
+    val resourcesToCreate = (
+      Seq(specimenResource.toOption, sampleResource.toOption).flatten
+        ++ documentReferencesResources.resources()
+        ++ taskResources
+      ).toList
 
-    val resourcesToUpdate = Seq(serviceRequest.buildResource(specimenResource.toReference(), sampleResource.toReference()))
+    val resourcesToUpdate = Seq(serviceRequestResource)
 
     val bundleEntriesToCreate = resourcesToCreate.map { fhirResource =>
       val be = new BundleEntryComponent()
@@ -57,10 +61,10 @@ object BuildBundle {
 
     val bundleEntriesToUpdate = resourcesToUpdate.map { fhirResource =>
       val be = new BundleEntryComponent()
-      be.setFullUrl(fhirResource.getIdElement().getIdPart)
+      be.setFullUrl(fhirResource.getIdElement.getIdPart)
         .setResource(fhirResource)
         .getRequest
-        .setUrl(fhirResource.getIdElement().getValue())
+        .setUrl(fhirResource.getIdElement.getValue)
         .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
       be
     }
@@ -69,39 +73,7 @@ object BuildBundle {
 
   }
 
-  def validateServiceRequest(a: Analysis)(implicit client: IClinFhirClient): ValidatedNel[String, TServiceRequest] = {
-    val fhirServiceRequest = opt(client.getServiceRequestById(new IdType(a.serviceRequestId)))
-    fhirServiceRequest match {
-      case None => s"ServiceRequest ${a.serviceRequestId} does not exist".invalidNel[TServiceRequest]
-      case Some(fsr) => TServiceRequest(fsr).validNel[String]
-    }
-  }
 
-  def validateOrganization(a: Analysis)(implicit client: IClinFhirClient): ValidatedNel[String, IdType] = {
-    val fhirOrg = opt(client.findByNameOrAlias(new StringParam(a.ldm)))
-    fhirOrg match {
-      case None => s"Organization ${a.ldm} does not exist".invalidNel[IdType]
-      case Some(org) => IdType.of(org).validNel[String]
-    }
-  }
-
-  def validateFiles(files: Map[String, FileEntry], a: Analysis): ValidationResult[DocumentReferences] = {
-
-    def validateOneFile(f: String) = files.get(f) match {
-      case Some(file) => TDocumentReference(objectStoreId = file.id, title = f, md5 = file.md5).validNel[String]
-      case None => s"File ${f} does not exist".invalidNel[TDocumentReference]
-    }
-
-    (
-      validateOneFile(a.files.cram),
-      validateOneFile(a.files.crai),
-      validateOneFile(a.files.vcf),
-      validateOneFile(a.files.tbi),
-      validateOneFile(a.files.qc)
-      ).mapN(DocumentReferences)
-
-  }
-
-  def validateTasks(a: Analysis): ValidationResult[Tasks] = Tasks(TTask(), TTask(), TTask()).validNel[String]
+  def validateTasks(a: Analysis): ValidationResult[TTasks] = TTasks(TTask(), TTask(), TTask()).validNel[String]
 
 }

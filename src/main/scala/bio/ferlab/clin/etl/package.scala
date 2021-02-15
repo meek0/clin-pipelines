@@ -12,6 +12,13 @@ package object etl {
     v.toList.sequence_.map(_ => f)
   }
 
+  def isValid[A, E](f: => A, errors: Seq[E]): ValidatedNel[E, A] = {
+    errors match {
+      case Nil => f.validNel[E]
+      case s => NonEmptyList.fromList(s.toList).get.invalid[A]
+    }
+  }
+
   implicit class ValidatedNelExtension[A, B](v1: ValidatedNel[A, B]) {
     def appendErrors(v2: ValidatedNel[A, _]): ValidatedNel[A, B] = {
       (v1, v2) match {

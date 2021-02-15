@@ -1,16 +1,16 @@
 package bio.ferlab.clin.etl.task
 
+import bio.ferlab.clin.etl.fhir._
+import bio.ferlab.clin.etl.interceptor.AuthTokenInterceptor
 import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.parser.IParser
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException
-import bio.ferlab.clin.etl.fhir._
-import bio.ferlab.clin.etl.interceptor.AuthTokenInterceptor
-import org.hl7.fhir.r4.model.{Bundle, ServiceRequest, Specimen}
+import org.hl7.fhir.r4.model.{Bundle, Specimen}
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
-import sttp.model.{MediaType, StatusCode}
 import sttp.client3._
+import sttp.model.{MediaType, StatusCode}
 
 object LoadHapiFhirDataTask {
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
@@ -35,15 +35,15 @@ object LoadHapiFhirDataTask {
     clinClient.registerInterceptor(hapiFhirInterceptor)
     client.registerInterceptor(hapiFhirInterceptor)
 
-    val specimens: Seq[Specimen] = SpecimenLoader.loadSpecimens(clinClient)
-    val samples: Seq[Specimen] = SpecimenLoader.loadSamples(clinClient, specimens.map(a => a.getId -> a).toMap)
+//    val specimens: Seq[Specimen] = SpecimenLoader.loadSpecimens(clinClient)
+//    val samples: Seq[Specimen] = SpecimenLoader.loadSamples(clinClient, specimens.map(a => a.getId -> a).toMap)
 
     //vferretti decided to put these on hold for now.
     //val nanuqServiceRequests: Seq[ServiceRequest] = SequencingServiceRequestLoader.load(clinClient, specimens)
 
 
 
-    createBundle(client, hapiFhirInterceptor, (specimens ++ samples))
+    createBundle(client, hapiFhirInterceptor, Nil)
 
   }
 

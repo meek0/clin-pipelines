@@ -1,12 +1,14 @@
-package bio.ferlab.clin.etl.task
+package bio.ferlab.clin.etl.task.validation
 
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.fhir.IClinFhirClient.opt
 import bio.ferlab.clin.etl.model.InputPatient
 import bio.ferlab.clin.etl.{ValidationResult, allValid}
 import cats.data.Validated.Valid
-import cats.implicits._
 import org.hl7.fhir.r4.model.IdType
+import cats.data.ValidatedNel
+import cats.implicits._
+import scala.collection.JavaConverters._
 
 object PatientValidation {
 

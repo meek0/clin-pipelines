@@ -4,26 +4,6 @@ import java.util.{Date, Locale}
 
 object Model {
 
-  object ClinSpecimenType extends Enumeration {
-    val BLOOD = Value("BLD")
-    val TUMOR = Value("TUMOR")
-
-    implicit class Display(specimenType: Value) {
-      def display: String = specimenType match {
-        case BLOOD => "Whole blood"
-        case TUMOR => "Tumor"
-        case _ => "Other"
-      }
-
-      def text: String = specimenType match {
-        case BLOOD => "Blood"
-        case TUMOR => "Tumor"
-        case _ => "Other"
-      }
-    }
-
-  }
-
   object ClinServiceRequestCode extends Enumeration {
     val WXS = Value("WXS")
     val WGS = Value("WGS")

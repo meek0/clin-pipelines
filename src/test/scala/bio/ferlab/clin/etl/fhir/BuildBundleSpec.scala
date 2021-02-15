@@ -16,11 +16,11 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Wit
       defaultAnalysis.copy(patient = defaultPatient(ptId), serviceRequestId = serviceRequestId)
     ))
     val files = Seq(
-      FileEntry("file1.cram", "123", "md5"),
-      FileEntry("file1.crai", "345", "md5"),
-      FileEntry("file2.vcf", "678", "md5"),
-      FileEntry("file2.tbi", "901", "md5"),
-      FileEntry("file3.tgz", "234", "md5")
+      FileEntry("file1.cram", "123", "md5", 10),
+      FileEntry("file1.crai", "345", "md5", 10),
+      FileEntry("file2.vcf", "678", "md5", 10),
+      FileEntry("file2.tbi", "901", "md5", 10),
+      FileEntry("file3.tgz", "234", "md5", 10)
     )
     val result = BuildBundle.validate(meta, files)
 
