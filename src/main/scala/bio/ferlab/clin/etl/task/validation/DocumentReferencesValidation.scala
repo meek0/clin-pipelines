@@ -12,7 +12,7 @@ object DocumentReferencesValidation {
   def validateFiles(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient): ValidationResult[TDocumentReferences] = {
     def validateOneFile(f: String, label:String) = files.get(f) match {
       case Some(file) =>
-        val dr = TDocumentReference(objectStoreId = file.id, title = f, md5 = file.md5)
+        val dr = TDocumentReference(objectStoreId = file.id, title = f, md5 = file.md5, size = file.size)
         val outcome = dr.validateBaseResource()
         val issues = outcome.getIssue.asScala
         val errors = issues.collect {

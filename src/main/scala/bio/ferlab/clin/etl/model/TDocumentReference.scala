@@ -3,21 +3,21 @@ package bio.ferlab.clin.etl.model
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import org.hl7.fhir.r4.model.DocumentReference.{DocumentReferenceContentComponent, DocumentReferenceContextComponent}
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus
-import org.hl7.fhir.r4.model.{Attachment, DocumentReference, IdType, OperationOutcome, Reference, Resource}
+import org.hl7.fhir.r4.model.{Attachment, DocumentReference, IdType, OperationOutcome, Reference, Resource, UnsignedIntType}
 
 import scala.collection.JavaConverters._
 
-case class TDocumentReference(objectStoreId: String, title: String, md5: String) {
+case class TDocumentReference(objectStoreId: String, title: String, md5: String, size: Long) {
 
   def validateBaseResource()(implicit fhirClient: IGenericClient): OperationOutcome = {
     val baseResource = buildBase()
     Fhir.validateResource(baseResource)
   }
 
-  def buildResource(subject: Reference, custodian: Reference, sample: Reference, related:Option[Reference]): Resource = {
+  def buildResource(subject: Reference, custodian: Reference, sample: Reference, related: Option[Reference]): Resource = {
     val dr = buildBase()
     val drc = new DocumentReferenceContextComponent()
-    related.foreach( r => drc.setRelated(List(r).asJava))
+    related.foreach(r => drc.setRelated(List(r).asJava))
 
     dr.setContext(drc)
 
@@ -37,6 +37,7 @@ case class TDocumentReference(objectStoreId: String, title: String, md5: String)
     a.setUrl(s"https://objectstore.cqgc.ca/$objectStoreId")
     a.setHash(md5.getBytes())
     a.setTitle(title)
+    a.setSizeElement(new UnsignedIntType(size))
     val drcc = new DocumentReferenceContentComponent(a)
     dr.setContent(List(drcc).asJava)
   }
