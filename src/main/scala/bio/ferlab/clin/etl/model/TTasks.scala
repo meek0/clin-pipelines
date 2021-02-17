@@ -69,10 +69,10 @@ case class TTasks(sequencingAlignment: TTask, variantCall: TTask, qualityControl
     }
 
     val qualityControlOutput = {
-      val p = new TaskOutputComponent()
+      val qc = new TaskOutputComponent()
         .setType(new CodeableConcept().setText(QC_FILE)) //TODO Use a terminology
         .setValue(drr.qc.toReference())
-      Seq(p.setValue(sequencingAlignmentR.toReference()))
+      Seq(qc)
     }
     val qualityControlR = qualityControl.buildResource(SEQUENCING_QC_ANALYSIS,serviceRequest, patient, organization, qualityControlInput, qualityControlOutput)
 

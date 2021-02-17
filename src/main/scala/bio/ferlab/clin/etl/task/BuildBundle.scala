@@ -54,7 +54,7 @@ object BuildBundle {
         .setResource(s)
         .getRequest
         .setUrl("Specimen")
-        .setIfNoneExist(s"accessionIdentifier=${s.getAccessionIdentifier.getSystem}|${s.getIdentifierFirstRep.getValue}")
+        .setIfNoneExist(s"accession=${s.getAccessionIdentifier.getSystem}|${s.getAccessionIdentifier.getValue}")
         .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST)
       be
     }

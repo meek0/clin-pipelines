@@ -60,7 +60,8 @@ object SpecimenValidation {
   private def validateOneSpecimen(a: Analysis, specimen: Option[Specimen], label: SpecimenSampleType)(implicit client: IGenericClient): ValidatedNel[String, TSpecimen] = specimen match {
     case None =>
       val id = if (label == SpecimenType) a.specimenId else a.sampleId
-      val s = TNewSpecimen(a.ldm, id, a.specimenType, a.bodySite)
+      val stype = if (label == SpecimenType) a.specimenType else a.sampleType.getOrElse(a.specimenType)
+      val s = TNewSpecimen(a.ldm, id, stype, a.bodySite)
       val outcome = s.validateBaseResource
       val issues = outcome.getIssue.asScala
       val errors = issues.collect {

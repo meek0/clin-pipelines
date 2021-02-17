@@ -3,7 +3,7 @@ package bio.ferlab.clin.etl.model
 
 import ca.uhn.fhir.rest.api.MethodOutcome
 import ca.uhn.fhir.rest.client.api.IGenericClient
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException
+import ca.uhn.fhir.rest.server.exceptions.{PreconditionFailedException, UnprocessableEntityException}
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome
 import org.hl7.fhir.r4.model.Bundle.{BundleEntryComponent, BundleEntryRequestComponent}
 import org.hl7.fhir.r4.model.DocumentReference.{DocumentReferenceContentComponent, DocumentReferenceContextComponent}
@@ -31,6 +31,7 @@ object Fhir {
   def validateResource(r: Resource)(implicit client: IGenericClient): OperationOutcome = {
     Try(client.validate().resource(r).execute().getOperationOutcome).recover {
       case e: PreconditionFailedException => e.getOperationOutcome
+      case e: UnprocessableEntityException => e.getOperationOutcome
     }.get.asInstanceOf[OperationOutcome]
   }
 }
