@@ -24,9 +24,9 @@ class SpecimenValidationSpec extends FlatSpec with Matchers with WithFhirServer 
 
     val ptId1 = FhirTestUtils.loadPatients().getIdPart
     val ptId2 = FhirTestUtils.loadPatients().getIdPart
-    val spId1 = FhirTestUtils.loadSpecimens2(ptId1, "CHUSJ", "1")
-    val spId3 = FhirTestUtils.loadSpecimens2(ptId1, "CHUM", "1")
-    val spId2 = FhirTestUtils.loadSpecimens2(ptId2, "CHUSJ", "2")
+    val spId1 = FhirTestUtils.loadSpecimen(ptId1, "CHUSJ", "1")
+    val spId3 = FhirTestUtils.loadSpecimen(ptId1, "CHUM", "1")
+    val spId2 = FhirTestUtils.loadSpecimen(ptId2, "CHUSJ", "2")
     val metadata = defaultMetadata.copy(
       analyses = Seq(
         defaultAnalysis.copy(specimenId = "1", ldm = "CHUSJ", patient = defaultPatient("not_the_good_one_1")),
@@ -53,8 +53,8 @@ class SpecimenValidationSpec extends FlatSpec with Matchers with WithFhirServer 
     import org.hl7.fhir.r4.model.Patient
     import org.hl7.fhir.r4.model.Provenance
     val ptId1 = FhirTestUtils.loadPatients().getIdPart
-    val parent = FhirTestUtils.loadSpecimens2(ptId1, "CHUSJ", "1")
-    val sample = FhirTestUtils.loadSpecimens2(ptId1, "CHUSJ", "2", parent = Some(parent))
+    val parent = FhirTestUtils.loadSpecimen(ptId1, "CHUSJ", "1")
+    val sample = FhirTestUtils.loadSpecimen(ptId1, "CHUSJ", "2", parent = Some(parent))
     val analysis = defaultAnalysis.copy(specimenId = "1", sampleId="2", ldm = "CHUSJ", patient = defaultPatient("not_the_good_one_1"))
     validateSample(analysis)
   }

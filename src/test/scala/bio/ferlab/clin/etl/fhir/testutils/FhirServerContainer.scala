@@ -4,15 +4,14 @@ import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.parser.IParser
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
-import com.dimafeng.testcontainers.FixedHostPortGenericContainer
+import com.dimafeng.testcontainers.{FixedHostPortGenericContainer, GenericContainer}
 import org.hl7.fhir.r4.model.IdType
 import org.scalatest.{BeforeAndAfterAll, TestSuite}
 import org.testcontainers.containers.wait.strategy.Wait
-
+import scala.collection.JavaConverters._
 import java.time.Duration
 
 object FhirServerContainer {
-  val exposedPort: Int = 18080
   val fhirEnv: Map[String, String] = Map(
     "HAPI_DATASOURCE_URL" -> "jdbc:h2:mem:hapi",
     "HAPI_DATASOURCE_DRIVER" -> "org.h2.Driver",
@@ -23,38 +22,33 @@ object FhirServerContainer {
     "HAPI_BIO_ELASTICSEARCH_ENABLED" -> "false",
     "HAPI_LOGGING_INTERCEPTOR_SERVER_ENABLED" -> "false",
     "HAPI_LOGGING_INTERCEPTOR_CLIENT_ENABLED" -> "false",
-    "HAPI_SERVER_ADDRESS" -> s"http://localhost:$exposedPort/fhir/",
     "HAPI_VALIDATE_RESPONSES_ENABLED" -> "false",
     "JAVA_OPTS" -> "-Dhibernate.dialect=org.hibernate.dialect.H2Dialect"
   )
   private var isStarted = false
 
-  lazy val container = FixedHostPortGenericContainer(
-
+  private val CONTAINER_NAME = "clin-pipeline-fhir-test"
+  lazy val container = GenericContainer(
     "chusj/clin-fhir-server:latest",
     waitStrategy = Wait.forHttp("/").withStartupTimeout(Duration.ofSeconds(60)),
-    exposedHostPort = exposedPort,
-    exposedContainerPort = 8080,
+    exposedPorts = Seq(8080),
     env = fhirEnv,
+    labels = Map("name" -> CONTAINER_NAME)
   )
 
-  def start() = {
-    if (System.getenv("startFhirServer") == "true") {
-      if (!isStarted) {
+  def start(): Int = {
+
+    val runningContainer = container.dockerClient.listContainersCmd().withLabelFilter(Map("name" -> CONTAINER_NAME).asJava).exec().asScala
+
+    runningContainer.toList match {
+      case Nil =>
         container.start()
-        isStarted = true
+        val port = container.mappedPort(8080)
+        println(s"Container start, port=${port}")
+        port
+      case List(c) =>
+        c.ports.collectFirst { case p if p.getPrivatePort == 8080 => p.getPublicPort }.get
 
-      }
-    } else {
-      isStarted = true
-    }
-    exposedPort
-  }
-
-  def forceStart() = {
-    if (!isStarted) {
-      container.start()
-      isStarted = true
     }
 
   }
@@ -63,12 +57,12 @@ object FhirServerContainer {
 
 trait WithFhirServer extends TestSuite with BeforeAndAfterAll {
 
-  val port = FhirServerContainer.start()
-  implicit val fhirServer = new FhirServerContainer(s"http://localhost:${port}/fhir")
-  implicit val clinFhirClient = fhirServer.clinClient
-  implicit val fhirClient = fhirServer.fhirClient
+  val port: Int = FhirServerContainer.start()
+  implicit val fhirServer: FhirServerContainer = new FhirServerContainer(s"http://localhost:${port}/fhir")
+  implicit val clinFhirClient: IClinFhirClient = fhirServer.clinClient
+  implicit val fhirClient: IGenericClient = fhirServer.fhirClient
 
-  override def afterAll() = {
+  override def afterAll(): Unit = {
     FhirTestUtils.clearAll()
     println("Shutting down.")
   }
@@ -87,7 +81,7 @@ class FhirServerContainer(val fhirBaseUrl: String) {
 
 object AppFhirServer extends App {
   while (true) {
-    FhirServerContainer.forceStart()
+    FhirServerContainer.start()
   }
 }
 
@@ -95,14 +89,14 @@ object test extends App with WithFhirServer {
   val ptId = FhirTestUtils.loadPatients().getIdPart
   FhirTestUtils.loadOrganizations()
   FhirTestUtils.loadServiceRequest(patientId = ptId)
-//  fhirClient.delete().resourceById(new IdType("Specimen", "5")).execute()
-//  FhirTestUtils.clearAll()
+  //  fhirClient.delete().resourceById(new IdType("Specimen", "5")).execute()
+  //  FhirTestUtils.clearAll()
 
 }
 
 object delete extends App with WithFhirServer {
-    fhirClient.delete().resourceById(new IdType("Specimen", "15")).execute()
-    fhirClient.delete().resourceById(new IdType("Specimen", "14")).execute()
+  fhirClient.delete().resourceById(new IdType("Specimen", "15")).execute()
+  fhirClient.delete().resourceById(new IdType("Specimen", "14")).execute()
   //  FhirTestUtils.clearAll()
 
 }

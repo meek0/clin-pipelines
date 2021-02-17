@@ -10,21 +10,21 @@ import java.time.{LocalDate, ZoneId}
 import java.util.{Collections, Date}
 
 object FhirTestUtils {
-  val DEFAULT_ZONE_ID = ZoneId.of("UTC")
+  val DEFAULT_ZONE_ID: ZoneId = ZoneId.of("UTC")
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
-  def loadOrganizations()(implicit fhirServer: FhirServerContainer) = {
+  def loadOrganizations()(implicit fhirServer: FhirServerContainer): String = {
     val org: Organization = new Organization()
     org.setId("111")
     org.setName("CHU Ste-Justine")
     org.setAlias(Collections.singletonList(new StringType("CHUSJ")))
 
-    val id: IIdType = fhirServer.fhirClient.create().resource(org).execute().getId()
-    LOGGER.info("Organization created with id : " + id.getIdPart())
-    id.getIdPart()
+    val id: IIdType = fhirServer.fhirClient.create().resource(org).execute().getId
+    LOGGER.info("Organization created with id : " + id.getIdPart)
+    id.getIdPart
   }
 
-  def loadPractitioners()(implicit fhirServer: FhirServerContainer) = {
+  def loadPractitioners()(implicit fhirServer: FhirServerContainer): String = {
     val pr: Practitioner = new Practitioner()
     pr.setId("222")
 
@@ -44,9 +44,9 @@ object FhirTestUtils {
 
     pr.addName().setFamily("Afritt").addGiven("Barack").addPrefix("Dr.")
 
-    val id: IIdType = fhirServer.fhirClient.create().resource(pr).execute().getId()
-    LOGGER.info("Practitioner created with id : " + id.getIdPart())
-    id.getIdPart()
+    val id: IIdType = fhirServer.fhirClient.create().resource(pr).execute().getId
+    LOGGER.info("Practitioner created with id : " + id.getIdPart)
+    id.getIdPart
   }
 
 
@@ -82,7 +82,7 @@ object FhirTestUtils {
 
   }
 
-  def loadSpecimens2(patientId: String, lab: String = "CHUSJ", submitterId: String = "1", specimenType: String = "BLD", parent: Option[String] = None)(implicit fhirServer: FhirServerContainer): String = {
+  def loadSpecimen(patientId: String, lab: String = "CHUSJ", submitterId: String = "1", specimenType: String = "BLD", parent: Option[String] = None)(implicit fhirServer: FhirServerContainer): String = {
     val sp = new Specimen()
     sp.setSubject(new Reference(s"Patient/$patientId"))
 
@@ -111,9 +111,9 @@ object FhirTestUtils {
     )
   }
 
-  def clearAll()(implicit fhirServer: FhirServerContainer) = {
+  def clearAll()(implicit fhirServer: FhirServerContainer): Parameters = {
     val inParams = new Parameters()
-    inParams.addParameter.setName("expungeEverything").setValue(new BooleanType(true))
+    inParams.addParameter().setName("expungeEverything").setValue(new BooleanType(true))
     fhirServer.fhirClient
       .operation()
       .onServer()
@@ -123,7 +123,7 @@ object FhirTestUtils {
 
   }
 
-  def printJson[A <: IBaseResource](resource: A)(implicit fhirServer: FhirServerContainer) = {
+  def printJson[A <: IBaseResource](resource: A)(implicit fhirServer: FhirServerContainer): Unit = {
     LOGGER.info(fhirServer.parser.encodeResourceToString(resource))
   }
 }
