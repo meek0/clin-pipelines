@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.parser.IParser
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
 import com.dimafeng.testcontainers.FixedHostPortGenericContainer
+import org.hl7.fhir.r4.model.IdType
 import org.scalatest.{BeforeAndAfterAll, TestSuite}
 import org.testcontainers.containers.wait.strategy.Wait
 
@@ -88,5 +89,21 @@ object AppFhirServer extends App {
   while (true) {
     FhirServerContainer.forceStart()
   }
+}
+
+object test extends App with WithFhirServer {
+  val ptId = FhirTestUtils.loadPatients().getIdPart
+  FhirTestUtils.loadOrganizations()
+  FhirTestUtils.loadServiceRequest(patientId = ptId)
+//  fhirClient.delete().resourceById(new IdType("Specimen", "5")).execute()
+//  FhirTestUtils.clearAll()
+
+}
+
+object delete extends App with WithFhirServer {
+    fhirClient.delete().resourceById(new IdType("Specimen", "15")).execute()
+    fhirClient.delete().resourceById(new IdType("Specimen", "14")).execute()
+  //  FhirTestUtils.clearAll()
+
 }
 

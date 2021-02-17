@@ -19,7 +19,7 @@ object DocumentReferencesValidation {
           case o if o.getSeverity.ordinal() <= OperationOutcome.IssueSeverity.ERROR.ordinal =>
             val diag = o.getDiagnostics
             val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
-            s"File type=$label, file_name=${file.name}, specimen=${a.specimenId}, sample=${a.sampleId}, patient:${a.patient.id} : $loc - $diag"
+            s"File type=$label, file_name=${file.filename}, specimen=${a.specimenId}, sample=${a.sampleId}, patient:${a.patient.id} : $loc - $diag"
         }.toSeq
         isValid(dr, errors)
       case None => s"File $f does not exist : type:$label, specimen=${a.specimenId}, sample=${a.sampleId}, patient:${a.patient.id}".invalidNel[TDocumentReference]

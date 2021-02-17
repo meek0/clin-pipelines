@@ -11,12 +11,12 @@ import bio.ferlab.clin.etl.{EitherResourceExtension, IdTypeExtension, ResourceEx
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.implicits._
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
-import org.hl7.fhir.r4.model.IdType
+import org.hl7.fhir.r4.model.{IdType, Specimen}
 
 object BuildBundle {
 
   def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[TBundle] = {
-    val mapFiles = files.map(f => (f.name, f)).toMap
+    val mapFiles = files.map(f => (f.filename, f)).toMap
     val allResources = metadata.analyses.toList.map { a =>
 
       (
@@ -39,17 +39,27 @@ object BuildBundle {
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), Some(specimenResource.toReference()))
     val documentReferencesResources: DocumentReferencesResources = files.buildResources(patient.toReference(), organization.toReference(), sampleResource.toReference())
     val serviceRequestResource = serviceRequest.buildResource(specimenResource.toReference(), sampleResource.toReference())
-    val taskResources = tasks.buildResources(serviceRequestResource.toReference(), patient.toReference(), organization.toReference(), sampleResource.toReference(), documentReferencesResources)
+    val taskResources = tasks.buildResources(serviceRequest.sr.toReference(), patient.toReference(), organization.toReference(), sampleResource.toReference(), documentReferencesResources)
 
     val resourcesToCreate = (
-      Seq(specimenResource.toOption, sampleResource.toOption).flatten
-        ++ documentReferencesResources.resources()
+      documentReferencesResources.resources()
         ++ taskResources
       ).toList
 
-    val resourcesToUpdate = Seq(serviceRequestResource)
+    val resourcesToUpdate = Seq(serviceRequestResource).flatten
 
-    val bundleEntriesToCreate = resourcesToCreate.map { fhirResource =>
+    val bundleEntriesSpecimen = Seq(specimenResource.toOption, sampleResource.toOption).flatten.map { s =>
+      val be = new BundleEntryComponent()
+      be.setFullUrl(s.getIdElement.getValue)
+        .setResource(s)
+        .getRequest
+        .setUrl("Specimen")
+        .setIfNoneExist(s"accessionIdentifier=${s.getAccessionIdentifier.getSystem}|${s.getIdentifierFirstRep.getValue}")
+        .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST)
+      be
+    }
+
+    val bundleEntriesToCreate: Seq[BundleEntryComponent] = bundleEntriesSpecimen ++ resourcesToCreate.map { fhirResource =>
       val be = new BundleEntryComponent()
       be.setFullUrl(fhirResource.getIdElement.getValue)
         .setResource(fhirResource)
@@ -68,7 +78,7 @@ object BuildBundle {
         .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
       be
     }
-    bundleEntriesToCreate ++ bundleEntriesToUpdate
+    (bundleEntriesToCreate ++ bundleEntriesToUpdate).toList
 
 
   }

@@ -21,18 +21,18 @@
   "analyses": [
     {
       "patient": {
-        "id": "clin_id",
-        "firstName": "",
-        "lastName": "",
-        "sex": "M"
+        "id": "1",
+        "firstName": "John",
+        "lastName": "Doe",
+        "sex": "male"
       },
-      "ldm": "ICM",
-      "sampleId": "submitted_sample_id",
-      "specimenId": "submitted_specimen_id",
-      "specimenType": "Normal blood",
+      "ldm": "CHUSJ",
+      "sampleId": "submitted_sample_id3",
+      "specimenId": "submitted_specimen_id3",
+      "specimenType": "BLD",
       "sampleType": "DNA",
       "bodySite": "can be null",
-      "serviceRequestId": "clin_prescription_id",
+      "serviceRequestId": "3",
       "labAliquotId": "nanuq_sample_id",
       "files": {
         "cram": "file1.cram",

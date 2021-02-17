@@ -5,6 +5,8 @@ import org.hl7.fhir.r4.model.DocumentReference.{DocumentReferenceContentComponen
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus
 import org.hl7.fhir.r4.model.{Attachment, DocumentReference, IdType, OperationOutcome, Reference, Resource, UnsignedIntType}
 
+import java.nio.charset.Charset
+import java.util.Base64
 import scala.collection.JavaConverters._
 
 case class TDocumentReference(objectStoreId: String, title: String, md5: String, size: Long) {

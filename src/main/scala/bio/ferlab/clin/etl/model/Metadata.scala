@@ -1,9 +1,33 @@
 package bio.ferlab.clin.etl.model
 
-import play.api.libs.json.{Json, Reads}
+import cats.data.{NonEmptyList, ValidatedNel}
+import cats.implicits.catsSyntaxValidatedId
+import com.amazonaws.services.s3.AmazonS3
+import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
+
+import java.io.ByteArrayInputStream
 
 object Metadata {
   implicit val reads: Reads[Metadata] = Json.reads[Metadata]
+
+  def validateMetadataFile(bucket: String, prefix: String)(implicit s3Client: AmazonS3): ValidatedNel[String, Metadata] = {
+    val objectName = s"$prefix/metadata.json"
+    val objectExist = s3Client.doesObjectExist(bucket, objectName)
+    if (!objectExist) {
+      s"Metadata file does not exist, bucket=$bucket, prefix=$prefix".invalidNel[Metadata]
+    } else {
+      val obj = s3Client.getObject(bucket, objectName)
+      val content = obj.getObjectContent
+      val bis = new ByteArrayInputStream(content.readAllBytes())
+      val r = Json.parse(bis).validate[Metadata]
+      r match {
+        case JsSuccess(m, _) => m.validNel[String]
+        case JsError(errors) =>
+          val all = errors.flatMap { case (path, jsError) => jsError.map(e => s"Error parsing $path => $e") }
+          NonEmptyList.fromList(all.toList).get.invalid[Metadata]
+      }
+    }
+  }
 }
 
 case class Metadata(experiment: Experiment, workflow: Workflow, analyses: Seq[Analysis])
@@ -55,11 +79,11 @@ object Analysis {
 }
 
 case class InputPatient(
-                    id: String,
-                    firstName: String,
-                    lastName: String,
-                    sex: String
-                  )
+                         id: String,
+                         firstName: String,
+                         lastName: String,
+                         sex: String
+                       )
 
 object InputPatient {
   implicit val reads: Reads[InputPatient] = Json.reads[InputPatient]

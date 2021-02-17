@@ -1,0 +1,33 @@
+version: "3"
+services:
+  # make sure that you specify correct volume to be mounted
+  minio:
+    image: minio/minio
+    environment:
+      - MINIO_ACCESS_KEY=accesskey
+      - MINIO_SECRET_KEY=secretkey
+    volumes:
+      - ./data1/minio:/data:delegated
+    ports:
+      - 9000:9000
+    command: server /data
+  hapi-fhir-server:
+    image: chusj/clin-fhir-server:latest
+    container_name: hapi-fhir-server
+    restart: on-failure
+    environment:
+      HAPI_DATASOURCE_URL: "jdbc:h2:mem:hapi"
+      HAPI_DATASOURCE_DRIVER: "org.h2.Driver"
+      HAPI_DATASOURCE_USERNAME: ""
+      HAPI_DATASOURCE_PASSWORD: ""
+      HAPI_AUTH_ENABLED: "false"
+      HAPI_AUDITS_ENABLED: "false"
+      HAPI_BIO_ELASTICSEARCH_ENABLED: "false"
+      HAPI_LOGGING_INTERCEPTOR_SERVER_ENABLED: "false"
+      HAPI_LOGGING_INTERCEPTOR_CLIENT_ENABLED: "false"
+      HAPI_SERVER_ADDRESS: "http://localhost:18080/fhir/"
+      HAPI_VALIDATE_RESPONSES_ENABLED: "false"
+      JAVA_OPTS: "-Dhibernate.dialect=org.hibernate.dialect.H2Dialect"
+    ports:
+      - 18080:8080
+

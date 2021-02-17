@@ -69,11 +69,12 @@ object FhirTestUtils {
     id
   }
 
-  def loadServiceRequest(patientId: String)(implicit fhirServer: FhirServerContainer): String = {
+  def loadServiceRequest(patientId: String, specimenIds:Seq[String] = Nil)(implicit fhirServer: FhirServerContainer): String = {
     val sr = new ServiceRequest()
     sr.setSubject(new Reference(s"Patient/$patientId"))
     sr.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE)
     sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER)
+    specimenIds.foreach(spId => sr.addSpecimen(new Reference(s"Specimen/$spId")))
     val id: IIdType = fhirServer.fhirClient.create().resource(sr).execute().getId
 
     LOGGER.info("ServiceRequest created with id : " + id.getIdPart)

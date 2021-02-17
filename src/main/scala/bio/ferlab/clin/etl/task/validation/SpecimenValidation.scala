@@ -8,10 +8,11 @@ import ca.uhn.fhir.rest.param.TokenParam
 import cats.data.Validated.Valid
 import cats.data.ValidatedNel
 import cats.implicits._
+
 import scala.collection.JavaConverters._
-import org.hl7.fhir.r4.model.Bundle.SearchEntryMode
+import org.hl7.fhir.r4.model.Bundle.{IDENTIFIER, SearchEntryMode}
 import org.hl7.fhir.r4.model.Specimen.{ACCESSION, INCLUDE_PARENT}
-import org.hl7.fhir.r4.model.{Bundle, IdType, OperationOutcome, Specimen}
+import org.hl7.fhir.r4.model.{Bundle, IdType, Identifier, OperationOutcome, Specimen}
 
 object SpecimenValidation {
   def validateSpecimen(a: Analysis)(implicit client: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[TSpecimen] = {
@@ -20,11 +21,12 @@ object SpecimenValidation {
   }
 
   def validateSample(analysis: Analysis)(implicit client: IGenericClient): ValidationResult[TSpecimen] = {
+    val accessionSystem = s"https://cqgc.qc.ca/labs/${analysis.ldm}"
     val results = client
       .search
       .forResource(classOf[Specimen])
       .encodedJson
-      .where(ACCESSION.exactly().systemAndCode("https://cqgc.qc.ca/labs/CHUSJ", analysis.sampleId))
+      .where(ACCESSION.exactly().systemAndCode(accessionSystem, analysis.sampleId))
       .include(INCLUDE_PARENT)
       .returnBundle(classOf[Bundle]).execute
 
@@ -33,11 +35,23 @@ object SpecimenValidation {
     val fhirSample = entries.collectFirst { case be if be.getSearch.getMode == SearchEntryMode.MATCH => be.getResource.asInstanceOf[Specimen] }
     val sampleValidation = validateOneSpecimen(analysis, fhirSample, SampleType)
 
+    def specimenAccessionEquals(fsp: Specimen) = {
+      val identifier = new Identifier().setSystem(accessionSystem).setValue(analysis.specimenId)
+      fsp.getAccessionIdentifier.equalsShallow(identifier)
+    }
+
     val parentValidation: ValidatedNel[String, Any] = (fhirParent, fhirSample) match {
-      case (Some(_), None) => throw new IllegalStateException("A sample parent has been returned without parent") //should never happened
-      case (None, Some(fsa)) => "error".invalidNel[Any]
-      case (Some(fsp), Some(fsa)) if IdType.of(fsp).getIdPart != analysis.specimenId => "error sample does not have same specimen".invalidNel[Any]
-      case (_, Some(_)) => Valid()
+      case (Some(fsp), None) =>
+        val specimenAccessionSystem = Option(fsp.getAccessionIdentifier).map(_.getSystem).getOrElse("None")
+        val specimenAccessionValue = Option(fsp.getAccessionIdentifier).map(_.getValue).getOrElse("None")
+        s"Sample ${analysis.sampleId} : A parent specimen id=${fsp.getId}, accession_system=$specimenAccessionSystem, accession_value=$specimenAccessionValue has been returned without sample".invalidNel[Any] //should never happened
+      case (None, Some(fsa)) =>
+        s"Sample ${analysis.sampleId} : no parent specimen has been found".invalidNel[Any] //should never happened
+      case (Some(fsp), Some(_)) if !specimenAccessionEquals(fsp) =>
+        val specimenAccessionSystem = Option(fsp.getAccessionIdentifier).map(_.getSystem).getOrElse("None")
+        val specimenAccessionValue = Option(fsp.getAccessionIdentifier).map(_.getValue).getOrElse("None")
+        s"Sample ${analysis.sampleId} : parent specimen are not the same (${analysis.specimenId} <-> ${specimenAccessionValue} AND (${accessionSystem} <-> $specimenAccessionSystem)".invalidNel[Any]
+      case (Some(_), Some(_)) => Valid()
       case (None, None) => Valid()
     }
     sampleValidation.appendErrors(parentValidation)
@@ -45,7 +59,8 @@ object SpecimenValidation {
 
   private def validateOneSpecimen(a: Analysis, specimen: Option[Specimen], label: SpecimenSampleType)(implicit client: IGenericClient): ValidatedNel[String, TSpecimen] = specimen match {
     case None =>
-      val s = TNewSpecimen(a.ldm, a.specimenId, a.specimenType, a.bodySite)
+      val id = if (label == SpecimenType) a.specimenId else a.sampleId
+      val s = TNewSpecimen(a.ldm, id, a.specimenType, a.bodySite)
       val outcome = s.validateBaseResource
       val issues = outcome.getIssue.asScala
       val errors = issues.collect {

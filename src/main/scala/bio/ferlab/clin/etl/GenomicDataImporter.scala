@@ -15,10 +15,9 @@ object GenomicDataImporter extends App {
   val (task: String, batchId: Option[String]) = args match {
     case Array(task) => (task, None)
     case Array(task, batchId) => (task, Some(batchId))
-    case _ => {
+    case _ =>
       LOGGER.error("Usage: GenomicDataImporter task_name [batch_id]")
       System.exit(-1)
-    }
   }
 
   val credentials: BasicAWSCredentials = new BasicAWSCredentials(Configuration.accessKey, Configuration.secretKey)
@@ -30,10 +29,10 @@ object GenomicDataImporter extends App {
   LOGGER.info(s"Executing bio.ferlab.clin.etl.task : $task")
 
   var returnCode: Int = task match {
-    case "validate-files-on-s3" => {
+    case "validate-files-on-s3" =>
       try {
 
-        val files: List[String] = if (!batchId.isEmpty)
+        val files: List[String] = if (batchId.isDefined)
           CheckS3DataTask.run(Configuration.bucket, batchId.get, s3Client)
         else
           CheckS3DataTask.run(Configuration.bucket, s3Client)
@@ -59,8 +58,7 @@ object GenomicDataImporter extends App {
           LOGGER.error("An error occurred", e);
           -1
       }
-    }
-    case "load-metadata-in-bio.ferlab.clin.etl.fhir" => {
+    case "load-metadata-in-bio.ferlab.clin.etl.fhir" =>
       try {
         LoadHapiFhirDataTask.run(Configuration.fhirServerBase)
         LOGGER.info(s"Done loading specimens in HAPI Fhir")
@@ -68,7 +66,6 @@ object GenomicDataImporter extends App {
       } catch {
         case _: Throwable => -1
       }
-    }
     case "extract-bio.ferlab.clin.etl.fhir-data-for-etl" => {
       LOGGER.info(s"Done exporting patients and specimens from HAPI Fhir")
       0
