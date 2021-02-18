@@ -11,13 +11,12 @@ import java.io.File
 class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
 
   "loadFileEntries" should "return list of files present in bucket" in {
-    withBuckets { (inputBucket, _) =>
+    withObjects { (prefix, _) =>
       val transferManager = TransferManagerBuilder.standard.withS3Client(s3).build()
-      val prefix = "run_abc"
       val transfert = transferManager.uploadDirectory(inputBucket, prefix, new File(getClass.getResource("/good").toURI), false);
       transfert.waitForCompletion()
 
-      val fileEntries = CheckS3Data.loadFileEntries(inputBucket, "run_abc")
+      val fileEntries = CheckS3Data.loadFileEntries(inputBucket, prefix)
 
       fileEntries should contain theSameElementsAs List(
         FileEntry(inputBucket, s"$prefix/file1.crai", "8e2c4493b1fb0f04c6a8a9e393216ae8", 10),
