@@ -39,7 +39,7 @@ object Main extends App {
   val metadata = Metadata.validateMetadataFile(bucket, prefix)
   val result: Validated[NonEmptyList[String], Bundle] = metadata.andThen { m: Metadata =>
     val fileEntries = CheckS3DataTask.loadFileEntries(bucket, prefix)
-    (BuildBundle.validate(m, fileEntries), CheckS3DataTask.validate(m, fileEntries))
+    (BuildBundle.validate(m, fileEntries), CheckS3DataTask.validateFileEntries(m, fileEntries))
       .mapN { (bundle, files) =>
         try {
           FileEntry.copyFiles(files, bucketDest, prefixDest)

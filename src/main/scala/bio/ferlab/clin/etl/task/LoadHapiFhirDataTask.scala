@@ -1,7 +1,6 @@
 package bio.ferlab.clin.etl.task
 
-import bio.ferlab.clin.etl.fhir._
-import bio.ferlab.clin.etl.interceptor.AuthTokenInterceptor
+import bio.ferlab.clin.etl.fhir.{AuthTokenInterceptor, _}
 import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.parser.IParser
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}

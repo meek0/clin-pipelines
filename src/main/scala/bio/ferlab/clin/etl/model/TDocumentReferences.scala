@@ -1,7 +1,6 @@
 package bio.ferlab.clin.etl.model
 
-
-import bio.ferlab.clin.etl.ResourceExtension
+import bio.ferlab.clin.etl.fhir.FhirUtils.ResourceExtension
 import org.hl7.fhir.r4.model.{Reference, Resource}
 
 case class TDocumentReferences(cram: TDocumentReference, crai: TDocumentReference, vcf: TDocumentReference, tbi: TDocumentReference, qc: TDocumentReference) {

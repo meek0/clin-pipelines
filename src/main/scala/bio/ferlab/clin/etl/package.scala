@@ -31,30 +31,5 @@ package object etl {
 
   }
 
-  implicit class EitherResourceExtension(v: Either[IdType, Resource]) {
-    def toReference(): Reference = {
-      v match {
-        case Right(r) => r.toReference()
-        case Left(r) => r.toReference()
-      }
-    }
-
-  }
-
-  implicit class ResourceExtension(v: Resource) {
-    def toReference(): Reference = {
-
-      val ref = new Reference(IdType.of(v).toUnqualifiedVersionless)
-      ref
-    }
-
-
-  }
-
-  implicit class IdTypeExtension(v: IdType) {
-    def toReference(): Reference = new Reference(v.toUnqualifiedVersionless)
-
-
-  }
 
 }

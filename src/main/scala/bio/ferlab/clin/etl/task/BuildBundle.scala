@@ -1,5 +1,7 @@
 package bio.ferlab.clin.etl.task
 
+import bio.ferlab.clin.etl.ValidationResult
+import bio.ferlab.clin.etl.fhir.FhirUtils.{EitherResourceExtension, IdTypeExtension, ResourceExtension}
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.model._
 import bio.ferlab.clin.etl.task.validation.DocumentReferencesValidation.validateFiles
@@ -7,11 +9,10 @@ import bio.ferlab.clin.etl.task.validation.OrganizationValidation.validateOrgani
 import bio.ferlab.clin.etl.task.validation.PatientValidation.validatePatient
 import bio.ferlab.clin.etl.task.validation.ServiceRequestValidation.validateServiceRequest
 import bio.ferlab.clin.etl.task.validation.SpecimenValidation.{validateSample, validateSpecimen}
-import bio.ferlab.clin.etl.{EitherResourceExtension, IdTypeExtension, ResourceExtension, ValidationResult}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.implicits._
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
-import org.hl7.fhir.r4.model.{IdType, Specimen}
+import org.hl7.fhir.r4.model.IdType
 
 object BuildBundle {
 

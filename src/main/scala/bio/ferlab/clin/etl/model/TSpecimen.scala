@@ -2,6 +2,7 @@ package bio.ferlab.clin.etl.model
 
 
 
+import bio.ferlab.clin.etl.fhir.FhirUtils
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import org.hl7.fhir.r4.model._
 
@@ -31,7 +32,7 @@ case class TNewSpecimen(lab: String, submitterId: String, specimenType: String, 
 
   def validateBaseResource()(implicit fhirClient: IGenericClient): OperationOutcome = {
     val baseResource = buildBase()
-    Fhir.validateResource(baseResource)
+    FhirUtils.validateResource(baseResource)
   }
 
   private def buildBase() = {

@@ -1,4 +1,4 @@
-package bio.ferlab.clin.etl.interceptor
+package bio.ferlab.clin.etl.fhir
 
 import ca.uhn.fhir.rest.client.api.{IClientInterceptor, IHttpRequest, IHttpResponse}
 import org.slf4j.{Logger, LoggerFactory}

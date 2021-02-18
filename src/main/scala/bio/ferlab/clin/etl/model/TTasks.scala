@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl.model
 
-import bio.ferlab.clin.etl.ResourceExtension
+import bio.ferlab.clin.etl.fhir.FhirUtils.ResourceExtension
 import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskOutputComponent}
 import org.hl7.fhir.r4.model.{CodeableConcept, Reference, Resource}
 

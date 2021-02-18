@@ -1,5 +1,6 @@
 package bio.ferlab.clin.etl.model
 
+import bio.ferlab.clin.etl.fhir.FhirUtils
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import org.hl7.fhir.r4.model.DocumentReference.{DocumentReferenceContentComponent, DocumentReferenceContextComponent}
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus
@@ -13,7 +14,7 @@ case class TDocumentReference(objectStoreId: String, title: String, md5: String,
 
   def validateBaseResource()(implicit fhirClient: IGenericClient): OperationOutcome = {
     val baseResource = buildBase()
-    Fhir.validateResource(baseResource)
+    FhirUtils.validateResource(baseResource)
   }
 
   def buildResource(subject: Reference, custodian: Reference, sample: Reference, related: Option[Reference]): Resource = {
