@@ -1,14 +1,13 @@
 package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils._
-import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, WithFhirServer}
+import bio.ferlab.clin.etl.fhir.testutils.{FhirServerSuite, FhirTestUtils}
 import bio.ferlab.clin.etl.task.validation.PatientValidation.validatePatient
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
-import org.hl7.fhir.r4.model.IdType
 import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}
 
-class PatientValidationSpec extends FlatSpec with Matchers with GivenWhenThen with WithFhirServer {
+class PatientValidationSpec extends FlatSpec with Matchers with GivenWhenThen with FhirServerSuite {
 
   "validate" should "not return any error if patient match fhir resource" in {
     Given("A fhir server with a patient resource")

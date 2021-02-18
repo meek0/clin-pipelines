@@ -1,12 +1,12 @@
 package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils.{defaultAnalysis, defaultMetadata, defaultPatient}
-import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, MetadataTestUtils, WithFhirServer}
+import bio.ferlab.clin.etl.fhir.testutils.{FhirServerSuite, FhirTestUtils}
 import bio.ferlab.clin.etl.model.FileEntry
 import bio.ferlab.clin.etl.task.BuildBundle
 import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}
 
-class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with WithFhirServer {
+class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with FhirServerSuite {
 
   "it" should "Build" in {
     val ptId = FhirTestUtils.loadPatients().getIdPart

@@ -1,23 +1,13 @@
 package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils.{defaultAnalysis, defaultPatient}
-import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, WithFhirServer}
-import bio.ferlab.clin.etl.model
-import bio.ferlab.clin.etl.model.TExistingSpecimen
-import bio.ferlab.clin.etl.task.validation.SpecimenValidation.{SampleType, validateOneSpecimen, validateSample, validateSpecimen}
+import bio.ferlab.clin.etl.fhir.testutils.{FhirServerSuite, FhirTestUtils}
+import bio.ferlab.clin.etl.task.validation.SpecimenValidation.{validateSample, validateSpecimen}
 import cats.data.Validated.Invalid
 import cats.data._
-import cats.implicits.catsSyntaxValidatedId
-import org.hl7.fhir.r4.model.Bundle.SearchEntryMode
-import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes
-import org.hl7.fhir.r4.model.{Bundle, IdType, Specimen}
 import org.scalatest.{FlatSpec, Matchers}
 
-import java.io
-import collection.JavaConverters._
-import scala.collection.mutable
-
-class SpecimenValidationSpec extends FlatSpec with Matchers with WithFhirServer {
+class SpecimenValidationSpec extends FlatSpec with Matchers with FhirServerSuite {
 
   "validate samples" should "return a list of errors if samples are not associated to anothers donors" in {
     import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils._
@@ -49,9 +39,6 @@ class SpecimenValidationSpec extends FlatSpec with Matchers with WithFhirServer 
   }
 
   "test" should "deede" in {
-    import ca.uhn.fhir.rest.param.DateRangeParam
-    import org.hl7.fhir.r4.model.Patient
-    import org.hl7.fhir.r4.model.Provenance
     val ptId1 = FhirTestUtils.loadPatients().getIdPart
     val parent = FhirTestUtils.loadSpecimen(ptId1, "CHUSJ", "1")
     val sample = FhirTestUtils.loadSpecimen(ptId1, "CHUSJ", "2", parent = Some(parent))

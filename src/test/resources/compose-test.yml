@@ -7,13 +7,15 @@ services:
       - MINIO_ACCESS_KEY=accesskey
       - MINIO_SECRET_KEY=secretkey
     volumes:
-      - ./tmp/data1/minio:/data:delegated
-    ports:
-      - 9000:9000
+      - ./tmp/test/minio:/data:delegated
     command: server /data
+    expose:
+      - 9000
   hapi-fhir-server:
     image: chusj/clin-fhir-server:latest
     restart: on-failure
+    expose:
+      - 8080
     environment:
       HAPI_DATASOURCE_URL: "jdbc:h2:mem:hapi"
       HAPI_DATASOURCE_DRIVER: "org.h2.Driver"
@@ -24,9 +26,7 @@ services:
       HAPI_BIO_ELASTICSEARCH_ENABLED: "false"
       HAPI_LOGGING_INTERCEPTOR_SERVER_ENABLED: "false"
       HAPI_LOGGING_INTERCEPTOR_CLIENT_ENABLED: "false"
-      HAPI_SERVER_ADDRESS: "http://localhost:18080/fhir/"
       HAPI_VALIDATE_RESPONSES_ENABLED: "false"
       JAVA_OPTS: "-Dhibernate.dialect=org.hibernate.dialect.H2Dialect"
-    ports:
-      - 18080:8080
+
 

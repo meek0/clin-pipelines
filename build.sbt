@@ -17,7 +17,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-json" % "2.9.2",
   "com.softwaremill.sttp.client3" %% "core" % "3.1.0",
   "org.scalatest" %% "scalatest" % "3.0.8" % Test,
-  "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.38.8" % "test"
+  "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.38.8" % "test",
+  "org.testcontainers" % "localstack" % "1.15.2" %"test"
 )
 
 Test / fork := true
