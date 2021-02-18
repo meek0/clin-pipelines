@@ -40,4 +40,14 @@ object CheckS3Data {
     fileEntries
   }
 
+  def revert(files: Seq[FileEntry], bucketDest: String, pathDest: String)(implicit s3Client: AmazonS3): Unit = files.foreach { f =>
+    s3Client.deleteObject(bucketDest, s"$pathDest/${f.id}")
+  }
+
+  def copyFiles(files: Seq[FileEntry], bucketDest: String, pathDest: String)(implicit s3Client: AmazonS3): Unit = {
+    files.foreach { f =>
+      s3Client.copyObject(f.bucket, f.key, bucketDest, s"$pathDest/${f.id}")
+    }
+  }
+
 }

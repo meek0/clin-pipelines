@@ -41,6 +41,10 @@ trait MinioServer {
     }
   }
 
+  def list(bucket: String, prefix: String): Seq[String] = {
+    s3.listObjects(bucket, prefix).getObjectSummaries.asScala.map(_.getKey)
+  }
+
   private def deleteRecursively(bucket: String, prefix: String): Unit = {
     val obj = s3.listObjects(bucket, prefix)
     obj.getObjectSummaries.asScala.foreach { o =>

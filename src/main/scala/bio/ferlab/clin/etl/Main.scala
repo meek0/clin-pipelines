@@ -42,11 +42,11 @@ object Main extends App {
     (BuildBundle.validate(m, fileEntries), CheckS3Data.validateFileEntries(m, fileEntries))
       .mapN { (bundle, files) =>
         try {
-          FileEntry.copyFiles(files, bucketDest, prefixDest)
+          CheckS3Data.copyFiles(files, bucketDest, prefixDest)
           bundle.save()
         } catch {
           case e: Exception =>
-            FileEntry.revert(files, bucketDest, prefixDest)
+            CheckS3Data.revert(files, bucketDest, prefixDest)
             throw e
         }
       }
