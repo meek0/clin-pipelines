@@ -8,7 +8,7 @@ import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
 import org.scalatest.{BeforeAndAfterAll, TestSuite}
 
 trait FhirServer {
-  val Some(fhirPort) = FhirServerContainer.startIfNotRunning()
+  val fhirPort = FhirServerContainer.startIfNotRunning()
   val fhirBaseUrl = s"http://localhost:${fhirPort}/fhir"
   val fhirContext: FhirContext = FhirContext.forR4()
   fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING)

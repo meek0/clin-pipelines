@@ -3,7 +3,7 @@ package bio.ferlab.clin.etl
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.model.{FileEntry, Metadata}
 import bio.ferlab.clin.etl.task.LoadHapiFhirDataTask.fhirContext
-import bio.ferlab.clin.etl.task.{BuildBundle, CheckS3DataTask}
+import bio.ferlab.clin.etl.task.{BuildBundle, CheckS3Data}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.Validated.Invalid
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
@@ -38,8 +38,8 @@ object Main extends App {
 
   val metadata = Metadata.validateMetadataFile(bucket, prefix)
   val result: Validated[NonEmptyList[String], Bundle] = metadata.andThen { m: Metadata =>
-    val fileEntries = CheckS3DataTask.loadFileEntries(bucket, prefix)
-    (BuildBundle.validate(m, fileEntries), CheckS3DataTask.validateFileEntries(m, fileEntries))
+    val fileEntries = CheckS3Data.loadFileEntries(bucket, prefix)
+    (BuildBundle.validate(m, fileEntries), CheckS3Data.validateFileEntries(m, fileEntries))
       .mapN { (bundle, files) =>
         try {
           FileEntry.copyFiles(files, bucketDest, prefixDest)

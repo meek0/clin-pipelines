@@ -10,7 +10,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
-object CheckS3DataTask {
+object CheckS3Data {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 

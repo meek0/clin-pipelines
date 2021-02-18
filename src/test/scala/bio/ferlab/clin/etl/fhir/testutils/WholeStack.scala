@@ -1,10 +1,10 @@
 package bio.ferlab.clin.etl.fhir.testutils
 
-trait WholeStack extends LocalStackT with FhirServer
+trait WholeStack extends MinioServer with FhirServer
 
-trait WithWholeStackSuite extends LocalStackT with FhirServerSuite
+trait WithWholeStackSuite extends MinioServer with FhirServerSuite
 
-object StartWholeStack extends App with LocalStackT with FhirServer {
+object StartWholeStack extends App with MinioServer with FhirServer {
   println("Whole stack is started")
   while (true) {
 

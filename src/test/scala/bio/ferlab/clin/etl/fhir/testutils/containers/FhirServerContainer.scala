@@ -8,6 +8,7 @@ import org.testcontainers.utility.DockerImageName
 
 import java.time.Duration
 import scala.collection.JavaConverters._
+
 case object FhirServerContainer extends OurContainer {
   val fhirEnv: Map[String, String] = Map(
     "HAPI_DATASOURCE_URL" -> "jdbc:h2:mem:hapi",
@@ -23,12 +24,12 @@ case object FhirServerContainer extends OurContainer {
     "JAVA_OPTS" -> "-Dhibernate.dialect=org.hibernate.dialect.H2Dialect"
   )
   val name = "clin-pipeline-fhir-test"
-  private val httpPort = 8080
-  val port = Some(httpPort)
+
+  val port = 8080
   val container = GenericContainer(
     "chusj/clin-fhir-server:latest",
     waitStrategy = Wait.forHttp("/").withStartupTimeout(Duration.ofSeconds(60)),
-    exposedPorts = Seq(httpPort),
+    exposedPorts = Seq(port),
     env = fhirEnv,
     labels = Map("name" -> name)
   )
