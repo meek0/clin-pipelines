@@ -21,21 +21,21 @@
   "analyses": [
     {
       "patient": {
-        "id": "1",
-        "firstName": "Jane",
-        "lastName": "River",
-        "sex": "female"
+        "id": "_PATIENT_ID_",
+        "firstName": "John",
+        "lastName": "Doe",
+        "sex": "male"
       },
       "ldm": "CHUSJ",
       "sampleId": "submitted_sample_id3",
       "specimenId": "submitted_specimen_id3",
-      "specimenType": "Echantillon  de sang",
-      "sampleType": "DNA",
+      "specimenType": "BLD",
+      "sampleType": "BLD",
       "bodySite": "can be null",
-      "serviceRequestId": "99999",
+      "serviceRequestId": "_SERVICE_REQUEST_ID_",
       "labAliquotId": "nanuq_sample_id",
       "files": {
-        "cram": "fileXXXX.cram",
+        "cram": "file1.cram",
         "crai": "file1.crai",
         "vcf": "file2.vcf",
         "tbi": "file2.tbi",

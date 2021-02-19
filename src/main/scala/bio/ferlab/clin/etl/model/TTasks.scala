@@ -1,27 +1,12 @@
 package bio.ferlab.clin.etl.model
 
 import bio.ferlab.clin.etl.fhir.FhirUtils.ResourceExtension
+import bio.ferlab.clin.etl.model.TTasks._
 import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskOutputComponent}
 import org.hl7.fhir.r4.model.{CodeableConcept, Reference, Resource}
 
 case class TTasks(sequencingAlignment: TTask, variantCall: TTask, qualityControl: TTask) {
-  private val SEQUENCING_ALIGNMENT_ANALYSIS = "Sequencing Alignment Analysis"
 
-  private val ANALYSED_SAMPLE = "Analysed sample"
-
-  private val CRAM_FILE = "CRAM File"
-
-  private val CRAI_FILE = "CRAI File"
-
-  private val VCF_FILE = "VCF File"
-
-  private val TBI_FILE = "TBI File"
-
-  private val VARIANT_CALLING_ANALYSIS = "Variant Calling Analysis"
-
-  private val SEQUENCING_QC_ANALYSIS = "Sequencing QC Analysis"
-
-  private val QC_FILE = "QC File"
 
   def buildResources(serviceRequest: Reference, patient: Reference, organization: Reference, sample: Reference, drr: DocumentReferencesResources): Seq[Resource] = {
 
@@ -40,7 +25,7 @@ case class TTasks(sequencingAlignment: TTask, variantCall: TTask, qualityControl
       Seq(cram, crai)
     }
     val sequencingAlignmentR =
-      sequencingAlignment.buildResource(SEQUENCING_ALIGNMENT_ANALYSIS,serviceRequest, patient, organization, sequencingExperimentInput, sequencingExperimentOutput)
+      sequencingAlignment.buildResource(SEQUENCING_ALIGNMENT_ANALYSIS, serviceRequest, patient, organization, sequencingExperimentInput, sequencingExperimentOutput)
 
     val variantCallInput = {
       val p = new ParameterComponent()
@@ -56,7 +41,7 @@ case class TTasks(sequencingAlignment: TTask, variantCall: TTask, qualityControl
         .setValue(drr.crai.toReference())
       Seq(vcf, tbi)
     }
-    val variantCallR = variantCall.buildResource(VARIANT_CALLING_ANALYSIS,serviceRequest, patient, organization, variantCallInput, variantCallOutput)
+    val variantCallR = variantCall.buildResource(VARIANT_CALLING_ANALYSIS, serviceRequest, patient, organization, variantCallInput, variantCallOutput)
 
     val qualityControlInput = {
       val sq = new ParameterComponent()
@@ -74,10 +59,32 @@ case class TTasks(sequencingAlignment: TTask, variantCall: TTask, qualityControl
         .setValue(drr.qc.toReference())
       Seq(qc)
     }
-    val qualityControlR = qualityControl.buildResource(SEQUENCING_QC_ANALYSIS,serviceRequest, patient, organization, qualityControlInput, qualityControlOutput)
+    val qualityControlR = qualityControl.buildResource(SEQUENCING_QC_ANALYSIS, serviceRequest, patient, organization, qualityControlInput, qualityControlOutput)
 
     Seq(sequencingAlignmentR, variantCallR, qualityControlR)
 
   }
 
+}
+
+object TTasks {
+  val SEQUENCING_ALIGNMENT_ANALYSIS = "Sequencing Alignment Analysis"
+
+  val ANALYSED_SAMPLE = "Analysed sample"
+
+  val CRAM_FILE = "CRAM File"
+
+  val CRAI_FILE = "CRAI File"
+
+  val VCF_FILE = "VCF File"
+
+  val TBI_FILE = "TBI File"
+
+  val VARIANT_CALLING_ANALYSIS = "Variant Calling Analysis"
+
+  val SEQUENCING_QC_ANALYSIS = "Sequencing QC Analysis"
+
+  val QC_FILE = "QC File"
+
+  val allTypes = Seq(SEQUENCING_ALIGNMENT_ANALYSIS, VARIANT_CALLING_ANALYSIS, SEQUENCING_QC_ANALYSIS)
 }

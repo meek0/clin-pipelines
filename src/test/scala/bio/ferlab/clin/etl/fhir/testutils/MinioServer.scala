@@ -5,10 +5,13 @@ import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.s3.model.ListObjectsRequest
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
 import org.scalatest.{BeforeAndAfterAll, TestSuite}
 
+import java.io.File
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.Random
 
 trait MinioServer {
@@ -24,9 +27,13 @@ trait MinioServer {
 
   val inputBucket = s"clin-import"
   val outputBucket = s"clin-repository"
-  private val bucketsToCreate = s3.listBuckets().asScala.collect { case b if b.getName == inputBucket || b.getName == outputBucket => b.getName }.diff(Seq(inputBucket, outputBucket))
-  bucketsToCreate.foreach(s3.createBucket)
+  createBuckets()
 
+  private def createBuckets(): Unit = {
+    val alreadyExistingBuckets = s3.listBuckets().asScala.collect { case b if b.getName == inputBucket || b.getName == outputBucket => b.getName }
+    val bucketsToCreate = Seq(inputBucket, outputBucket).diff(alreadyExistingBuckets)
+    bucketsToCreate.foreach(s3.createBucket)
+  }
 
   def withObjects[T](block: (String, String) => T): Unit = {
     val inputPrefix = s"run_${Random.nextInt(10000)}"
@@ -50,6 +57,11 @@ trait MinioServer {
     obj.getObjectSummaries.asScala.foreach { o =>
       s3.deleteObject(bucket, o.getKey)
     }
+  }
+  def transferFromResources(prefix: String, resource: String, bucket: String = inputBucket): Unit = {
+    val transferManager = TransferManagerBuilder.standard.withS3Client(s3).build()
+    val transfert = transferManager.uploadDirectory(bucket, prefix, new File(getClass.getResource(s"/$resource").toURI), false);
+    transfert.waitForCompletion()
   }
 }
 

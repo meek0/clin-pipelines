@@ -29,12 +29,6 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
 
   }
 
-  private def transferFromResources(prefix: String, resource: String, bucket: String = inputBucket): Unit = {
-    val transferManager = TransferManagerBuilder.standard.withS3Client(s3).build()
-    val transfert = transferManager.uploadDirectory(bucket, prefix, new File(getClass.getResource(s"/$resource").toURI), false);
-    transfert.waitForCompletion()
-  }
-
   class FileEntryWithFixedId(override val key: String, override val id: String) extends FileEntry(inputBucket, key, "md5", 1) {}
 
   "copyFiles" should "move files from one bucket to the other" in {
