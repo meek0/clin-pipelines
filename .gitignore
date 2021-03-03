@@ -4,3 +4,6 @@ project/target/*
 project/project/*
 .idea
 deleteme
+data1/*
+tmp/*
+.DS_Store

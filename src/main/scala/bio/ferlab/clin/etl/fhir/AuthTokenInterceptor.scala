@@ -1,13 +1,15 @@
+package bio.ferlab.clin.etl.fhir
+
 import ca.uhn.fhir.rest.client.api.{IClientInterceptor, IHttpRequest, IHttpResponse}
 import org.slf4j.{Logger, LoggerFactory}
 
-class HapiFhirInterceptor(var token: String) extends IClientInterceptor{
+//var -> because token needs to be updated when it expires
+class AuthTokenInterceptor(var token: String) extends IClientInterceptor{
 
-  val LOGGER: Logger = LoggerFactory.getLogger(GenomicDataImporter.getClass)
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
   override def interceptRequest(theRequest: IHttpRequest): Unit = {
-    LOGGER.info("HAPI FHIR request intercepted.  Adding Authorization header.")
-    LOGGER.info(s"HAPI FHIR auth token :\n${token}")
+    LOGGER.debug("HTTP request intercepted.  Adding Authorization header.")
     theRequest.addHeader("Authorization", s"Bearer ${token}")
   }
 
