@@ -1,15 +1,12 @@
 package bio.ferlab.clin.etl.fhir.testutils.containers
 
 import com.dimafeng.testcontainers.GenericContainer
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.containers.localstack.LocalStackContainer.Service
 import org.testcontainers.containers.wait.strategy.Wait
-import org.testcontainers.utility.DockerImageName
 
 import java.time.Duration
-import scala.collection.JavaConverters._
 
 case object FhirServerContainer extends OurContainer {
+
   val fhirEnv: Map[String, String] = Map(
     "HAPI_DATASOURCE_URL" -> "jdbc:h2:mem:hapi",
     "HAPI_DATASOURCE_DRIVER" -> "org.h2.Driver",
@@ -26,11 +23,12 @@ case object FhirServerContainer extends OurContainer {
   val name = "clin-pipeline-fhir-test"
 
   val port = 8080
-  val container = GenericContainer(
+  val container: GenericContainer = GenericContainer(
     "chusj/clin-fhir-server:latest",
     waitStrategy = Wait.forHttp("/").withStartupTimeout(Duration.ofSeconds(60)),
     exposedPorts = Seq(port),
     env = fhirEnv,
     labels = Map("name" -> name)
   )
+
 }

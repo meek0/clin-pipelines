@@ -1,16 +1,21 @@
 package bio.ferlab.clin.etl.fhir.testutils
 
 import ca.uhn.fhir.rest.client.api.IGenericClient
+import org.apache.commons.io.FileUtils
 import org.hl7.fhir.instance.model.api.{IBaseResource, IIdType}
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender
 import org.hl7.fhir.r4.model._
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.io.File
+import java.net.URL
 import java.time.{LocalDate, ZoneId}
 import java.util.{Collections, Date}
+import scala.io.Source
 
 object FhirTestUtils {
   val DEFAULT_ZONE_ID: ZoneId = ZoneId.of("UTC")
+  val ROOT_REMOTE_EXTENSION = "https://raw.githubusercontent.com/Ferlab-Ste-Justine/clin-fhir/task-analysis/site_root/input/resources/"
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
   def loadOrganizations()(implicit fhirClient: IGenericClient): String = {
@@ -43,7 +48,7 @@ object FhirTestUtils {
     id
   }
 
-  def loadServiceRequest(patientId: String, specimenIds:Seq[String] = Nil)(implicit fhirClient: IGenericClient): String = {
+  def loadServiceRequest(patientId: String, specimenIds: Seq[String] = Nil)(implicit fhirClient: IGenericClient): String = {
     val sr = new ServiceRequest()
     sr.setSubject(new Reference(s"Patient/$patientId"))
     sr.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE)
@@ -85,7 +90,7 @@ object FhirTestUtils {
     )
   }
 
-  def clearAll()(implicit fhirClient : IGenericClient): Parameters = {
+  def clearAll()(implicit fhirClient: IGenericClient): Unit = {
     val inParams = new Parameters()
     inParams.addParameter().setName("expungeEverything").setValue(new BooleanType(true))
     fhirClient
@@ -96,4 +101,59 @@ object FhirTestUtils {
       .execute()
   }
 
+  def init()(implicit fhirClient: IGenericClient): Unit = {
+    def downloadAndCreate(p: String) = {
+      val content = downloadIfNotInResources(p)
+      fhirClient.create().resource(content).execute()
+    }
+
+    println("Init fhir container with extensions ...")
+
+    //Sequential
+    Seq(
+      "extensions/StructureDefinition-workflow.json",
+      "extensions/StructureDefinition-sequencing-experiment.json",
+      "profiles/StructureDefinition-cqgc-analysis-task.json",
+
+    ).foreach(downloadAndCreate)
+
+    //Parallel
+    Seq("terminology/CodeSystem-variant-type.json",
+      "terminology/CodeSystem-specimen-type.json",
+      "terminology/CodeSystem-genome-build.json",
+      "terminology/CodeSystem-experimental-strategy.json",
+      "terminology/CodeSystem-document-format.json",
+      "terminology/CodeSystem-data-type.json",
+      "terminology/CodeSystem-data-category.json",
+      "terminology/ValueSet-variant-type.json",
+      "terminology/ValueSet-specimen-type.json",
+      "terminology/ValueSet-genome-build.json",
+      "terminology/ValueSet-data-type.json",
+      "terminology/ValueSet-data-category.json",
+      "terminology/ValueSet-blood-relationship.json",
+      "terminology/ValueSet-analysis-type.json",
+      "terminology/ValueSet-age-at-onset.json").par.foreach(downloadAndCreate)
+
+
+  }
+
+  def downloadIfNotInResources(p: String): String = {
+    val resourceUrl = getClass.getResource(s"/fhir_extensions/$p")
+    if (resourceUrl == null) {
+      val remoteUrl = new URL(s"$ROOT_REMOTE_EXTENSION/$p")
+      val resourcePath = s"${getClass.getResource("/").getPath}/fhir_extensions/$p"
+      FileUtils.copyURLToFile(remoteUrl, new File(resourcePath))
+      val content = Source.fromFile(resourcePath).mkString
+      content
+    } else {
+      Source.fromURL(resourceUrl).mkString
+    }
+
+
+  }
+}
+
+
+object testFhirUtils extends App {
+  FhirTestUtils.downloadIfNotInResources("extensions/StructureDefinition-workflow.json")
 }
