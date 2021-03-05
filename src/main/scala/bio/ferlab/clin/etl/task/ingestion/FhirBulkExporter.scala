@@ -141,7 +141,7 @@ class FhirBulkExporter(authConfig: Config,
       .zipWithIndex
       .foreach {
         case ((folderName, fileUrl), idx) =>
-          val filekey = s"raw/$folderName/${folderName}_${idx}_$timestamp.json"
+          val filekey = s"raw/landing/$folderName/${folderName}_${idx}_$timestamp.json"
           println(s"upload object to: $bucketName/$filekey")
           s3Client.putObject(bucketName, filekey, getFileContent(fileUrl))
     }
