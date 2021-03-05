@@ -2,6 +2,7 @@ package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.Main
 import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, WholeStackSuite}
+import bio.ferlab.clin.etl.model.TSpecimen.SPECIMEN_TYPE_CODING_SYSTEM
 import bio.ferlab.clin.etl.model.TTasks
 import ca.uhn.fhir.rest.api.SummaryEnum
 import org.hl7.fhir.instance.model.api.IBaseResource
@@ -22,13 +23,14 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       val serviceRequestId = FhirTestUtils.loadServiceRequest(patientId)
       val fhirServiceRequestId = s"ServiceRequest/$serviceRequestId"
       val organizationId = FhirTestUtils.loadOrganizations()
-      val fhirOrganizationId = s"Organization/${organizationId}"
+      val fhirOrganizationId = s"Organization/$organizationId"
       val templateMetadata = Source.fromResource("good/metadata.json").mkString
       val metadata = templateMetadata.replace("_PATIENT_ID_", patientId).replace("_SERVICE_REQUEST_ID_", serviceRequestId)
       s3.putObject(inputBucket, s"$inputPrefix/metadata.json", metadata)
 
       val result = Main.run(inputBucket, inputPrefix, outputBucket, outputPrefix)
 
+      println(result)
       //Validate documents that has been copied
       result.isValid shouldBe true
       list(outputBucket, outputPrefix).size shouldBe 5
@@ -39,6 +41,8 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       searchSpecimens.getEntry.asScala.foreach { be =>
         val s = be.getResource.asInstanceOf[Specimen]
         s.getSubject.getReference shouldBe fhirPatientId
+        s.getType.getCodingFirstRep.getSystem shouldBe SPECIMEN_TYPE_CODING_SYSTEM
+        s.getType.getCodingFirstRep.getCode shouldBe "NBL"
       }
       val fullSpecimens = read(searchSpecimens, classOf[Specimen])
 
@@ -108,8 +112,16 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
 
 
   }
+ it should "return errors" in {
+   withObjects { (inputPrefix, outputPrefix) =>
+     transferFromResources(inputPrefix, "bad")
+     val result = Main.run(inputBucket, inputPrefix, outputBucket, outputPrefix)
 
-
+     //Validate documents that has been copied
+     println(result)
+     result.isValid shouldBe false
+   }
+ }
   private def read[T <: IBaseResource](b: Bundle, theClass: Class[T]): Seq[T] = {
     b.getEntry.asScala.map { be =>
       fhirClient.read().resource(theClass).withUrl(id(be.getResource)).execute()

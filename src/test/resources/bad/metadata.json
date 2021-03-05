@@ -30,7 +30,7 @@
       "sampleId": "submitted_sample_id3",
       "specimenId": "submitted_specimen_id3",
       "specimenType": "Echantillon  de sang",
-      "sampleType": "DNA",
+      "sampleType": "BadSampleType",
       "bodySite": "can be null",
       "serviceRequestId": "99999",
       "labAliquotId": "nanuq_sample_id",
