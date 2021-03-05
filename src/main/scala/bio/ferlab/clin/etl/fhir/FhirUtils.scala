@@ -9,6 +9,18 @@ import scala.util.Try
 
 object FhirUtils {
 
+  object Constants {
+
+    private val baseFhirServer = "http://fhir.cqgc.ferlab.bio/"
+
+    object CodingSystems {
+      val SPECIMEN_TYPE = s"$baseFhirServer/CodeSystem/specimen-type"
+      val DR_TYPE = s"$baseFhirServer/CodeSystem/data-type"
+      val DR_CATEGORY = s"$baseFhirServer/CodeSystem/data-category"
+      val DR_FORMAT = s"$baseFhirServer/CodeSystem/document-format"
+    }
+  }
+
   def validateResource(r: Resource)(implicit client: IGenericClient): OperationOutcome = {
     Try(client.validate().resource(r).execute().getOperationOutcome).recover {
       case e: PreconditionFailedException => e.getOperationOutcome
@@ -17,7 +29,7 @@ object FhirUtils {
   }
 
   def createExtension(url: String, values: Seq[ClinExtension]): Extension = {
-    val ext:Extension = new Extension()
+    val ext: Extension = new Extension()
     ext.setUrl(url)
 
     values.foreach(metric => {
@@ -75,4 +87,5 @@ object FhirUtils {
 
 
   }
+
 }

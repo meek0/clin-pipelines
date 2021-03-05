@@ -1,8 +1,8 @@
 package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.Main
+import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
 import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, WholeStackSuite}
-import bio.ferlab.clin.etl.model.TSpecimen.SPECIMEN_TYPE_CODING_SYSTEM
 import bio.ferlab.clin.etl.model.TTasks
 import ca.uhn.fhir.rest.api.SummaryEnum
 import org.hl7.fhir.instance.model.api.IBaseResource
@@ -41,7 +41,7 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       searchSpecimens.getEntry.asScala.foreach { be =>
         val s = be.getResource.asInstanceOf[Specimen]
         s.getSubject.getReference shouldBe fhirPatientId
-        s.getType.getCodingFirstRep.getSystem shouldBe SPECIMEN_TYPE_CODING_SYSTEM
+        s.getType.getCodingFirstRep.getSystem shouldBe CodingSystems.SPECIMEN_TYPE
         s.getType.getCodingFirstRep.getCode shouldBe "NBL"
       }
       val fullSpecimens = read(searchSpecimens, classOf[Specimen])
@@ -96,6 +96,12 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       }
       //Expected title
       documentReferences.map(d => d.getContentFirstRep.getAttachment.getTitle) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file3.json")
+      //Expected code systems
+      documentReferences.map(d => d.getType.getCodingFirstRep.getSystem) should contain only(CodingSystems.DR_TYPE)
+      documentReferences.map(d => d.getType.getCodingFirstRep.getCode) should contain only("AR", "SNV", "INDEX", "QC")
+      documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only(CodingSystems.DR_CATEGORY)
+      documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only("SR", "SNV", "INDEX")
+      documentReferences.map(d => d.getContentFirstRep.getFormat.getSystem) should contain only(CodingSystems.DR_FORMAT)
 
       //Validate tasks
       val searchTasks = searchFhir("Task")
