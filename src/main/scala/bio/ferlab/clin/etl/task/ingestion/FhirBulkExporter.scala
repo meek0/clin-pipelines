@@ -138,12 +138,16 @@ class FhirBulkExporter(authConfig: Config,
     files.foreach(println)
 
     files
-      .zipWithIndex
+      .groupBy{ case (entity, _) => entity }
+      .map { case (entity, list) => entity -> list.zipWithIndex}
       .foreach {
-        case ((folderName, fileUrl), idx) =>
-          val filekey = s"raw/landing/$folderName/${folderName}_${idx}_$timestamp.json"
-          println(s"upload object to: $bucketName/$filekey")
-          s3Client.putObject(bucketName, filekey, getFileContent(fileUrl))
+        case (_, filesWithIndex) =>
+          filesWithIndex.foreach {
+            case ((folderName, fileUrl), idx) =>
+              val filekey = s"raw/landing/fhir/$folderName/${folderName}_${idx}_$timestamp.json"
+              println(s"upload object to: $bucketName/$filekey")
+              s3Client.putObject(bucketName, filekey, getFileContent(fileUrl))
+          }
     }
   }
 }
