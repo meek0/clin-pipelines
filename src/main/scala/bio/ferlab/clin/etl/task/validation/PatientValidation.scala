@@ -20,7 +20,7 @@ object PatientValidation {
       case Some(fp) =>
         val firstName = fp.getNameFirstRep.getGivenAsSingleString
         val lastName = fp.getNameFirstRep.getFamily
-        val sex = fp.getGender.getDisplay.toLowerCase
+        val sex = Option(fp.getGender).map(_.getDisplay).map(_.toLowerCase).getOrElse("")
         allValid(
           matchProperty("First Name")(p.id, p.firstName, firstName),
           matchProperty("Last Name")(p.id, p.lastName, lastName),

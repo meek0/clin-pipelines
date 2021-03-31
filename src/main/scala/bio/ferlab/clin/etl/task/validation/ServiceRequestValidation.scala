@@ -13,7 +13,7 @@ object ServiceRequestValidation {
   def validateServiceRequest(a: Analysis)(implicit client: IClinFhirClient): ValidatedNel[String, TServiceRequest] = {
     val fhirServiceRequest = opt(client.getServiceRequestById(new IdType(a.serviceRequestId)))
     fhirServiceRequest match {
-      case None => s"ServiceRequest ${a.serviceRequestId} does not exist".invalidNel[TServiceRequest]
+      case None => s"ServiceRequest id=${a.serviceRequestId} does not exist".invalidNel[TServiceRequest]
       case Some(fsr) => TServiceRequest(fsr).validNel[String]
     }
   }

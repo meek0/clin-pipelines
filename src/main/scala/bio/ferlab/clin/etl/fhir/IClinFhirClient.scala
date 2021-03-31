@@ -25,10 +25,6 @@ trait IClinFhirClient extends IBasicClient {
   @Search(`type` = classOf[Specimen])
   def findSpecimenByAccession(@RequiredParam(name = Specimen.SP_ACCESSION) theId: TokenParam): Specimen
 
-  @Search(`type` = classOf[Organization])
-  def findByNameOrAlias(@RequiredParam(name = Organization.SP_NAME) alias: StringParam): Organization
-
-
 }
 
 object IClinFhirClient {

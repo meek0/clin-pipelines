@@ -27,6 +27,7 @@ object CheckS3Data {
   }
 
   def validateFileEntries(m: Metadata, fileEntries: Seq[FileEntry]): ValidatedNel[String, Seq[FileEntry]] = {
+    println("################# Validate File entries ##################")
     val filesFromAnalysis = m.analyses.flatMap(a => Seq(a.files.cram, a.files.crai, a.files.vcf, a.files.tbi, a.files.qc))
     val fileEntriesNotInAnalysis = fileEntries.filterNot(f => filesFromAnalysis.contains(f.filename))
 
@@ -40,11 +41,15 @@ object CheckS3Data {
     fileEntries
   }
 
-  def revert(files: Seq[FileEntry], bucketDest: String, pathDest: String)(implicit s3Client: AmazonS3): Unit = files.foreach { f =>
-    s3Client.deleteObject(bucketDest, s"$pathDest/${f.id}")
+  def revert(files: Seq[FileEntry], bucketDest: String, pathDest: String)(implicit s3Client: AmazonS3): Unit = {
+    println("################# Reverting Copy Files ##################")
+    files.foreach { f =>
+      s3Client.deleteObject(bucketDest, s"$pathDest/${f.id}")
+    }
   }
 
   def copyFiles(files: Seq[FileEntry], bucketDest: String, pathDest: String)(implicit s3Client: AmazonS3): Unit = {
+    println("################# Copy Files ##################")
     files.foreach { f =>
       s3Client.copyObject(f.bucket, f.key, bucketDest, s"$pathDest/${f.id}")
     }

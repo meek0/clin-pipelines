@@ -34,27 +34,20 @@ object FhirUtils {
 
     values.foreach(metric => {
       metric.valueType match {
-        case ClinExtensionValueType.DECIMAL => {
+        case ClinExtensionValueType.DECIMAL =>
           ext.addExtension(metric.url, new DecimalType(metric.value))
-        }
-        case ClinExtensionValueType.INTEGER => {
+        case ClinExtensionValueType.INTEGER =>
           ext.addExtension(metric.url, new IntegerType(metric.value))
-        }
-        case ClinExtensionValueType.BOOLEAN => {
+        case ClinExtensionValueType.BOOLEAN =>
           ext.addExtension(metric.url, new BooleanType(metric.value))
-        }
-        case ClinExtensionValueType.DATE => {
+        case ClinExtensionValueType.DATE =>
           ext.addExtension(metric.url, new DateType(metric.value))
-        }
-        case ClinExtensionValueType.STRING => {
+        case ClinExtensionValueType.STRING =>
           ext.addExtension(metric.url, new StringType(metric.value))
-        }
-        case ClinExtensionValueType.CODE => {
+        case ClinExtensionValueType.CODE =>
           ext.addExtension(metric.url, new CodeType(metric.value))
-        }
-        case _ => {
+        case _ =>
           ext.addExtension(metric.url, new StringType(metric.value))
-        }
       }
     })
 

@@ -17,6 +17,11 @@ object LoadHapiFhirDataTask {
   val authRequestMaxRetries: Int = 3
 
   val fhirContext: FhirContext = FhirContext.forR4()
+  // Set how long to try and establish the initial TCP connection (in ms)
+  fhirContext.getRestfulClientFactory.setConnectTimeout(120 * 1000);
+
+  // Set how long to block for individual read/write operations (in ms)
+  fhirContext.getRestfulClientFactory.setSocketTimeout(120 * 1000);
   fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING)
   fhirContext.getRestfulClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER)
 

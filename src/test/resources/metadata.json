@@ -29,7 +29,7 @@
       "ldm": "CHUSJ",
       "sampleId": "submitted_sample_id3",
       "specimenId": "submitted_specimen_id3",
-      "specimenType": "BLD",
+      "specimenType": "NBL",
       "sampleType": "DNA",
       "bodySite": "can be null",
       "serviceRequestId": "3",

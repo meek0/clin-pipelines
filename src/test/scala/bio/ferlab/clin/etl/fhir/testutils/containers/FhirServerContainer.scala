@@ -8,6 +8,7 @@ import java.time.Duration
 case object FhirServerContainer extends OurContainer {
 
   val fhirEnv: Map[String, String] = Map(
+    "HAPI_FHIR_GRAPHQL_ENABLED" -> "true",
     "HAPI_DATASOURCE_URL" -> "jdbc:h2:mem:hapi",
     "HAPI_DATASOURCE_DRIVER" -> "org.h2.Driver",
     "HAPI_DATASOURCE_USERNAME" -> "",

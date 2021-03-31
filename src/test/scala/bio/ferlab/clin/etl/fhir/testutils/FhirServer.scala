@@ -9,6 +9,7 @@ import org.scalatest.{BeforeAndAfterAll, TestSuite}
 
 trait FhirServer {
   val fhirPort: Int = FhirServerContainer.startIfNotRunning()
+//val fhirPort = "8080"
   val fhirBaseUrl = s"http://localhost:$fhirPort/fhir"
   val fhirContext: FhirContext = FhirContext.forR4()
   fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING)
@@ -26,7 +27,7 @@ trait FhirServerSuite extends FhirServer with TestSuite with BeforeAndAfterAll {
   }
 
   override def afterAll(): Unit = {
-    FhirTestUtils.clearAll()
+    //FhirTestUtils.clearAll()
   }
 }
 
