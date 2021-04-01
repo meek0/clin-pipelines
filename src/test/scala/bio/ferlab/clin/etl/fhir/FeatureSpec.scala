@@ -33,7 +33,9 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       println(result)
       //Validate documents that has been copied
       result.isValid shouldBe true
-      list(outputBucket, outputPrefix).size shouldBe 5
+      val resultFiles = list(outputBucket, outputPrefix)
+      println(s"Files=${resultFiles.mkString(",")}")
+      resultFiles.size shouldBe 5
 
       // Validate specimens
       val searchSpecimens = searchFhir("Specimen")

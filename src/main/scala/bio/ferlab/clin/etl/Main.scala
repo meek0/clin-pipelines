@@ -55,8 +55,9 @@ object Main extends App {
   def run(inputBucket: String, inputPrefix: String, outputBucket: String, outputPrefix: String)(implicit s3: AmazonS3, client: IGenericClient, clinFhirClient: IClinFhirClient) = {
     val metadata = Metadata.validateMetadataFile(inputBucket, inputPrefix)
     metadata.andThen { m: Metadata =>
-      val fileEntries = CheckS3Data.loadFileEntries(inputBucket, inputPrefix)
-      (BuildBundle.validate(m, fileEntries), CheckS3Data.validateFileEntries(m, fileEntries))
+      val rawFileEntries = CheckS3Data.loadRawFileEntries(inputBucket, inputPrefix)
+      val fileEntries = CheckS3Data.loadFileEntries(m, rawFileEntries)
+      (BuildBundle.validate(m, fileEntries), CheckS3Data.validateFileEntries(rawFileEntries, fileEntries))
         .mapN { (bundle, files) =>
           try {
             CheckS3Data.copyFiles(files, outputBucket, outputPrefix)
