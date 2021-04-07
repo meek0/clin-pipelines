@@ -78,32 +78,34 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
 
       //Validate DocumentReference
       val searchDr = searchFhir("DocumentReference")
-      searchDr.getTotal shouldBe 5
+      searchDr.getTotal shouldBe 3
       val documentReferences = read(searchDr, classOf[DocumentReference])
       documentReferences.foreach { d =>
-        val attachment = d.getContentFirstRep.getAttachment
-        val objectKey = attachment.getUrl.replace("https://objectstore.cqgc.ca/", "")
-        val objectFullKey = s"$outputPrefix/$objectKey"
-        //Object exist
-        assert(s3.doesObjectExist(outputBucket, objectFullKey), s"DocumentReference with key $objectKey does not exist in object store")
-        val objectMetadata = s3.getObject(outputBucket, objectFullKey).getObjectMetadata
+        val attachment = d.getContent.asScala.map { content =>
+          val attachment= content.getAttachment
+          val objectKey = attachment.getUrl.replace("https://objectstore.cqgc.ca/", "")
+          val objectFullKey = s"$outputPrefix/$objectKey"
+          //Object exist
+          assert(s3.doesObjectExist(outputBucket, objectFullKey), s"DocumentReference with key $objectKey does not exist in object store")
+          val objectMetadata = s3.getObject(outputBucket, objectFullKey).getObjectMetadata
 
-        //Size
-        attachment.getSize shouldBe objectMetadata.getContentLength
+          //Size
+          attachment.getSize shouldBe objectMetadata.getContentLength
 
-        //MD5
-        new String(attachment.getHash) shouldBe objectMetadata.getETag
-        d.getSubject.getReference shouldBe fhirPatientId
-        d.getCustodian.getReference shouldBe fhirOrganizationId
+          //MD5
+          new String(attachment.getHash) shouldBe objectMetadata.getETag
+          d.getSubject.getReference shouldBe fhirPatientId
+          d.getCustodian.getReference shouldBe fhirOrganizationId
+        }
       }
       //Expected title
-      documentReferences.map(d => d.getContentFirstRep.getAttachment.getTitle) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file3.json")
+      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file3.json")
       //Expected code systems
-      documentReferences.map(d => d.getType.getCodingFirstRep.getSystem) should contain only(CodingSystems.DR_TYPE)
-      documentReferences.map(d => d.getType.getCodingFirstRep.getCode) should contain only("AR", "SNV", "INDEX", "QC")
-      documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only(CodingSystems.DR_CATEGORY)
-      documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only("SR", "SNV", "INDEX")
-      documentReferences.map(d => d.getContentFirstRep.getFormat.getSystem) should contain only(CodingSystems.DR_FORMAT)
+      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only (CodingSystems.DR_TYPE)
+      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("AR", "SNV", "QC")
+      documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only (CodingSystems.DR_CATEGORY)
+      documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only("SR", "SNV", "RE")
+      documentReferences.flatMap(d => d.getContent.asScala.map(_.getFormat.getSystem)) should contain only (CodingSystems.DR_FORMAT)
 
       //Validate tasks
       val searchTasks = searchFhir("Task")
@@ -120,16 +122,17 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
 
 
   }
- it should "return errors" in {
-   withObjects { (inputPrefix, outputPrefix) =>
-     transferFromResources(inputPrefix, "bad")
-     val result = Main.run(inputBucket, inputPrefix, outputBucket, outputPrefix)
+  it should "return errors" in {
+    withObjects { (inputPrefix, outputPrefix) =>
+      transferFromResources(inputPrefix, "bad")
+      val result = Main.run(inputBucket, inputPrefix, outputBucket, outputPrefix)
 
-     //Validate documents that has been copied
-     println(result)
-     result.isValid shouldBe false
-   }
- }
+      //Validate documents that has been copied
+      println(result)
+      result.isValid shouldBe false
+    }
+  }
+
   private def read[T <: IBaseResource](b: Bundle, theClass: Class[T]): Seq[T] = {
     b.getEntry.asScala.map { be =>
       fhirClient.read().resource(theClass).withUrl(id(be.getResource)).execute()

@@ -16,13 +16,10 @@ case class TTasks(sequencingAlignment: TTask, variantCall: TTask, qualityControl
       Seq(p.setValue(sample))
     }
     val sequencingExperimentOutput = {
-      val cram = new TaskOutputComponent()
+      val sequencingAlignment = new TaskOutputComponent()
         .setType(new CodeableConcept().setText(CRAM_FILE)) //TODO Use a terminology
-        .setValue(drr.cram.toReference())
-      val crai = new TaskOutputComponent()
-        .setType(new CodeableConcept().setText(CRAI_FILE)) //TODO Use a terminology
-        .setValue(drr.crai.toReference())
-      Seq(cram, crai)
+        .setValue(drr.sequencingAlignment.toReference())
+      Seq(sequencingAlignment)
     }
     val sequencingAlignmentR =
       sequencingAlignment.buildResource(SEQUENCING_ALIGNMENT_ANALYSIS, serviceRequest, patient, organization, sequencingExperimentInput, sequencingExperimentOutput)
@@ -33,13 +30,10 @@ case class TTasks(sequencingAlignment: TTask, variantCall: TTask, qualityControl
       Seq(p.setValue(sequencingAlignmentR.toReference()))
     }
     val variantCallOutput = {
-      val vcf = new TaskOutputComponent()
+      val variantCalling = new TaskOutputComponent()
         .setType(new CodeableConcept().setText(VCF_FILE)) //TODO Use a terminology
-        .setValue(drr.cram.toReference())
-      val tbi = new TaskOutputComponent()
-        .setType(new CodeableConcept().setText(TBI_FILE)) //TODO Use a terminology
-        .setValue(drr.crai.toReference())
-      Seq(vcf, tbi)
+        .setValue(drr.variantCalling.toReference())
+      Seq(variantCalling)
     }
     val variantCallR = variantCall.buildResource(VARIANT_CALLING_ANALYSIS, serviceRequest, patient, organization, variantCallInput, variantCallOutput)
 

@@ -17,6 +17,7 @@ case class TTask() {
     t.setCode(new CodeableConcept().setText(code)) //TODO Use a terminology
     t.setFocus(serviceRequest)
     t.setFor(patient)
+
     t.setOwner(owner)
     input.foreach { r =>
       //      val p = new ParameterComponent()

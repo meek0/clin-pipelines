@@ -10,6 +10,7 @@ import bio.ferlab.clin.etl.task.validation.PatientValidation.validatePatient
 import bio.ferlab.clin.etl.task.validation.ServiceRequestValidation.validateServiceRequest
 import bio.ferlab.clin.etl.task.validation.SpecimenValidation.{validateSample, validateSpecimen}
 import ca.uhn.fhir.rest.client.api.IGenericClient
+import cats.data.ValidatedNel
 import cats.implicits._
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
 import org.hl7.fhir.r4.model.IdType
@@ -19,7 +20,7 @@ object BuildBundle {
   def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[TBundle] = {
     println("################# Validate Resources ##################")
     val mapFiles = files.map(f => (f.filename, f)).toMap
-    val allResources = metadata.analyses.toList.map { a =>
+    val allResources: ValidatedNel[String, List[BundleEntryComponent]] = metadata.analyses.toList.map { a =>
 
       (
         validateOrganization(a),
