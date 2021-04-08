@@ -29,7 +29,7 @@ object BuildBundle {
         validateSpecimen(a),
         validateSample(a),
         validateFiles(mapFiles, a),
-        validateTasks(a),
+        validateTasks(metadata),
         ).mapN(createResources(metadata))
 
     }.combineAll
@@ -87,6 +87,6 @@ object BuildBundle {
   }
 
 
-  def validateTasks(a: Analysis): ValidationResult[TTasks] = TTasks(TTask(), TTask(), TTask()).validNel[String]
+  def validateTasks(m: Metadata): ValidationResult[TTasks] = TTasks(m.workflow, m.experiment).validNel[String]
 
 }

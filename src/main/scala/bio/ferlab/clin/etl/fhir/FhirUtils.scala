@@ -1,6 +1,5 @@
 package bio.ferlab.clin.etl.fhir
 
-import bio.ferlab.clin.etl.fhir.Model.{ClinExtension, ClinExtensionValueType}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import ca.uhn.fhir.rest.server.exceptions.{PreconditionFailedException, UnprocessableEntityException}
 import org.hl7.fhir.r4.model.{BooleanType, CodeType, DateType, DecimalType, Extension, IdType, IntegerType, OperationOutcome, Reference, Resource, StringType}
@@ -11,13 +10,20 @@ object FhirUtils {
 
   object Constants {
 
-    private val baseFhirServer = "http://fhir.cqgc.ferlab.bio/"
+    private val baseFhirServer = "http://fhir.cqgc.ferlab.bio"
 
     object CodingSystems {
       val SPECIMEN_TYPE = s"$baseFhirServer/CodeSystem/specimen-type"
       val DR_TYPE = s"$baseFhirServer/CodeSystem/data-type"
       val DR_CATEGORY = s"$baseFhirServer/CodeSystem/data-category"
       val DR_FORMAT = s"$baseFhirServer/CodeSystem/document-format"
+      val EXPERIMENTAL_STRATEGY = s"$baseFhirServer/CodeSystem/experimental-strategy"
+      val GENOME_BUILD = s"$baseFhirServer/CodeSystem/genome-build"
+    }
+
+    object Extensions {
+      val WORKFLOW = s"$baseFhirServer/StructureDefinition/workflow"
+      val SEQUENCING_EXPERIMENT = s"$baseFhirServer/StructureDefinition/sequencing-experiment"
     }
   }
 
@@ -27,33 +33,6 @@ object FhirUtils {
       case e: UnprocessableEntityException => e.getOperationOutcome
     }.get.asInstanceOf[OperationOutcome]
   }
-
-  def createExtension(url: String, values: Seq[ClinExtension]): Extension = {
-    val ext: Extension = new Extension()
-    ext.setUrl(url)
-
-    values.foreach(metric => {
-      metric.valueType match {
-        case ClinExtensionValueType.DECIMAL =>
-          ext.addExtension(metric.url, new DecimalType(metric.value))
-        case ClinExtensionValueType.INTEGER =>
-          ext.addExtension(metric.url, new IntegerType(metric.value))
-        case ClinExtensionValueType.BOOLEAN =>
-          ext.addExtension(metric.url, new BooleanType(metric.value))
-        case ClinExtensionValueType.DATE =>
-          ext.addExtension(metric.url, new DateType(metric.value))
-        case ClinExtensionValueType.STRING =>
-          ext.addExtension(metric.url, new StringType(metric.value))
-        case ClinExtensionValueType.CODE =>
-          ext.addExtension(metric.url, new CodeType(metric.value))
-        case _ =>
-          ext.addExtension(metric.url, new StringType(metric.value))
-      }
-    })
-
-    ext
-  }
-
 
   implicit class EitherResourceExtension(v: Either[IdType, Resource]) {
     def toReference(): Reference = {
