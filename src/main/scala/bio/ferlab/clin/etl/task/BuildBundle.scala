@@ -9,6 +9,7 @@ import bio.ferlab.clin.etl.task.validation.OrganizationValidation.validateOrgani
 import bio.ferlab.clin.etl.task.validation.PatientValidation.validatePatient
 import bio.ferlab.clin.etl.task.validation.ServiceRequestValidation.validateServiceRequest
 import bio.ferlab.clin.etl.task.validation.SpecimenValidation.{validateSample, validateSpecimen}
+import bio.ferlab.clin.etl.task.validation.TaskExtensionValidation
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
 import cats.implicits._
@@ -19,6 +20,7 @@ object BuildBundle {
 
   def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[TBundle] = {
     println("################# Validate Resources ##################")
+    val taskExtensions = TaskExtensionValidation.validateTaskExtension(metadata)
     val mapFiles = files.map(f => (f.filename, f)).toMap
     val allResources: ValidatedNel[String, List[BundleEntryComponent]] = metadata.analyses.toList.map { a =>
 
@@ -29,15 +31,16 @@ object BuildBundle {
         validateSpecimen(a),
         validateSample(a),
         validateFiles(mapFiles, a),
-        validateTasks(metadata),
-        ).mapN(createResources(metadata))
+        taskExtensions,
+        ).mapN(createResources)
 
     }.combineAll
 
     allResources.map(TBundle)
   }
 
-  def createResources(m: Metadata)(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, tasks: TTasks): List[BundleEntryComponent] = {
+  def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions): List[BundleEntryComponent] = {
+    val tasks = TTasks(taskExtensions)
     val specimenResource = specimen.buildResource(patient.toReference(), serviceRequest.sr.toReference())
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), Some(specimenResource.toReference()))
     val documentReferencesResources: DocumentReferencesResources = files.buildResources(patient.toReference(), organization.toReference(), sampleResource.toReference())
@@ -85,8 +88,5 @@ object BuildBundle {
 
 
   }
-
-
-  def validateTasks(m: Metadata): ValidationResult[TTasks] = TTasks(m.workflow, m.experiment).validNel[String]
 
 }

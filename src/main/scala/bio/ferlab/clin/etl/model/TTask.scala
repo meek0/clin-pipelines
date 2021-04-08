@@ -1,21 +1,13 @@
 package bio.ferlab.clin.etl.model
 
 import bio.ferlab.clin.etl.fhir.AnalysisTask
-import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskIntent, TaskOutputComponent, TaskPriority, TaskStatus}
-import org.hl7.fhir.r4.model.{CodeableConcept, DateTimeType, Extension, IdType, Reference, Resource, Task}
-
-import java.util.Date
+import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskOutputComponent}
+import org.hl7.fhir.r4.model.{CodeableConcept, IdType, Reference, Resource}
 
 case class TTask() {
 
-  def buildResource(code: String, serviceRequest: Reference, patient: Reference, owner: Reference, input: Seq[ParameterComponent], output: Seq[TaskOutputComponent], workflow: Extension, experiment: Extension): Resource = {
-    val t = new AnalysisTask()
-    t.addBasedOn()
-    t.setStatus(TaskStatus.COMPLETED)
-    t.setIntent(TaskIntent.ORDER)
-    t.setPriority(TaskPriority.ROUTINE)
-    t.setPriority(TaskPriority.ROUTINE)
-    t.setAuthoredOnElement(new DateTimeType(new Date()))
+  def buildResource(code: String, serviceRequest: Reference, patient: Reference, owner: Reference, input: Seq[ParameterComponent], output: Seq[TaskOutputComponent], taskExtensions: TaskExtensions): Resource = {
+    val t = AnalysisTask()
     t.setCode(new CodeableConcept().setText(code)) //TODO Use a terminology
     t.setFocus(serviceRequest)
     t.setFor(patient)
@@ -33,8 +25,8 @@ case class TTask() {
 
 
     t.setId(IdType.newRandomUuid())
-    t.addExtension(workflow)
-    t.addExtension(experiment)
+    t.addExtension(taskExtensions.workflowExtension)
+    t.addExtension(taskExtensions.experimentExtension)
     t
   }
 }
