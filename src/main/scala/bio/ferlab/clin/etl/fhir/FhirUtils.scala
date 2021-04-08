@@ -25,6 +25,7 @@ object FhirUtils {
       val WORKFLOW = s"$baseFhirServer/StructureDefinition/workflow"
       val SEQUENCING_EXPERIMENT = s"$baseFhirServer/StructureDefinition/sequencing-experiment"
     }
+
   }
 
   def validateResource(r: Resource)(implicit client: IGenericClient): OperationOutcome = {

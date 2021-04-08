@@ -1,5 +1,6 @@
 package bio.ferlab.clin.etl.model
 
+import bio.ferlab.clin.etl.fhir.AnalysisTask
 import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskIntent, TaskOutputComponent, TaskPriority, TaskStatus}
 import org.hl7.fhir.r4.model.{CodeableConcept, DateTimeType, Extension, IdType, Reference, Resource, Task}
 
@@ -8,7 +9,7 @@ import java.util.Date
 case class TTask() {
 
   def buildResource(code: String, serviceRequest: Reference, patient: Reference, owner: Reference, input: Seq[ParameterComponent], output: Seq[TaskOutputComponent], workflow: Extension, experiment: Extension): Resource = {
-    val t = new Task()
+    val t = new AnalysisTask()
     t.addBasedOn()
     t.setStatus(TaskStatus.COMPLETED)
     t.setIntent(TaskIntent.ORDER)

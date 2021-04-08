@@ -12,7 +12,7 @@ case class TTasks( workflow: Workflow, experiment: Experiment) {
   val qualityControl: TTask = TTask()
 
   private def buildWorkflowExtension() = {
-    val workflowExtension = new Extension(Extensions.WORKFLOW);
+    val workflowExtension = new Extension(Extensions.WORKFLOW)
     workflow.name.foreach { name => workflowExtension.addExtension(new Extension("workflowName", new StringType(name))) }
     workflow.genomeBuild.foreach { genomeBuild =>
       val code = new Coding()
