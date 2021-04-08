@@ -27,25 +27,27 @@ object MetadataTestUtils {
     labAliquotId = Some("nanuq_sample_id"),
     files = defaultFilesAnalysis
   )
+  val defaultExperiment: Experiment = Experiment(
+    platform = Some("Illumina"),
+    sequencerId = Some("NB552318"),
+    runName = Some("runNameExample"),
+    runDate = Some("2014-09-21T11:50:23-05:00"),
+    runAlias = Some("runAliasExample"),
+    flowcellId = Some("0"),
+    isPairedEnd = Some(true),
+    fragmentSize = Some(100),
+    experimentalStrategy = Some("WXS"),
+    captureKit = Some("RocheKapaHyperExome"),
+    baitDefinition = Some("KAPA_HyperExome_hg38_capture_targets")
+  )
+  val defaultWorkflow: Workflow = Workflow(
+    name = Some("Dragen"),
+    version = Some("1.1.0"),
+    genomeBuild = Some("GRCh38")
+  )
   val defaultMetadata: Metadata = Metadata(
-    Experiment(
-      platform = Some("Illumina"),
-      sequencerId = Some("NB552318"),
-      runName = Some("runNameExample"),
-      runDate = Some("2014-09-21T11:50:23-05"),
-      runAlias = Some("runAliasExample"),
-      flowcellId = Some("0"),
-      isPairedEnd = Some(true),
-      fragmentSize = Some(100),
-      experimentalStrategy = Some("WXS"),
-      captureKit = Some("RocheKapaHyperExome"),
-      baitDefinition = Some("KAPA_HyperExome_hg38_capture_targets")
-    ),
-    Workflow(
-      name = Some("Dragen"),
-      version = Some("1.1.0"),
-      genomeBuild = Some("GRCh38")
-    ),
+    defaultExperiment,
+    defaultWorkflow,
     analyses = Seq(
       defaultAnalysis
     )
