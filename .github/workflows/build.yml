@@ -11,7 +11,7 @@ jobs:
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
         with:
-          java-version: "adopt@11"
+          java-version: "adopt@1.11"
       - name: Build and Test
         run: sbt -v -Dfile.encoding=UTF-8 +test
       - name: Publish Test Report
