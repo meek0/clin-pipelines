@@ -4,7 +4,7 @@
     "platform": "Illumina",
     "sequencerId": "NB552318",
     "runName": "runNameExample",
-    "runDate": "2014-09-21T11:50:23-05",
+    "runDate": "2014-09-21T11:50:23-05:00",
     "runAlias": "runAliasExample",
     "flowcellId": "0",
     "isPairedEnd": true,

@@ -1,11 +1,23 @@
 package bio.ferlab.clin.etl.model
 
-import com.amazonaws.services.s3.AmazonS3
+case class FileEntry(
+                      bucket: String,
+                      key: String,
+                      md5: String,
+                      size: Long,
+                      id: String) {
+  lazy val filename: String = FileEntry.getFileName(key)
+}
 
-import java.util.UUID
+object FileEntry {
+  def apply(raw: RawFileEntry, id: String): FileEntry = {
+    new FileEntry(raw.bucket, raw.key, raw.md5, raw.size, id)
+  }
 
-case class FileEntry(bucket: String, key: String, md5: String, size: Long) {
-  val id: String = UUID.randomUUID().toString
-  lazy val filename: String = key.substring(key.lastIndexOf("/") + 1)
+  def getFileName(key:String): String = key.substring(key.lastIndexOf("/") + 1)
+}
+
+case class RawFileEntry(bucket: String, key: String, md5: String, size: Long) {
+  lazy val filename: String = FileEntry.getFileName(key)
 }
 

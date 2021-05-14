@@ -9,7 +9,9 @@ import bio.ferlab.clin.etl.task.validation.OrganizationValidation.validateOrgani
 import bio.ferlab.clin.etl.task.validation.PatientValidation.validatePatient
 import bio.ferlab.clin.etl.task.validation.ServiceRequestValidation.validateServiceRequest
 import bio.ferlab.clin.etl.task.validation.SpecimenValidation.{validateSample, validateSpecimen}
+import bio.ferlab.clin.etl.task.validation.TaskExtensionValidation
 import ca.uhn.fhir.rest.client.api.IGenericClient
+import cats.data.ValidatedNel
 import cats.implicits._
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
 import org.hl7.fhir.r4.model.IdType
@@ -17,8 +19,10 @@ import org.hl7.fhir.r4.model.IdType
 object BuildBundle {
 
   def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[TBundle] = {
+    println("################# Validate Resources ##################")
+    val taskExtensions = TaskExtensionValidation.validateTaskExtension(metadata)
     val mapFiles = files.map(f => (f.filename, f)).toMap
-    val allResources = metadata.analyses.toList.map { a =>
+    val allResources: ValidatedNel[String, List[BundleEntryComponent]] = metadata.analyses.toList.map { a =>
 
       (
         validateOrganization(a),
@@ -27,15 +31,16 @@ object BuildBundle {
         validateSpecimen(a),
         validateSample(a),
         validateFiles(mapFiles, a),
-        validateTasks(a),
-        ).mapN(createResources(metadata))
+        taskExtensions,
+        ).mapN(createResources)
 
     }.combineAll
 
     allResources.map(TBundle)
   }
 
-  def createResources(m: Metadata)(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, tasks: TTasks): List[BundleEntryComponent] = {
+  def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions): List[BundleEntryComponent] = {
+    val tasks = TTasks(taskExtensions)
     val specimenResource = specimen.buildResource(patient.toReference(), serviceRequest.sr.toReference())
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), Some(specimenResource.toReference()))
     val documentReferencesResources: DocumentReferencesResources = files.buildResources(patient.toReference(), organization.toReference(), sampleResource.toReference())
@@ -83,8 +88,5 @@ object BuildBundle {
 
 
   }
-
-
-  def validateTasks(a: Analysis): ValidationResult[TTasks] = TTasks(TTask(), TTask(), TTask()).validNel[String]
 
 }

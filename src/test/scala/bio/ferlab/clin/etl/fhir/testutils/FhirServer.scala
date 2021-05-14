@@ -26,7 +26,7 @@ trait FhirServerSuite extends FhirServer with TestSuite with BeforeAndAfterAll {
   }
 
   override def afterAll(): Unit = {
-    FhirTestUtils.clearAll()
+   FhirTestUtils.clearAll()
   }
 }
 
