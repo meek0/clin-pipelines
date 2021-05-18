@@ -15,6 +15,7 @@ libraryDependencies ++= Seq(
   "ca.uhn.hapi.fhir" % "org.hl7.fhir.r4" % "5.0.0",
   "org.typelevel" %% "cats-core" % "2.3.1",
   "com.typesafe.play" %% "play-json" % "2.9.2",
+  "org.keycloak" % "keycloak-authz-client" % "12.0.3",
   "com.softwaremill.sttp.client3" %% "core" % "3.1.0",
   "org.scalatest" %% "scalatest" % "3.0.8" % Test,
   "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.38.8" % "test",
