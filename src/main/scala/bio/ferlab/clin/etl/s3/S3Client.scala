@@ -11,7 +11,7 @@ object S3Client {
     val clientConfiguration = new ClientConfiguration
     clientConfiguration.setSignerOverride("AWSS3V4SignerType")
     AmazonS3ClientBuilder.standard()
-      .withEndpointConfiguration(new EndpointConfiguration(sys.env("S3_ENDPOINT"), Regions.US_EAST_1.name()))
+      .withEndpointConfiguration(new EndpointConfiguration(sys.env("AWS_ENDPOINT"), Regions.US_EAST_1.name()))
       .withPathStyleAccessEnabled(true)
       .withClientConfiguration(clientConfiguration)
       .build()
