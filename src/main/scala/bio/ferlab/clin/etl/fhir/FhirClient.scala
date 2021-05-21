@@ -1,11 +1,12 @@
 package bio.ferlab.clin.etl.fhir
 
+import bio.ferlab.clin.etl.task.{FhirConf, KeycloakConf}
 import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
 
 object FhirClient {
-  def buildFhirClients() = {
-    val fhirServerUrl = sys.env("FHIR_SERVER_URL")//http://localhost:49160/fhir
+  def buildFhirClients(fhirConf:FhirConf, keycloakConf:KeycloakConf) = {
+    val fhirServerUrl = fhirConf.url
     val fhirContext: FhirContext = FhirContext.forR4()
     fhirContext.getRestfulClientFactory.setConnectTimeout(120 * 1000)
     fhirContext.getRestfulClientFactory.setSocketTimeout(120 * 1000)
@@ -14,7 +15,7 @@ object FhirClient {
 
     val clinClient: IClinFhirClient = fhirContext.newRestfulClient(classOf[IClinFhirClient], fhirServerUrl)
     val client: IGenericClient = fhirContext.newRestfulGenericClient(fhirServerUrl)
-    val hapiFhirInterceptor: AuthTokenInterceptor = new AuthTokenInterceptor()
+    val hapiFhirInterceptor: AuthTokenInterceptor = new AuthTokenInterceptor(keycloakConf)
     clinClient.registerInterceptor(hapiFhirInterceptor)
     client.registerInterceptor(hapiFhirInterceptor)
 

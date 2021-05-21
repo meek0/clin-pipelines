@@ -2,30 +2,31 @@ package bio.ferlab.clin.etl.model
 
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.implicits.catsSyntaxValidatedId
-import com.amazonaws.services.s3.AmazonS3
+
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
 
 import java.io.ByteArrayInputStream
+import scala.util.{Failure, Success, Try}
 
 object Metadata {
   implicit val reads: Reads[Metadata] = Json.reads[Metadata]
 
-  def validateMetadataFile(bucket: String, prefix: String)(implicit s3Client: AmazonS3): ValidatedNel[String, Metadata] = {
+  def validateMetadataFile(bucket: String, prefix: String)(implicit s3Client: S3Client): ValidatedNel[String, Metadata] = {
     val objectName = s"$prefix/metadata.json"
-    val objectExist = s3Client.doesObjectExist(bucket, objectName)
-    if (!objectExist) {
-      s"Metadata file does not exist, bucket=$bucket, prefix=$prefix".invalidNel[Metadata]
-    } else {
-      val obj = s3Client.getObject(bucket, objectName)
-      val content = obj.getObjectContent
-      val bis = new ByteArrayInputStream(content.readAllBytes())
-      val r = Json.parse(bis).validate[Metadata]
-      r match {
-        case JsSuccess(m, _) => m.validNel[String]
-        case JsError(errors) =>
-          val all = errors.flatMap { case (path, jsError) => jsError.map(e => s"Error parsing $path => $e") }
-          NonEmptyList.fromList(all.toList).get.invalid[Metadata]
-      }
+    val get = GetObjectRequest.builder().bucket(bucket).key(objectName).build()
+    Try(s3Client.getObject(get)) match {
+      case Failure(e) => s"Error duriung fetching metadata file does not exist, bucket=$bucket, prefix=$prefix, error=${e.getMessage}".invalidNel[Metadata]
+      case Success(o) =>
+        val bis = new ByteArrayInputStream(o.readAllBytes())
+        val r = Json.parse(bis).validate[Metadata]
+        r match {
+          case JsSuccess(m, _) => m.validNel[String]
+          case JsError(errors) =>
+            val all = errors.flatMap { case (path, jsError) => jsError.map(e => s"Error parsing $path => $e") }
+            NonEmptyList.fromList(all.toList).get.invalid[Metadata]
+        }
     }
   }
 }

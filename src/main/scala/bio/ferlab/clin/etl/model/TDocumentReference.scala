@@ -2,6 +2,7 @@ package bio.ferlab.clin.etl.model
 
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
+import bio.ferlab.clin.etl.task.FerloadConf
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import org.hl7.fhir.r4.model.DocumentReference.{DocumentReferenceContentComponent, DocumentReferenceContextComponent}
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus
@@ -11,12 +12,12 @@ import scala.collection.JavaConverters._
 
 case class TDocumentReference(document: Seq[TDocumentAttachment], documentReferenceType: DocumentReferenceType) {
 
-  def validateBaseResource()(implicit fhirClient: IGenericClient): OperationOutcome = {
+  def validateBaseResource()(implicit fhirClient: IGenericClient, ferloadConf: FerloadConf): OperationOutcome = {
     val baseResource = buildBase()
     FhirUtils.validateResource(baseResource)
   }
 
-  def buildResource(subject: Reference, custodian: Reference, sample: Reference, related: Option[Reference]): Resource = {
+  def buildResource(subject: Reference, custodian: Reference, sample: Reference, related: Option[Reference])(implicit ferloadConf: FerloadConf): Resource = {
     val dr = buildBase()
     val drc = new DocumentReferenceContextComponent()
     related.foreach(r => drc.setRelated(List(r).asJava))
@@ -30,7 +31,7 @@ case class TDocumentReference(document: Seq[TDocumentAttachment], documentRefere
 
   }
 
-  private def buildBase() = {
+  private def buildBase()(implicit ferloadConf: FerloadConf) = {
     val dr = new DocumentReference()
     dr.setStatus(DocumentReferenceStatus.CURRENT)
     dr.getType.addCoding()
@@ -39,10 +40,10 @@ case class TDocumentReference(document: Seq[TDocumentAttachment], documentRefere
     dr.addCategory().addCoding()
       .setSystem(CodingSystems.DR_CATEGORY)
       .setCode(documentReferenceType.category)
-    val components = document.map{ d=>
+    val components = document.map { d =>
       val a = new Attachment()
-      a.setContentType("application/binary")
-      a.setUrl(s"https://objectstore.cqgc.ca/${d.objectStoreId}")
+      a.setContentType(d.contentType)
+      a.setUrl(s"${ferloadConf.url}/${d.objectStoreId}")
       a.setHash(d.md5.getBytes())
       a.setTitle(d.title)
       a.setSizeElement(new UnsignedIntType(d.size))
@@ -81,24 +82,25 @@ trait TDocumentAttachment {
   val title: String
   val md5: String
   val size: Long
+  val contentType: String
 }
 
-case class CRAI(objectStoreId: String, title: String, md5: String, size: Long) extends TDocumentAttachment {
+case class CRAI(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
   override val format: String = "CRAI"
 }
 
-case class CRAM(objectStoreId: String, title: String, md5: String, size: Long) extends TDocumentAttachment {
+case class CRAM(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
   override val format: String = "CRAM"
 }
 
-case class VCF(objectStoreId: String, title: String, md5: String, size: Long) extends TDocumentAttachment {
+case class VCF(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
   override val format: String = "VCF"
 }
 
-case class TBI(objectStoreId: String, title: String, md5: String, size: Long) extends TDocumentAttachment {
+case class TBI(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
   override val format: String = "TBI"
 }
 
-case class QC(objectStoreId: String, title: String, md5: String, size: Long) extends TDocumentAttachment {
+case class QC(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
   override val format: String = "TGZ"
 }

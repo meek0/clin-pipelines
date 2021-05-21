@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.IdType
 
 object BuildBundle {
 
-  def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[TBundle] = {
+  def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
     println("################# Validate Resources ##################")
     val taskExtensions = TaskExtensionValidation.validateTaskExtension(metadata)
     val mapFiles = files.map(f => (f.filename, f)).toMap
@@ -39,7 +39,7 @@ object BuildBundle {
     allResources.map(TBundle)
   }
 
-  def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions): List[BundleEntryComponent] = {
+  def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
     val tasks = TTasks(taskExtensions)
     val specimenResource = specimen.buildResource(patient.toReference(), serviceRequest.sr.toReference())
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), Some(specimenResource.toReference()))

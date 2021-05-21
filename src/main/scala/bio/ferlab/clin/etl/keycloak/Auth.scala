@@ -1,21 +1,23 @@
 package bio.ferlab.clin.etl.keycloak
 
+import bio.ferlab.clin.etl.task.KeycloakConf
 import org.keycloak.authorization.client.{AuthzClient, Configuration}
 import org.keycloak.common.util.Time
 import org.keycloak.representations.idm.authorization.AuthorizationRequest
+
 import scala.collection.JavaConverters._
 
-object Auth {
+class Auth(conf: KeycloakConf) {
 
   private val config = new Configuration()
-  config.setRealm(sys.env("KEYCLOAK_REALM")) //clin
-  config.setAuthServerUrl(sys.env("KEYCLOAK_URL")) //https://auth.qa.cqdg.ferlab.bio/auth)
-  config.setResource(sys.env("KEYCLOAK_CLIENT_KEY")) //clin-system
-  config.setCredentials(Map("secret" -> sys.env("KEYCLOAK_CLIENT_SECRET")).toMap[String, Object].asJava)
+  config.setRealm(conf.realm)
+  config.setAuthServerUrl(conf.url)
+  config.setResource(conf.clientKey)
+  config.setCredentials(Map("secret" -> conf.clientSecret).toMap[String, Object].asJava)
   private val authzClient = AuthzClient.create(config)
 
   private val req = new AuthorizationRequest()
-  req.setAudience(sys.env("KEYCLOAK_AUTHORIZATION_AUDIENCE")) //clin-acl
+  req.setAudience(conf.audience)
 
   private var expiresAt = 0L
   private var token = ""
