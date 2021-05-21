@@ -2,6 +2,7 @@ package bio.ferlab.clin.etl.fhir.testutils
 
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.fhir.testutils.containers.FhirServerContainer
+import bio.ferlab.clin.etl.task.FerloadConf
 import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.parser.IParser
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
@@ -21,6 +22,7 @@ trait FhirServer {
 }
 
 trait FhirServerSuite extends FhirServer with TestSuite with BeforeAndAfterAll {
+  implicit val ferloadConf: FerloadConf = FerloadConf("https://objectstore.cqgc.qc.ca")
   override def beforeAll(): Unit = {
     FhirTestUtils.init()
   }

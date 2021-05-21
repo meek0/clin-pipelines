@@ -1,6 +1,7 @@
 package bio.ferlab.clin.etl.task.validation
 
 import bio.ferlab.clin.etl.model._
+import bio.ferlab.clin.etl.task.FerloadConf
 import bio.ferlab.clin.etl.{ValidationResult, isValid}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
@@ -11,7 +12,7 @@ import scala.collection.JavaConverters._
 
 object DocumentReferencesValidation {
 
-  def validateFiles(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient): ValidationResult[TDocumentReferences] = {
+  def validateFiles(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TDocumentReferences] = {
     (
       ToSequencingAlignment.validate(files, a),
       ToVariantCalling.validate(files, a),
@@ -26,6 +27,7 @@ object DocumentReferencesValidation {
 
     def analysisFileName: Analysis => String
 
+
     def buildFile: FileEntry => TDocumentAttachment
 
     def validateFile(files: Map[String, FileEntry], a: Analysis): ValidatedNel[String, TDocumentAttachment] = {
@@ -39,7 +41,7 @@ object DocumentReferencesValidation {
 
     override def analysisFileName: Analysis => String = a => a.files.cram
 
-    override def buildFile: FileEntry => TDocumentAttachment = f => CRAM(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size)
+    override def buildFile: FileEntry => TDocumentAttachment = f => CRAM(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
   }
 
   case object ToCrai extends ToDocumentAttachment {
@@ -47,7 +49,7 @@ object DocumentReferencesValidation {
 
     override def analysisFileName: Analysis => String = a => a.files.crai
 
-    override def buildFile: FileEntry => TDocumentAttachment = f => CRAI(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size)
+    override def buildFile: FileEntry => TDocumentAttachment = f => CRAI(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
   }
 
   case object ToVCF extends ToDocumentAttachment {
@@ -55,7 +57,7 @@ object DocumentReferencesValidation {
 
     override def analysisFileName: Analysis => String = a => a.files.vcf
 
-    override def buildFile: FileEntry => TDocumentAttachment = f => VCF(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size)
+    override def buildFile: FileEntry => TDocumentAttachment = f => VCF(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
   }
 
   case object ToTBI extends ToDocumentAttachment {
@@ -63,7 +65,7 @@ object DocumentReferencesValidation {
 
     override def analysisFileName: Analysis => String = a => a.files.tbi
 
-    override def buildFile: FileEntry => TDocumentAttachment = f => TBI(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size)
+    override def buildFile: FileEntry => TDocumentAttachment = f => TBI(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
   }
 
   case object ToQCAttachment extends ToDocumentAttachment {
@@ -71,7 +73,7 @@ object DocumentReferencesValidation {
 
     override def analysisFileName: Analysis => String = a => a.files.qc
 
-    override def buildFile: FileEntry => TDocumentAttachment = f => QC(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size)
+    override def buildFile: FileEntry => TDocumentAttachment = f => QC(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
   }
 
 
@@ -82,7 +84,7 @@ object DocumentReferencesValidation {
 
     def analysisToDocument: Seq[ToDocumentAttachment]
 
-    def validate(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient): ValidationResult[TDocumentReference] = {
+    def validate(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TDocumentReference] = {
       analysisToDocument.toList.map(_.validateFile(files, a)).sequence
         .andThen { attachments =>
           val dr = TDocumentReference(attachments, documentReferenceType)

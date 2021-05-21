@@ -1,49 +1,28 @@
 package bio.ferlab.clin.etl
 
+import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.model.Metadata
-import bio.ferlab.clin.etl.task.{BuildBundle, CheckS3Data}
-import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
-import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
+import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
+import bio.ferlab.clin.etl.task.{BuildBundle, CheckS3Data, Conf, FerloadConf}
+import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.Validated.Invalid
-import cats.data.{NonEmptyList, Validated}
+import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.implicits.catsSyntaxTuple2Semigroupal
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
-import com.amazonaws.regions.Regions
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import org.hl7.fhir.r4.model.Bundle
+import software.amazon.awssdk.services.s3.S3Client
+
 
 object Main extends App {
 
   val Array(bucket, prefix, bucketDest, prefixDest) = args
-  val fhirServerUrl = sys.env.getOrElse("fhir.server.url", "http://localhost:49160/fhir")
 
-  import com.amazonaws.ClientConfiguration
 
-  val clientConfiguration = new ClientConfiguration
-  clientConfiguration.setSignerOverride("AWSS3V4SignerType")
-  val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard()
-    .withEndpointConfiguration(new EndpointConfiguration("http://localhost:49157", Regions.US_EAST_1.name()))
-    .withPathStyleAccessEnabled(true)
-    .withClientConfiguration(clientConfiguration)
-    .build()
-
-  val fhirContext: FhirContext = FhirContext.forR4()
-  fhirContext.getRestfulClientFactory.setConnectTimeout(120 * 1000)
-  fhirContext.getRestfulClientFactory.setSocketTimeout(120 * 1000)
-  fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING)
-  fhirContext.getRestfulClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER)
-
-  val clinClient: IClinFhirClient = fhirContext.newRestfulClient(classOf[IClinFhirClient], fhirServerUrl)
-  val client: IGenericClient = fhirContext.newRestfulGenericClient(fhirServerUrl)
-
-  //TODO :
-  //  val authToken: String = getAuthToken()
-  //    val hapiFhirInterceptor: AuthTokenInterceptor = new AuthTokenInterceptor(authToken)
-  //    clinClient.registerInterceptor(hapiFhirInterceptor)
-  //    client.registerInterceptor(hapiFhirInterceptor)
-
-  val result = run(bucket, prefix, bucketDest, prefixDest)(s3Client, client, clinClient)
-
+  val result = Conf.readConf().andThen { conf =>
+    val s3Client: S3Client = buildS3Client(conf.aws)
+    val (clinClient, client) = buildFhirClients(conf.fhir, conf.keycloak)
+    run(bucket, prefix, bucketDest, prefixDest)(s3Client, client, clinClient, conf.ferload)
+  }
   result match {
     case Invalid(NonEmptyList(h, t)) =>
       println(h)
@@ -52,8 +31,8 @@ object Main extends App {
     case Validated.Valid(_) => println("Success!")
   }
 
-  def run(inputBucket: String, inputPrefix: String, outputBucket: String, outputPrefix: String)(implicit s3: AmazonS3, client: IGenericClient, clinFhirClient: IClinFhirClient) = {
-    val metadata = Metadata.validateMetadataFile(inputBucket, inputPrefix)
+  def run(inputBucket: String, inputPrefix: String, outputBucket: String, outputPrefix: String)(implicit s3: S3Client, client: IGenericClient, clinFhirClient: IClinFhirClient, ferloadConf: FerloadConf) = {
+    val metadata: ValidatedNel[String, Metadata] = Metadata.validateMetadataFile(inputBucket, inputPrefix)
     metadata.andThen { m: Metadata =>
       val rawFileEntries = CheckS3Data.loadRawFileEntries(inputBucket, inputPrefix)
       val fileEntries = CheckS3Data.loadFileEntries(m, rawFileEntries)
@@ -70,6 +49,4 @@ object Main extends App {
         }
     }
   }
-
-
 }

@@ -1,38 +1,31 @@
 package bio.ferlab.clin.etl.task
 
-import scala.util.Properties
+import cats.data.ValidatedNel
+import pureconfig.ConfigReader.Result
+import pureconfig._
+import pureconfig.generic.auto._
+import cats.implicits._
 
-object Configuration {
-  // Object Store - S3
-  val accessKey: String = getConfiguration("ACCESS_KEY", "minio")
-  val secretKey: String = getConfiguration("SECRET_KEY", "minio123")
-  val serviceEndpoint: String = getConfiguration("SERVICE_ENDPOINT", "http://127.0.0.1:9000")
-  val bucket: String = getConfiguration("BUCKET", "clin")
-  val signinRegion: String = getConfiguration("SIGN_IN_REGION", "chusj")
+case class AWSConf(accessKey: String, secretKey: String, endpoint: String, pathStyleAccess:Boolean)
 
-  // HAPI FHIR
-  val fhirServerBase: String = getConfiguration("FHIR_SERVER_BASE", "https://fhir.qa.clin.ferlab.bio/fhir")
+case class KeycloakConf(realm: String, url: String, clientKey: String, clientSecret: String, audience:String)
 
-  // KeyCloak
-  val keycloakAuthUrl: String = getConfiguration("KEYCLOAK_AUTH_URL", "https://auth.qa.cqdg.ferlab.bio/auth/realms/clin/protocol/openid-connect/token")
-  val keycloakAuthClientId: String = getConfiguration("KEYCLOAK_AUTH_CLIENT_ID", "clin-system")
-  val keycloakAuthClientSecret: String = getConfiguration("KEYCLOAK_AUTH_CLIENT_SECRET", "__UNDEFINED__")
+case class FhirConf(url: String)
 
+case class FerloadConf(url: String)
 
-  def getConfiguration(key: String, default: String): String = {
-    Properties.envOrElse(key, Properties.propOrElse(key, default))
+case class Conf(aws: AWSConf, keycloak: KeycloakConf, fhir: FhirConf, ferload: FerloadConf)
+
+object Conf {
+
+  def readConf(): ValidatedNel[String, Conf] = {
+    val confResult: Result[Conf] = ConfigSource.default.load[Conf]
+    confResult match {
+      case Left(errors) =>
+        val message = errors.prettyPrint()
+        message.invalidNel[Conf]
+      case Right(conf) => conf.validNel[String]
+
+    }
   }
-
-  /*
-   * FOR LOCAL DEBUGGING ONLY - Do not print secrets in logs!
-   *
-  override def toString() : String = {
-    return "{\n" +
-      s"\taccessKey : $accessKey,\n" +
-      s"\tsecretKey : $secretKey,\n" +
-      s"\tserviceEndpoint: $serviceEndpoint,\n" +
-      s"\tsigninRegion: $signinRegion\n" +
-    "}"
-  }
-   */
 }

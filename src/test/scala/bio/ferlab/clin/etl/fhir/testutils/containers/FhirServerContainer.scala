@@ -26,7 +26,7 @@ case object FhirServerContainer extends OurContainer {
   val port = 8080
   val container: GenericContainer = GenericContainer(
     "chusj/clin-fhir-server:latest",
-    waitStrategy = Wait.forHttp("/").withStartupTimeout(Duration.ofSeconds(60)),
+    waitStrategy = Wait.forHttp("/").withStartupTimeout(Duration.ofSeconds(120)),
     exposedPorts = Seq(port),
     env = fhirEnv,
     labels = Map("name" -> name)

@@ -1,41 +1,37 @@
 package bio.ferlab.clin.etl.fhir.testutils
 
 import bio.ferlab.clin.etl.fhir.testutils.containers.MinioContainer
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
-import com.amazonaws.regions.Regions
-import com.amazonaws.services.s3.model.ListObjectsRequest
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import bio.ferlab.clin.etl.s3.S3Utils
+import bio.ferlab.clin.etl.task.AWSConf
 import org.scalatest.{BeforeAndAfterAll, TestSuite}
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.{CreateBucketRequest, DeleteObjectRequest, ListObjectsRequest, PutObjectRequest}
 
 import java.io.File
+import java.nio.file.Path
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 import scala.util.Random
 
 trait MinioServer {
   private val minioPort = MinioContainer.startIfNotRunning()
   protected val minioEndpoint = s"http://localhost:${minioPort}"
-  implicit val s3: AmazonS3 = AmazonS3ClientBuilder.standard
-    .withEndpointConfiguration(new EndpointConfiguration(minioEndpoint, Regions.US_EAST_1.name()))
-    .withPayloadSigningEnabled(false)
-    .withChunkedEncodingDisabled(true)
-    .withPathStyleAccessEnabled(true)
-    .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(MinioContainer.accessKey, MinioContainer.secretKey)))
-    .build
+  implicit val s3: S3Client = S3Utils.buildS3Client(AWSConf(MinioContainer.accessKey, MinioContainer.secretKey, minioEndpoint, pathStyleAccess = true))
 
   val inputBucket = s"clin-import"
   val outputBucket = s"clin-repository"
   createBuckets()
 
   private def createBuckets(): Unit = {
-    val alreadyExistingBuckets = s3.listBuckets().asScala.collect { case b if b.getName == inputBucket || b.getName == outputBucket => b.getName }
+    val alreadyExistingBuckets = s3.listBuckets().buckets().asScala.collect { case b if b.name() == inputBucket || b.name() == outputBucket => b.name() }
     val bucketsToCreate = Seq(inputBucket, outputBucket).diff(alreadyExistingBuckets)
-    bucketsToCreate.foreach(s3.createBucket)
+    bucketsToCreate.foreach { b =>
+      val buketRequest = CreateBucketRequest.builder().bucket(b).build()
+      s3.createBucket(buketRequest)
+    }
   }
 
-  def withObjects[T](block: (String, String) => T): Unit = {
+  def withS3Objects[T](block: (String, String) => T): Unit = {
     val inputPrefix = s"run_${Random.nextInt(10000)}"
     println(s"Use input prefix $inputPrefix : $minioEndpoint/minio/$inputBucket/$inputPrefix")
     val outputPrefix = s"files_${Random.nextInt(10000)}"
@@ -49,19 +45,37 @@ trait MinioServer {
   }
 
   def list(bucket: String, prefix: String): Seq[String] = {
-    s3.listObjects(bucket, prefix).getObjectSummaries.asScala.map(_.getKey)
+    val lsRequest = ListObjectsRequest.builder().bucket(bucket).prefix(prefix).build()
+    s3.listObjects(lsRequest).contents().asScala.map(_.key())
   }
 
   private def deleteRecursively(bucket: String, prefix: String): Unit = {
-    val obj = s3.listObjects(bucket, prefix)
-    obj.getObjectSummaries.asScala.foreach { o =>
-      s3.deleteObject(bucket, o.getKey)
+    val lsRequest = ListObjectsRequest.builder().bucket(bucket).prefix(prefix).build()
+    s3.listObjects(lsRequest).contents().asScala.foreach { o =>
+      val del = DeleteObjectRequest.builder().bucket(bucket).key(prefix).build()
+      s3.deleteObject(del)
     }
   }
+
+  def ls(file: File): List[File] = {
+    file.listFiles.filter(_.isFile).toList
+  }
+
   def transferFromResources(prefix: String, resource: String, bucket: String = inputBucket): Unit = {
-    val transferManager = TransferManagerBuilder.standard.withS3Client(s3).build()
-    val transfert = transferManager.uploadDirectory(bucket, prefix, new File(getClass.getResource(s"/$resource").toURI), false);
-    transfert.waitForCompletion()
+    val files = ls(new File(getClass.getResource(s"/$resource").toURI))
+    files.foreach { f =>
+      val put = PutObjectRequest.builder().bucket(bucket).key(s"$prefix/${f.getName}").build()
+      s3.putObject(put, RequestBody.fromFile(f))
+    }
+  }
+
+  def copyNFile(prefix: String, resource: String, times: Int, bucket: String = inputBucket): Unit = {
+    val file = new File(getClass.getResource(s"/$resource").toURI)
+    1.to(times).map { i =>
+      val filename = s"${file.getName}_$i"
+      val put = PutObjectRequest.builder().bucket(bucket).key(s"$prefix/$filename").build()
+      s3.putObject(put, RequestBody.fromFile(file))
+    }
   }
 }
 
