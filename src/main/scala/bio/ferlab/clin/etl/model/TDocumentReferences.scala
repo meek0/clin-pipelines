@@ -6,9 +6,9 @@ import org.hl7.fhir.r4.model.{Reference, Resource}
 case class TDocumentReferences(sequencingAlignment: TDocumentReference, variantCalling: TDocumentReference, qc: TDocumentReference) {
 
   def buildResources(subject: Reference, custodian: Reference, sample: Reference)(implicit ferloadConf: FerloadConf): DocumentReferencesResources = {
-    val sequencingAlignmentR = sequencingAlignment.buildResource(subject, custodian, sample, None)
-    val variantCallingR = variantCalling.buildResource(subject, custodian, sample, None)
-    val qcR = qc.buildResource(subject, custodian, sample, None)
+    val sequencingAlignmentR = sequencingAlignment.buildResource(subject, custodian, Seq(sample))
+    val variantCallingR = variantCalling.buildResource(subject, custodian, Seq(sample))
+    val qcR = qc.buildResource(subject, custodian, Seq(sample))
     DocumentReferencesResources(sequencingAlignmentR, variantCallingR, qcR)
   }
 

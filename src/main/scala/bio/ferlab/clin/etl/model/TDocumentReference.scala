@@ -17,11 +17,11 @@ case class TDocumentReference(document: Seq[TDocumentAttachment], documentRefere
     FhirUtils.validateResource(baseResource)
   }
 
-  def buildResource(subject: Reference, custodian: Reference, sample: Reference, related: Option[Reference])(implicit ferloadConf: FerloadConf): Resource = {
+  def buildResource(subject: Reference, custodian: Reference, related: Seq[Reference])(implicit ferloadConf: FerloadConf): Resource = {
     val dr = buildBase()
-    val drc = new DocumentReferenceContextComponent()
-    related.foreach(r => drc.setRelated(List(r).asJava))
 
+    val drc = new DocumentReferenceContextComponent()
+    drc.setRelated(related.asJava)
     dr.setContext(drc)
 
     dr.setId(IdType.newRandomUuid())
