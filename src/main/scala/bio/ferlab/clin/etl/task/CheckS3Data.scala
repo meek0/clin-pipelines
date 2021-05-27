@@ -52,15 +52,17 @@ object CheckS3Data {
 
     val mapOfIds = m.analyses.flatMap { a =>
       val cramId: String = generateId()
+      val craiId: String = generateId()
       val vcfId: String = generateId()
+      val tbiId: String = generateId()
       val qcId: String = generateId()
 
       Seq(
-        a.files.cram -> (cramId, "application/octet-stream", s""""attachment; filename="$cramId.cram"""""),
-        a.files.crai -> (s"$cramId.crai", "application/octet-stream", s""""attachment; filename="$cramId.cram.crai"""""),
-        a.files.vcf -> (vcfId, "application/octet-stream", s""""attachment; filename="$vcfId.vcf.gz"""""),
-        a.files.tbi -> (s"$vcfId.tbi", "application/octet-stream", s""""attachment; filename="$vcfId.vcf.gz.tbi"""""),
-        a.files.qc -> (qcId, "application/octet-stream", s""""attachment; filename="$qcId.gz""""")
+        a.files.cram -> (cramId, "application/octet-stream", s""""attachment; filename="${a.files.cram}"""""),
+        a.files.crai -> (craiId, "application/octet-stream", s""""attachment; filename="${a.files.crai}"""""),
+        a.files.vcf -> (vcfId, "application/octet-stream", s""""attachment; filename="${a.files.vcf}"""""),
+        a.files.tbi -> (tbiId, "application/octet-stream", s""""attachment; filename="${a.files.tbi}"""""),
+        a.files.qc -> (qcId, "application/octet-stream", s""""attachment; filename="${a.files.qc}""""")
       )
 
     }.toMap

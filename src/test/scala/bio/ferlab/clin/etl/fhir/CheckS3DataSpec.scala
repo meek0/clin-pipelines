@@ -38,7 +38,7 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
     }
   }
 
-  private def fileEntry(key: String, id: String, filename: String) = FileEntry(inputBucket, key, "md5", 1, id, "application/octet-stream", s""""attachment; filename="${filename}""""")
+  private def fileEntry(key: String, id: String, filename: String) = FileEntry(inputBucket, key, "md5", 1, id, "application/octet-stream", s""""attachment; filename="$filename""""")
 
   private def rawFileEntry(key: String) = RawFileEntry(inputBucket, key, "md5", 1)
 
@@ -103,35 +103,35 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
   }
 
   "loadFileEntries" should "return file entries based on raw data with id inferred for cram/crai and vcf/tbi and qc" in {
-    var i = 0;
+    var i = 0
     val generatorId = () => {
       i = i + 1
       s"id_$i"
     }
     CheckS3Data.loadFileEntries(defaultMetadata, rawFiles, generatorId) shouldBe Seq(
-      fileEntry(s"file1.cram", "id_1", "id_1.cram"),
-      fileEntry(s"file1.crai", "id_1.crai", "id_1.cram.crai"),
-      fileEntry(s"file2.vcf", "id_2", "id_2.vcf.gz"),
-      fileEntry(s"file2.tbi", "id_2.tbi", "id_2.vcf.gz.tbi"),
-      fileEntry(s"file3.tgz", "id_3", "id_3.gz")
+      fileEntry(s"file1.cram", "id_1", "file1.cram"),
+      fileEntry(s"file1.crai", "id_2", "file1.crai"),
+      fileEntry(s"file2.vcf", "id_3", "file2.vcf"),
+      fileEntry(s"file2.tbi", "id_4", "file2.tbi"),
+      fileEntry(s"file3.tgz", "id_5", "file3.tgz")
     )
   }
 
   it should "return file entries based and should ignore files that exist in metadata but not exist in objectstore" in {
     val inputRawFiles = Seq(rawFileEntry(s"file3.tgz"))
     CheckS3Data.loadFileEntries(defaultMetadata, inputRawFiles, () => "id") shouldBe Seq(
-      fileEntry(s"file3.tgz", "id", "id.gz")
+      fileEntry(s"file3.tgz", "id", "file3.tgz")
     )
   }
 
   it should "return file entries based and should ignore files that exist in object store but not exist in metadata" in {
     val inputRawFiles = rawFiles ++ Seq(rawFileEntry(s"file_not_in_metadata.cram"))
     CheckS3Data.loadFileEntries(defaultMetadata, inputRawFiles, () => "id") shouldBe Seq(
-      fileEntry(s"file1.cram", "id", "id.cram"),
-      fileEntry(s"file1.crai", "id.crai", "id.cram.crai"),
-      fileEntry(s"file2.vcf", "id", "id.vcf.gz"),
-      fileEntry(s"file2.tbi", "id.tbi", "id.vcf.gz.tbi"),
-      fileEntry(s"file3.tgz", "id", "id.gz")
+      fileEntry(s"file1.cram", "id", "file1.cram"),
+      fileEntry(s"file1.crai", "id", "file1.crai"),
+      fileEntry(s"file2.vcf", "id", "file2.vcf"),
+      fileEntry(s"file2.tbi", "id", "file2.tbi"),
+      fileEntry(s"file3.tgz", "id", "file3.tgz")
     )
   }
 }
