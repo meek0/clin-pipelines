@@ -1,18 +1,19 @@
 package bio.ferlab.clin.etl.task.validation
 
+import bio.ferlab.clin.etl.ValidationResult
+import bio.ferlab.clin.etl.fhir.FhirUtils.validateOutcomes
 import bio.ferlab.clin.etl.model._
 import bio.ferlab.clin.etl.task.FerloadConf
-import bio.ferlab.clin.etl.{ValidationResult, isValid}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
 import cats.implicits._
-import org.hl7.fhir.r4.model.OperationOutcome
 
 import scala.collection.JavaConverters._
 
 object DocumentReferencesValidation {
 
   def validateFiles(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TDocumentReferences] = {
+
     (
       ToSequencingAlignment.validate(files, a),
       ToVariantCalling.validate(files, a),
@@ -26,7 +27,6 @@ object DocumentReferencesValidation {
     def label: String
 
     def analysisFileName: Analysis => String
-
 
     def buildFile: FileEntry => TDocumentAttachment
 
@@ -89,18 +89,16 @@ object DocumentReferencesValidation {
         .andThen { attachments =>
           val dr = TDocumentReference(attachments, documentReferenceType)
           val outcome = dr.validateBaseResource()
-          val issues = outcome.getIssue.asScala
-          val errors = issues.collect {
-            case o if o.getSeverity.ordinal() <= OperationOutcome.IssueSeverity.ERROR.ordinal =>
-              val diag = o.getDiagnostics
-              val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
-              s"File type=$label, specimen=${a.specimenId}, sample=${a.sampleId}, patient:${a.patient.id} : $loc - $diag"
+          validateOutcomes(outcome, dr) { o =>
+            val diag = o.getDiagnostics
+            val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
+            s"File type=$label, specimen=${a.specimenId}, sample=${a.sampleId}, patient:${a.patient.id} : $loc - $diag"
           }
-          isValid(dr, errors)
         }
 
     }
   }
+
 
   case object ToSequencingAlignment extends ToDocumentReference {
     val label = "Sequencing Alignment (CRAM and CRAI)"

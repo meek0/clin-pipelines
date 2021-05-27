@@ -1,9 +1,12 @@
 package bio.ferlab.clin.etl.fhir
 
+import bio.ferlab.clin.etl.isValid
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import ca.uhn.fhir.rest.server.exceptions.{PreconditionFailedException, UnprocessableEntityException}
-import org.hl7.fhir.r4.model.{BooleanType, CodeType, DateType, DecimalType, Extension, IdType, IntegerType, OperationOutcome, Reference, Resource, StringType}
+import cats.data.ValidatedNel
+import org.hl7.fhir.r4.model.{IdType, OperationOutcome, Reference, Resource}
 
+import scala.collection.JavaConverters._
 import scala.util.Try
 
 object FhirUtils {
@@ -33,6 +36,15 @@ object FhirUtils {
       case e: PreconditionFailedException => e.getOperationOutcome
       case e: UnprocessableEntityException => e.getOperationOutcome
     }.get.asInstanceOf[OperationOutcome]
+  }
+
+
+  def validateOutcomes[T](outcome: OperationOutcome, result: T)(err: (OperationOutcome.OperationOutcomeIssueComponent) => String): ValidatedNel[String, T] = {
+    val issues = outcome.getIssue.asScala
+    val errors = issues.collect {
+      case o if o.getSeverity.ordinal() <= OperationOutcome.IssueSeverity.ERROR.ordinal => err(o)
+    }
+    isValid(result, errors)
   }
 
   implicit class EitherResourceExtension(v: Either[IdType, Resource]) {
