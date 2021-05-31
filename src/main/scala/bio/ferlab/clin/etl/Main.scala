@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.Validated.Invalid
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.implicits.catsSyntaxTuple2Semigroupal
-import org.hl7.fhir.r4.model.Bundle
 import software.amazon.awssdk.services.s3.S3Client
 
 

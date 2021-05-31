@@ -49,7 +49,7 @@ trait TDocumentReference extends DocumentReferenceType {
       val a = new Attachment()
       a.setContentType(d.contentType)
       a.setUrl(s"${ferloadConf.url}/${d.objectStoreId}")
-      a.setHash(d.md5.getBytes())
+      d.md5.map( md5sum => a.setHash(md5sum.getBytes()))
       a.setTitle(d.title)
       a.setSizeElement(new UnsignedIntType(d.size))
       val drcc = new DocumentReferenceContentComponent(a)

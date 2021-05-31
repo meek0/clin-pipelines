@@ -1,8 +1,10 @@
 package bio.ferlab.clin.etl.task
 
 import bio.ferlab.clin.etl.isValid
-import bio.ferlab.clin.etl.model.{FileEntry, Metadata, RawFileEntry}
+import bio.ferlab.clin.etl.model.{Analysis, FileEntry, Metadata, RawFileEntry}
 import cats.data.ValidatedNel
+import org.apache.http.entity.ContentType
+import org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM
 import org.slf4j.{Logger, LoggerFactory}
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model._
@@ -25,7 +27,7 @@ object CheckS3Data {
 
   @tailrec
   private def nextBatch(s3Client: S3Client, listing: ListObjectsV2Response, maxKeys: Int, objects: List[RawFileEntry] = Nil): List[RawFileEntry] = {
-    val pageKeys = listing.contents().asScala.map(o => RawFileEntry(listing.name(), o.key(), o.eTag().replace("\"", ""), o.size())).toList
+    val pageKeys = listing.contents().asScala.map(o => RawFileEntry(listing.name(), o.key(), o.size())).toList
 
     if (listing.isTruncated) {
       val nextRequest = ListObjectsV2Request.builder().bucket(listing.name).prefix(listing.prefix()).continuationToken(listing.nextContinuationToken()).build()
@@ -36,7 +38,7 @@ object CheckS3Data {
 
   def validateFileEntries(rawFileEntries: Seq[RawFileEntry], fileEntries: Seq[FileEntry]): ValidatedNel[String, Seq[FileEntry]] = {
     println("################# Validate File entries ##################")
-    val fileEntriesNotInAnalysis = rawFileEntries.filterNot(r => fileEntries.exists(f => f.key == r.key))
+    val fileEntriesNotInAnalysis = rawFileEntries.filterNot(r => r.isChecksum || fileEntries.exists(f => f.key == r.key))
     val errorFilesNotExist = fileEntriesNotInAnalysis.map(f => s"File ${f.filename} not found in metadata JSON file.")
     isValid(fileEntries, errorFilesNotExist)
   }
@@ -47,9 +49,17 @@ object CheckS3Data {
     fileEntries
   }
 
+  def getContent(bucket: String, key: String)(implicit s3Client: S3Client): String = {
+    val objectRequest = GetObjectRequest
+      .builder()
+      .key(key)
+      .bucket(bucket)
+      .build()
+    new String(s3Client.getObject(objectRequest).readAllBytes())
+  }
 
-  def loadFileEntries(m: Metadata, fileEntries: Seq[RawFileEntry], generateId: () => String = () => UUID.randomUUID().toString): Seq[FileEntry] = {
-
+  def loadFileEntries(m: Metadata, fileEntries: Seq[RawFileEntry], generateId: () => String = () => UUID.randomUUID().toString)(implicit s3Client: S3Client): Seq[FileEntry] = {
+    val (checksums, files) = fileEntries.partition(_.isChecksum)
     val mapOfIds = m.analyses.flatMap { a =>
       val cramId: String = generateId()
       val craiId: String = generateId()
@@ -58,23 +68,30 @@ object CheckS3Data {
       val qcId: String = generateId()
 
       Seq(
-        a.files.cram -> (cramId, "application/octet-stream", s""""attachment; filename="${a.files.cram}"""""),
-        a.files.crai -> (craiId, "application/octet-stream", s""""attachment; filename="${a.files.crai}"""""),
-        a.files.vcf -> (vcfId, "application/octet-stream", s""""attachment; filename="${a.files.vcf}"""""),
-        a.files.tbi -> (tbiId, "application/octet-stream", s""""attachment; filename="${a.files.tbi}"""""),
-        a.files.qc -> (qcId, "application/octet-stream", s""""attachment; filename="${a.files.qc}""""")
+        a.files.cram -> (cramId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cram)),
+        a.files.crai -> (craiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.crai)),
+        a.files.vcf -> (vcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.vcf)),
+        a.files.tbi -> (tbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.tbi)),
+        a.files.qc -> (qcId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.qc))
       )
 
     }.toMap
-    fileEntries
+    files
       .flatMap { f =>
         mapOfIds.get(f.filename).map {
-          case (id, contentType, contentDisposition) => FileEntry(f, id, contentType, contentDisposition)
+          case (id, contentType, contentDisposition) =>
+            val md5sum = checksums.find(c => c.filename.contains(f.filename))
+              .map { c => getContent(c.bucket, c.key) }
+            FileEntry(f, id, md5sum, contentType, contentDisposition)
         }
       }
 
   }
 
+
+  private def attach(f: String) = {
+    s""""attachment; filename="$f"""""
+  }
 
   def revert(files: Seq[FileEntry], bucketDest: String, pathDest: String)(implicit s3Client: S3Client): Unit = {
     println("################# Reverting Copy Files ##################")

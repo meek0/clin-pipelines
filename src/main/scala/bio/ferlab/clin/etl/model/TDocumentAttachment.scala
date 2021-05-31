@@ -7,7 +7,7 @@ trait TDocumentAttachment {
   val format: String
   val objectStoreId: String
   val title: String
-  val md5: String
+  val md5: Option[String]
   val size: Long
   val contentType: String
 }
@@ -29,7 +29,7 @@ trait ToAttachment[T <: TDocumentAttachment] {
   }
 }
 
-case class CRAM(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
+case class CRAM(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
   override val format: String = "CRAM"
 }
 
@@ -43,7 +43,7 @@ case object CRAM {
   }
 }
 
-case class CRAI(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
+case class CRAI(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
   override val format: String = "CRAI"
 }
 
@@ -57,7 +57,7 @@ object CRAI {
   }
 }
 
-case class VCF(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
+case class VCF(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
   override val format: String = "VCF"
 }
 
@@ -71,7 +71,7 @@ object VCF {
   }
 }
 
-case class TBI(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
+case class TBI(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
   override val format: String = "TBI"
 }
 
@@ -85,7 +85,7 @@ object TBI {
   }
 }
 
-case class QC(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
+case class QC(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
   override val format: String = "TGZ"
 }
 
