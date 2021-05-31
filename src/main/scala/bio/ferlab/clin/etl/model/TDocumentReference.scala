@@ -1,16 +1,21 @@
 package bio.ferlab.clin.etl.model
 
+import bio.ferlab.clin.etl.ValidationResult
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
+import bio.ferlab.clin.etl.fhir.FhirUtils.validateOutcomes
+import bio.ferlab.clin.etl.model.TDocumentAttachment.valid
 import bio.ferlab.clin.etl.task.FerloadConf
 import ca.uhn.fhir.rest.client.api.IGenericClient
+import cats.implicits._
 import org.hl7.fhir.r4.model.DocumentReference.{DocumentReferenceContentComponent, DocumentReferenceContextComponent}
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus
 import org.hl7.fhir.r4.model._
 
 import scala.collection.JavaConverters._
 
-case class TDocumentReference(document: Seq[TDocumentAttachment], documentReferenceType: DocumentReferenceType) {
+trait TDocumentReference extends DocumentReferenceType {
+  def document: Seq[TDocumentAttachment]
 
   def validateBaseResource()(implicit fhirClient: IGenericClient, ferloadConf: FerloadConf): OperationOutcome = {
     val baseResource = buildBase()
@@ -36,10 +41,10 @@ case class TDocumentReference(document: Seq[TDocumentAttachment], documentRefere
     dr.setStatus(DocumentReferenceStatus.CURRENT)
     dr.getType.addCoding()
       .setSystem(CodingSystems.DR_TYPE)
-      .setCode(documentReferenceType.documentType)
+      .setCode(documentType)
     dr.addCategory().addCoding()
       .setSystem(CodingSystems.DR_CATEGORY)
-      .setCode(documentReferenceType.category)
+      .setCode(category)
     val components = document.map { d =>
       val a = new Attachment()
       a.setContentType(d.contentType)
@@ -56,51 +61,88 @@ case class TDocumentReference(document: Seq[TDocumentAttachment], documentRefere
   }
 }
 
+object TDocumentReference {
+  def validate[T <: TDocumentReference](files: Map[String, FileEntry], a: Analysis)(implicit v: ToReference[T], fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = v.validate(files, a)
+}
+
 trait DocumentReferenceType {
   val documentType: String
   val category: String
 }
 
-case object SequencingAlignment extends DocumentReferenceType {
+case class SequencingAlignment(document: Seq[TDocumentAttachment]) extends TDocumentReference {
   override val documentType: String = "AR"
   override val category: String = "SR"
 }
 
-case object VariantCalling extends DocumentReferenceType {
+object SequencingAlignment {
+  implicit case object builder extends ToReference[SequencingAlignment] {
+    override val label: String = "Sequencing Alignment (CRAM and CRAI)"
+
+    protected override def build(documents: Seq[TDocumentAttachment]): SequencingAlignment = SequencingAlignment(documents)
+
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[CRAM], valid[CRAI])
+  }
+}
+
+case class VariantCalling(document: Seq[TDocumentAttachment]) extends TDocumentReference {
   override val documentType: String = "SNV"
   override val category: String = "SNV"
 }
 
-case object QualityControl extends DocumentReferenceType {
+object VariantCalling {
+  implicit case object builder extends ToReference[VariantCalling] {
+    override val label = "Variant Calling (VCF and TBI)"
+
+    protected override def build(documents: Seq[TDocumentAttachment]): VariantCalling = VariantCalling(documents)
+
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[VCF], valid[TBI])
+  }
+}
+
+case class QualityControl(document: Seq[TDocumentAttachment]) extends TDocumentReference {
   override val documentType: String = "QC"
   override val category: String = "RE"
 }
 
-trait TDocumentAttachment {
-  val format: String
-  val objectStoreId: String
-  val title: String
-  val md5: String
-  val size: Long
-  val contentType: String
+object QualityControl {
+  implicit case object builder extends ToReference[QualityControl] {
+    override val label = "QC"
+
+    protected override def build(documents: Seq[TDocumentAttachment]): QualityControl = QualityControl(documents)
+
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[QC])
+  }
 }
 
-case class CRAI(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
-  override val format: String = "CRAI"
+trait ToReference[T <: TDocumentReference] {
+  def label: String
+
+  protected def build(documents: Seq[TDocumentAttachment]): T
+
+  def attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]]
+
+  def attach(files: Map[String, FileEntry], a: Analysis): Seq[ValidationResult[TDocumentAttachment]] =
+    attachments.map(v => v(files, a))
+
+  def validate(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = {
+    attach(files, a).toList.sequence
+      .andThen { attachments =>
+        val dr = build(attachments)
+        val outcome = dr.validateBaseResource()
+        validateOutcomes(outcome, dr) { o =>
+          val diag = o.getDiagnostics
+          val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
+          s"File type=$label, specimen=${a.specimenId}, sample=${a.sampleId}, patient:${a.patient.id} : $loc - $diag"
+        }
+      }
+
+  }
+
+
 }
 
-case class CRAM(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
-  override val format: String = "CRAM"
-}
 
-case class VCF(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
-  override val format: String = "VCF"
-}
 
-case class TBI(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
-  override val format: String = "TBI"
-}
 
-case class QC(objectStoreId: String, title: String, md5: String, size: Long, contentType: String) extends TDocumentAttachment {
-  override val format: String = "TGZ"
-}
+
