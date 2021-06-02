@@ -1,10 +1,10 @@
-package bio.ferlab.clin.etl.task
+package bio.ferlab.clin.etl.conf
 
 import cats.data.ValidatedNel
+import cats.implicits._
 import pureconfig.ConfigReader.Result
 import pureconfig._
 import pureconfig.generic.auto._
-import cats.implicits._
 
 case class AWSConf(accessKey: String, secretKey: String, endpoint: String, pathStyleAccess:Boolean)
 

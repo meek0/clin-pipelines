@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl.fhir
 
-import bio.ferlab.clin.etl.model.TServiceRequest
+import bio.ferlab.clin.etl.task.fileimport.model.TServiceRequest
 import org.hl7.fhir.r4.model.{Reference, ServiceRequest}
 import org.scalatest.{FlatSpec, Matchers}
 

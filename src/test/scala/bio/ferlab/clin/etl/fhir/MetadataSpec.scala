@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl.fhir
 
-import bio.ferlab.clin.etl.model.Metadata
+import bio.ferlab.clin.etl.task.fileimport.model.Metadata
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
 

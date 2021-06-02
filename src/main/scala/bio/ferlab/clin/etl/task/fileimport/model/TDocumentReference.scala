@@ -1,11 +1,11 @@
-package bio.ferlab.clin.etl.model
+package bio.ferlab.clin.etl.task.fileimport.model
 
 import bio.ferlab.clin.etl.ValidationResult
+import bio.ferlab.clin.etl.conf.FerloadConf
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
 import bio.ferlab.clin.etl.fhir.FhirUtils.validateOutcomes
-import bio.ferlab.clin.etl.model.TDocumentAttachment.valid
-import bio.ferlab.clin.etl.task.FerloadConf
+import bio.ferlab.clin.etl.task.fileimport.model.TDocumentAttachment.valid
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.implicits._
 import org.hl7.fhir.r4.model.DocumentReference.{DocumentReferenceContentComponent, DocumentReferenceContextComponent}

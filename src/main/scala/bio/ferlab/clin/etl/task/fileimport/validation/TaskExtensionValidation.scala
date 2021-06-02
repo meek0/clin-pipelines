@@ -1,8 +1,8 @@
-package bio.ferlab.clin.etl.task.validation
+package bio.ferlab.clin.etl.task.fileimport.validation
 
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.{CodingSystems, Extensions}
-import bio.ferlab.clin.etl.fhir.{AnalysisTask, FhirUtils}
-import bio.ferlab.clin.etl.model.{Experiment, Metadata, TaskExtensions, Workflow}
+import bio.ferlab.clin.etl.fhir.FhirUtils
+import bio.ferlab.clin.etl.task.fileimport.model.{AnalysisTask, Experiment, Metadata, TaskExtensions, Workflow}
 import bio.ferlab.clin.etl.{ValidationResult, isValid}
 import ca.uhn.fhir.parser.DataFormatException
 import ca.uhn.fhir.rest.client.api.IGenericClient

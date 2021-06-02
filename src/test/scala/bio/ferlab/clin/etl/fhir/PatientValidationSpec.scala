@@ -2,7 +2,7 @@ package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils._
 import bio.ferlab.clin.etl.fhir.testutils.{FhirServerSuite, FhirTestUtils}
-import bio.ferlab.clin.etl.task.validation.PatientValidation.validatePatient
+import bio.ferlab.clin.etl.task.fileimport.validation.PatientValidation.validatePatient
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
 import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}

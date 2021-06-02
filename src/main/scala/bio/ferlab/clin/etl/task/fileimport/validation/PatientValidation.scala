@@ -1,8 +1,8 @@
-package bio.ferlab.clin.etl.task.validation
+package bio.ferlab.clin.etl.task.fileimport.validation
 
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.fhir.IClinFhirClient.opt
-import bio.ferlab.clin.etl.model.InputPatient
+import bio.ferlab.clin.etl.task.fileimport.model.InputPatient
 import bio.ferlab.clin.etl.{ValidationResult, allValid}
 import cats.data.Validated.Valid
 import org.hl7.fhir.r4.model.IdType

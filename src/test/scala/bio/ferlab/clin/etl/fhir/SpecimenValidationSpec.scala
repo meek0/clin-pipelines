@@ -1,7 +1,7 @@
 package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.fhir.testutils.{FhirServerSuite, FhirTestUtils}
-import bio.ferlab.clin.etl.task.validation.SpecimenValidation.validateSpecimen
+import bio.ferlab.clin.etl.task.fileimport.validation.SpecimenValidation.validateSpecimen
 import cats.data.Validated.Invalid
 import cats.data._
 import org.scalatest.{FlatSpec, Matchers}

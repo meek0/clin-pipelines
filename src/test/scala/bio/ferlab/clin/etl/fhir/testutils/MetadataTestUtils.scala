@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl.fhir.testutils
 
-import bio.ferlab.clin.etl.model._
+import bio.ferlab.clin.etl.task.fileimport.model._
 
 object MetadataTestUtils {
 

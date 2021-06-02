@@ -1,4 +1,4 @@
-package bio.ferlab.clin.etl.task.ingestion
+package bio.ferlab.clin.etl.task.fhirexport
 
 import scala.concurrent.duration.Duration
 

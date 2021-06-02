@@ -1,8 +1,8 @@
-package bio.ferlab.clin.etl.model
+package bio.ferlab.clin.etl.task.fileimport.model
 
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.{CodingSystems, Extensions}
 import bio.ferlab.clin.etl.fhir.FhirUtils.ResourceExtension
-import bio.ferlab.clin.etl.model.TTasks._
+import bio.ferlab.clin.etl.task.fileimport.model.TTasks._
 import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskOutputComponent}
 import org.hl7.fhir.r4.model._
 

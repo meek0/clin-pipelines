@@ -2,8 +2,8 @@ package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.fhir.testutils.FhirServerSuite
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils.{defaultExperiment, defaultMetadata, defaultWorkflow}
-import bio.ferlab.clin.etl.model.TaskExtensions
-import bio.ferlab.clin.etl.task.validation.TaskExtensionValidation
+import bio.ferlab.clin.etl.task.fileimport.model.TaskExtensions
+import bio.ferlab.clin.etl.task.fileimport.validation.TaskExtensionValidation
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
 import org.scalatest.Inside.inside

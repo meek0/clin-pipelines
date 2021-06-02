@@ -1,4 +1,4 @@
-package bio.ferlab.clin.etl.model
+package bio.ferlab.clin.etl.task.fileimport.model
 
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import org.hl7.fhir.r4.model.Bundle

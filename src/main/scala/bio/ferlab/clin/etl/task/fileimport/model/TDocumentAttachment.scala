@@ -1,4 +1,4 @@
-package bio.ferlab.clin.etl.model
+package bio.ferlab.clin.etl.task.fileimport.model
 
 import cats.data.ValidatedNel
 import cats.implicits._

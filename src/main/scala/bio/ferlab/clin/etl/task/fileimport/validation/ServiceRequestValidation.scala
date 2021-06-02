@@ -1,8 +1,8 @@
-package bio.ferlab.clin.etl.task.validation
+package bio.ferlab.clin.etl.task.fileimport.validation
 
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.fhir.IClinFhirClient.opt
-import bio.ferlab.clin.etl.model.{Analysis, TServiceRequest}
+import bio.ferlab.clin.etl.task.fileimport.model.{Analysis, TServiceRequest}
 import cats.data.ValidatedNel
 import cats.implicits._
 import scala.collection.JavaConverters._
