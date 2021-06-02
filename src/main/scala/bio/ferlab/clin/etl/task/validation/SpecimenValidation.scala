@@ -1,18 +1,19 @@
 package bio.ferlab.clin.etl.task.validation
 
+import bio.ferlab.clin.etl.fhir.FhirUtils.validateOutcomes
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.model.{Analysis, TExistingSpecimen, TNewSpecimen, TSpecimen}
-import bio.ferlab.clin.etl.{ValidationResult, allValid, isValid}
+import bio.ferlab.clin.etl.{ValidationResult, allValid}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import ca.uhn.fhir.rest.param.TokenParam
 import cats.data.Validated.Valid
 import cats.data.ValidatedNel
 import cats.implicits._
+import org.hl7.fhir.r4.model.Bundle.SearchEntryMode
+import org.hl7.fhir.r4.model.Specimen.{ACCESSION, INCLUDE_PARENT}
+import org.hl7.fhir.r4.model.{Bundle, Identifier, Specimen}
 
 import scala.collection.JavaConverters._
-import org.hl7.fhir.r4.model.Bundle.{IDENTIFIER, SearchEntryMode}
-import org.hl7.fhir.r4.model.Specimen.{ACCESSION, INCLUDE_PARENT}
-import org.hl7.fhir.r4.model.{Bundle, IdType, Identifier, OperationOutcome, Specimen}
 
 object SpecimenValidation {
   def validateSpecimen(a: Analysis)(implicit client: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[TSpecimen] = {
@@ -63,16 +64,14 @@ object SpecimenValidation {
       val stype = if (label == SpecimenType) a.specimenType else a.sampleType.getOrElse(a.specimenType)
       val s = TNewSpecimen(a.ldm, id, stype, a.bodySite)
       val outcome = s.validateBaseResource
-      val issues = outcome.getIssue.asScala
-      val errors = issues.collect {
-        case o if o.getSeverity.ordinal() <= OperationOutcome.IssueSeverity.ERROR.ordinal =>
-          val diag = o.getDiagnostics
-          val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
-            .replace("Parameters.parameter[0].resource.ofType(Specimen).", "")
-            .replace(".coding[0]", "")
-          s"Error $label : $loc - $diag"
-      }.toSeq
-      isValid(s, errors)
+      validateOutcomes(outcome, s) { o =>
+        val diag = o.getDiagnostics
+        val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
+          .replace("Parameters.parameter[0].resource.ofType(Specimen).", "")
+          .replace(".coding[0]", "")
+        s"Error $label : $loc - $diag"
+      }
+
     case Some(sp) => allValid(
       validatePatient(sp, a, label),
       validateSpecimenType(sp, a, label)

@@ -1,22 +1,17 @@
 package bio.ferlab.clin.etl.task.validation
 
-import bio.ferlab.clin.etl.fhir.IClinFhirClient
-import bio.ferlab.clin.etl.fhir.IClinFhirClient.opt
 import bio.ferlab.clin.etl.model.Analysis
 import ca.uhn.fhir.rest.client.api.IGenericClient
-import ca.uhn.fhir.rest.param.StringParam
 import cats.data.ValidatedNel
 import cats.implicits._
 import org.hl7.fhir.r4.model.IdType
 
 import scala.collection.JavaConverters._
-import scala.collection.JavaConverters._
 
 object OrganizationValidation {
   def validateOrganization(a: Analysis)(implicit client: IGenericClient): ValidatedNel[String, IdType] = {
     import ca.uhn.fhir.rest.gclient.StringClientParam
-    import org.hl7.fhir.r4.model.Bundle
-    import org.hl7.fhir.r4.model.Organization
+    import org.hl7.fhir.r4.model.{Bundle, Organization}
     val bundle: Bundle = client.search.
       forResource(classOf[Organization])
       .where(new StringClientParam("name")

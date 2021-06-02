@@ -1,9 +1,11 @@
 package bio.ferlab.clin.etl.fhir
 
+import bio.ferlab.clin.etl.ValidationResult
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils.{defaultAnalysis, defaultMetadata, defaultPatient}
 import bio.ferlab.clin.etl.fhir.testutils.{FhirServerSuite, FhirTestUtils}
-import bio.ferlab.clin.etl.model.FileEntry
+import bio.ferlab.clin.etl.model.{FileEntry, TBundle}
 import bio.ferlab.clin.etl.task.BuildBundle
+import cats.data.Validated.Valid
 import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}
 
 class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with FhirServerSuite {
@@ -16,14 +18,15 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       defaultAnalysis.copy(patient = defaultPatient(ptId), serviceRequestId = serviceRequestId)
     ))
     val files = Seq(
-      FileEntry("file1.cram", "123", "md5", 10, "1", "application/octet-stream", ""),
-      FileEntry("file1.crai", "345", "md5", 10, "1.crai", "application/octet-stream", ""),
-      FileEntry("file2.vcf", "678", "md5", 10, "2", "application/octet-stream", ""),
-      FileEntry("file2.tbi", "901", "md5", 10, "2.tbi", "application/octet-stream", ""),
-      FileEntry("file3.tgz", "234", "md5", 10, "3", "application/octet-stream", "")
+      FileEntry("bucket","file1.cram", Some("md5"), 10, "1", "application/octet-stream", ""),
+      FileEntry("bucket","file1.crai", Some("md5"), 10, "1.crai", "application/octet-stream", ""),
+      FileEntry("bucket","file2.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
+      FileEntry("bucket","file2.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
+      FileEntry("bucket","file3.tgz", Some("md5"), 10, "3", "application/octet-stream", "")
     )
-    val result = BuildBundle.validate(meta, files)
+    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files)
 
+    result.isValid shouldBe true
     val saveResult = result.map(b =>
       b.save()
 
