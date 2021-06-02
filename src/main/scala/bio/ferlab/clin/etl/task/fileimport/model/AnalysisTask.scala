@@ -1,8 +1,8 @@
-package bio.ferlab.clin.etl.fhir
+package bio.ferlab.clin.etl.task.fileimport.model
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef
-import org.hl7.fhir.r4.model.{DateTimeType, Task}
 import org.hl7.fhir.r4.model.Task.{TaskIntent, TaskPriority, TaskStatus}
+import org.hl7.fhir.r4.model.{DateTimeType, Task}
 
 import java.util.Date
 

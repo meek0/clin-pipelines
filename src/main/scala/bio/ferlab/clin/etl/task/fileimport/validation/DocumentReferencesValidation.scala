@@ -1,9 +1,9 @@
-package bio.ferlab.clin.etl.task.validation
+package bio.ferlab.clin.etl.task.fileimport.validation
 
 import bio.ferlab.clin.etl.ValidationResult
-import bio.ferlab.clin.etl.model.TDocumentReference.validate
-import bio.ferlab.clin.etl.model._
-import bio.ferlab.clin.etl.task.FerloadConf
+import bio.ferlab.clin.etl.conf.FerloadConf
+import bio.ferlab.clin.etl.task.fileimport.model.TDocumentReference.validate
+import bio.ferlab.clin.etl.task.fileimport.model._
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.implicits._
 

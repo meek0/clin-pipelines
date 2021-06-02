@@ -2,8 +2,8 @@ package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils._
 import bio.ferlab.clin.etl.fhir.testutils.MinioServerSuite
-import bio.ferlab.clin.etl.model.{FileEntry, RawFileEntry}
-import bio.ferlab.clin.etl.task.CheckS3Data
+import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, RawFileEntry}
+import bio.ferlab.clin.etl.task.fileimport.CheckS3Data
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
 import org.scalatest.{FlatSpec, Matchers}

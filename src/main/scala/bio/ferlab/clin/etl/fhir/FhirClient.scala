@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl.fhir
 
-import bio.ferlab.clin.etl.task.{FhirConf, KeycloakConf}
+import bio.ferlab.clin.etl.conf.{FhirConf, KeycloakConf}
 import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
 

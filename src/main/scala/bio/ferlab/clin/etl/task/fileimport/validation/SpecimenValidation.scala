@@ -1,8 +1,8 @@
-package bio.ferlab.clin.etl.task.validation
+package bio.ferlab.clin.etl.task.fileimport.validation
 
 import bio.ferlab.clin.etl.fhir.FhirUtils.validateOutcomes
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
-import bio.ferlab.clin.etl.model.{Analysis, TExistingSpecimen, TNewSpecimen, TSpecimen}
+import bio.ferlab.clin.etl.task.fileimport.model.{Analysis, TExistingSpecimen, TNewSpecimen, TSpecimen}
 import bio.ferlab.clin.etl.{ValidationResult, allValid}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import ca.uhn.fhir.rest.param.TokenParam

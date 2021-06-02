@@ -1,6 +1,6 @@
-package bio.ferlab.clin.etl.task.validation
+package bio.ferlab.clin.etl.task.fileimport.validation
 
-import bio.ferlab.clin.etl.model.Analysis
+import bio.ferlab.clin.etl.task.fileimport.model.Analysis
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
 import cats.implicits._

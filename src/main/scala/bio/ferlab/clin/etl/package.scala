@@ -1,12 +1,26 @@
 package bio.ferlab.clin
 
+import bio.ferlab.clin.etl.conf.Conf
 import cats.data.Validated.{Invalid, Valid}
-import cats.data.{NonEmptyList, Validated, ValidatedNel, _}
+import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.implicits._
-import org.hl7.fhir.r4.model.{IdType, Reference, Resource}
 
 package object etl {
   type ValidationResult[A] = Validated[NonEmptyList[String], A]
+
+  def withConf[T](b: Conf => ValidationResult[T]): Unit = {
+    val result = Conf.readConf().andThen { conf =>
+      b(conf)
+    }
+    result match {
+      case Invalid(NonEmptyList(h, t)) =>
+        println(h)
+        t.foreach(println)
+        System.exit(-1)
+      case Validated.Valid(_) => println("Success!")
+    }
+  }
+
 
   def allValid[A, E, T](v: ValidatedNel[A, E]*)(f: => T): Validated[NonEmptyList[A], T] = {
     v.toList.sequence_.map(_ => f)

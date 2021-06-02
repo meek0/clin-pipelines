@@ -1,9 +1,8 @@
-package bio.ferlab.clin.etl.task
+package bio.ferlab.clin.etl.task.fileimport
 
 import bio.ferlab.clin.etl.isValid
-import bio.ferlab.clin.etl.model.{Analysis, FileEntry, Metadata, RawFileEntry}
+import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, Metadata, RawFileEntry}
 import cats.data.ValidatedNel
-import org.apache.http.entity.ContentType
 import org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM
 import org.slf4j.{Logger, LoggerFactory}
 import software.amazon.awssdk.services.s3.S3Client
@@ -14,7 +13,6 @@ import java.nio.charset.StandardCharsets
 import java.util.UUID
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
-
 object CheckS3Data {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)

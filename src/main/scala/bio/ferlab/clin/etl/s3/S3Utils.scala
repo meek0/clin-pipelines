@@ -1,7 +1,6 @@
 package bio.ferlab.clin.etl.s3
 
-import bio.ferlab.clin.etl.task.AWSConf
-
+import bio.ferlab.clin.etl.conf.AWSConf
 import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.services.s3.{S3Client, S3Configuration}
 

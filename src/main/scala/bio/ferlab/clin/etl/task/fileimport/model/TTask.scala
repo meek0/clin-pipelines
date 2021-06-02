@@ -1,6 +1,5 @@
-package bio.ferlab.clin.etl.model
+package bio.ferlab.clin.etl.task.fileimport.model
 
-import bio.ferlab.clin.etl.fhir.AnalysisTask
 import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskOutputComponent}
 import org.hl7.fhir.r4.model.{CodeableConcept, IdType, Reference, Resource}
 

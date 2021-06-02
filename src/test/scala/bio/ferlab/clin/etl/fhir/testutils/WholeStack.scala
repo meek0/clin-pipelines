@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl.fhir.testutils
 
-import bio.ferlab.clin.etl.task.FerloadConf
+import bio.ferlab.clin.etl.conf.FerloadConf
 
 trait WholeStack extends MinioServer with FhirServer
 

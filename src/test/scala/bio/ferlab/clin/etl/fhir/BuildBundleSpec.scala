@@ -3,8 +3,8 @@ package bio.ferlab.clin.etl.fhir
 import bio.ferlab.clin.etl.ValidationResult
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils.{defaultAnalysis, defaultMetadata, defaultPatient}
 import bio.ferlab.clin.etl.fhir.testutils.{FhirServerSuite, FhirTestUtils}
-import bio.ferlab.clin.etl.model.{FileEntry, TBundle}
-import bio.ferlab.clin.etl.task.BuildBundle
+import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, TBundle}
+import bio.ferlab.clin.etl.task.fileimport.BuildBundle
 import cats.data.Validated.Valid
 import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}
 

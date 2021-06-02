@@ -1,8 +1,8 @@
 package bio.ferlab.clin.etl.fhir.testutils
 
+import bio.ferlab.clin.etl.conf.AWSConf
 import bio.ferlab.clin.etl.fhir.testutils.containers.MinioContainer
 import bio.ferlab.clin.etl.s3.S3Utils
-import bio.ferlab.clin.etl.task.AWSConf
 import org.scalatest.{BeforeAndAfterAll, TestSuite}
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client

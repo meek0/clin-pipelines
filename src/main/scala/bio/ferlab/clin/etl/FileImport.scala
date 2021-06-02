@@ -1,34 +1,26 @@
 package bio.ferlab.clin.etl
 
+import bio.ferlab.clin.etl.conf.FerloadConf
 import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
-import bio.ferlab.clin.etl.model.Metadata
 import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
-import bio.ferlab.clin.etl.task.{BuildBundle, CheckS3Data, Conf, FerloadConf}
+import bio.ferlab.clin.etl.task.fileimport.model.Metadata
+import bio.ferlab.clin.etl.task.fileimport.{BuildBundle, CheckS3Data}
 import ca.uhn.fhir.rest.client.api.IGenericClient
-import cats.data.Validated.Invalid
-import cats.data.{NonEmptyList, Validated, ValidatedNel}
+import cats.data.ValidatedNel
 import cats.implicits.catsSyntaxTuple2Semigroupal
 import software.amazon.awssdk.services.s3.S3Client
 
 
-object Main extends App {
+object FileImport extends App {
 
-  val Array(bucket, prefix, bucketDest, prefixDest) = args
-
-
-  val result = Conf.readConf().andThen { conf =>
+  withConf { conf =>
+    val Array(bucket, prefix, bucketDest, prefixDest) = args
     val s3Client: S3Client = buildS3Client(conf.aws)
     val (clinClient, client) = buildFhirClients(conf.fhir, conf.keycloak)
     run(bucket, prefix, bucketDest, prefixDest)(s3Client, client, clinClient, conf.ferload)
   }
-  result match {
-    case Invalid(NonEmptyList(h, t)) =>
-      println(h)
-      t.foreach(println)
-      System.exit(-1)
-    case Validated.Valid(_) => println("Success!")
-  }
+
 
   def run(inputBucket: String, inputPrefix: String, outputBucket: String, outputPrefix: String)(implicit s3: S3Client, client: IGenericClient, clinFhirClient: IClinFhirClient, ferloadConf: FerloadConf) = {
     val metadata: ValidatedNel[String, Metadata] = Metadata.validateMetadataFile(inputBucket, inputPrefix)

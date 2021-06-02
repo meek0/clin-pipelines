@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl.keycloak
 
-import bio.ferlab.clin.etl.task.KeycloakConf
+import bio.ferlab.clin.etl.conf.KeycloakConf
 import org.keycloak.authorization.client.{AuthzClient, Configuration}
 import org.keycloak.common.util.Time
 import org.keycloak.representations.idm.authorization.AuthorizationRequest

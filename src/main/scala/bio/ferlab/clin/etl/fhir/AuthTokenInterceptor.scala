@@ -1,7 +1,7 @@
 package bio.ferlab.clin.etl.fhir
 
+import bio.ferlab.clin.etl.conf.KeycloakConf
 import bio.ferlab.clin.etl.keycloak.Auth
-import bio.ferlab.clin.etl.task.KeycloakConf
 import ca.uhn.fhir.rest.client.api.{IClientInterceptor, IHttpRequest, IHttpResponse}
 import org.slf4j.{Logger, LoggerFactory}
 

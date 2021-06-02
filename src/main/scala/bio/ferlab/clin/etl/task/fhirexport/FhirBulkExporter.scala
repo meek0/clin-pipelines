@@ -1,9 +1,9 @@
-package bio.ferlab.clin.etl.task.ingestion
+package bio.ferlab.clin.etl.task.fhirexport
 
+import bio.ferlab.clin.etl.conf.{AWSConf, KeycloakConf}
 import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
-import bio.ferlab.clin.etl.task.ingestion.FhirBulkExporter._
-import bio.ferlab.clin.etl.task.ingestion.Poller.Task
-import bio.ferlab.clin.etl.task.{AWSConf, KeycloakConf}
+import bio.ferlab.clin.etl.task.fhirexport.FhirBulkExporter._
+import bio.ferlab.clin.etl.task.fhirexport.Poller.Task
 import play.api.libs.json.Reads._
 import play.api.libs.json.{Json, _}
 import software.amazon.awssdk.core.sync.RequestBody

@@ -1,9 +1,9 @@
 package bio.ferlab.clin.etl.fhir
 
-import bio.ferlab.clin.etl.Main
+import bio.ferlab.clin.etl.FileImport
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
 import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, WholeStackSuite}
-import bio.ferlab.clin.etl.model.TTasks
+import bio.ferlab.clin.etl.task.fileimport.model.TTasks
 import ca.uhn.fhir.rest.api.SummaryEnum
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model._
@@ -31,7 +31,7 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       val putMetadata = PutObjectRequest.builder().bucket(inputBucket).key(s"$inputPrefix/metadata.json").build()
       s3.putObject(putMetadata, RequestBody.fromString(metadata))
 
-      val result = Main.run(inputBucket, inputPrefix, outputBucket, outputPrefix)
+      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix)
 
       println(result)
       //Validate documents that has been copied
@@ -128,7 +128,7 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
   it should "return errors" in {
     withS3Objects { (inputPrefix, outputPrefix) =>
       transferFromResources(inputPrefix, "bad")
-      val result = Main.run(inputBucket, inputPrefix, outputBucket, outputPrefix)
+      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix)
 
       //Validate documents that has been copied
       println(result)
