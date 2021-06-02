@@ -1,13 +1,14 @@
 package bio.ferlab.clin.etl.task.ingestion
 
-import bio.ferlab.clin.etl.task.ingestion.Exporter.Config
+import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
 import bio.ferlab.clin.etl.task.ingestion.FhirBulkExporter._
 import bio.ferlab.clin.etl.task.ingestion.Poller.Task
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import bio.ferlab.clin.etl.task.{AWSConf, KeycloakConf}
 import play.api.libs.json.Reads._
 import play.api.libs.json.{Json, _}
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import sttp.client3.{HttpURLConnectionBackend, basicRequest, _}
 import sttp.model.{MediaType, StatusCode}
 
@@ -21,17 +22,18 @@ object FhirBulkExporter {
   val ALL_ENTITIES: String = Set("Organization", "Patient", "Practitioner", "PractitionerRole").mkString(",")
 
   case class ExportOutputFile(`type`: String, url: String)
+
   case class PollingResponse(transactionTime: String, request: String, output: Seq[ExportOutputFile])
 
   implicit val exportOutputReads: Reads[ExportOutputFile] = Json.reads[ExportOutputFile]
   implicit val pollingResponseReads: Reads[PollingResponse] = Json.reads[PollingResponse]
 }
 
-class FhirBulkExporter(authConfig: Config,
+class FhirBulkExporter(authConfig: KeycloakConf,
                        fhirUrl: String,
-                       storeConfig: Config) extends BulkExport {
+                       storeConfig: AWSConf) extends BulkExport {
 
-  val exportUrl: String => String = {entities => s"$fhirUrl/$$export?_type=$entities&_outputFormat=application/ndjson"}
+  val exportUrl: String => String = { entities => s"$fhirUrl/$$export?_type=$entities&_outputFormat=application/ndjson" }
 
   override def getAuthentication: String = {
     val backend = HttpURLConnectionBackend()
@@ -39,8 +41,8 @@ class FhirBulkExporter(authConfig: Config,
       .contentType(MediaType.ApplicationXWwwFormUrlencoded)
       .body(
         "grant_type" -> "client_credentials",
-        "client_id" -> authConfig.id,
-        "client_secret" -> authConfig.secret)
+        "client_id" -> authConfig.clientKey,
+        "client_secret" -> authConfig.clientSecret)
       .post(uri"${authConfig.url}")
       .send(backend)
 
@@ -58,7 +60,7 @@ class FhirBulkExporter(authConfig: Config,
     val response = basicRequest
       .headers(Map(
         "Authorization" -> s"Bearer $getAuthentication",
-        "Prefer"-> "respond-async"
+        "Prefer" -> "respond-async"
       ))
       .get(uri"${exportUrl(entities)}")
       .send(backend)
@@ -104,12 +106,15 @@ class FhirBulkExporter(authConfig: Config,
   }
 
   override def checkPollingStatus(pollingUrl: String, interval: Duration, timeout: Duration): List[(String, String)] = {
-    val pollingTask = Task(pollingUrl, interval, () => {checkPollingStatusOnce(pollingUrl)}, timeout)
+    val pollingTask = Task(pollingUrl, interval, () => {
+      checkPollingStatusOnce(pollingUrl)
+    }, timeout)
     val pollingResult = Poller.Default.addTask(pollingTask)
     Await.result(pollingResult, timeout + 1.second)
   }
 
   private def getFileContent(url: String): String = {
+    //TODO : strem the response https://sttp.softwaremill.com/en/latest/responses/body.html#streaming
     val backend = HttpURLConnectionBackend()
     val response = basicRequest
       .headers(Map("Authorization" -> s"Bearer $getAuthentication"))
@@ -122,15 +127,8 @@ class FhirBulkExporter(authConfig: Config,
 
   override def uploadFiles(files: List[(String, String)]): Unit = {
 
-    val  bucketName: String = "clin"
-
-    val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard
-      .withPayloadSigningEnabled(false)
-      .withChunkedEncodingDisabled(true)
-      .withPathStyleAccessEnabled(true)
-      .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(storeConfig.id, storeConfig.secret)))
-      .withEndpointConfiguration(new EndpointConfiguration(storeConfig.url, "RegionOne"))
-      .build()
+    val bucketName: String = "clin"
+    val s3Client: S3Client = buildS3Client(storeConfig)
 
     val formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
     val timestamp = LocalDateTime.now().format(formatter)
@@ -138,16 +136,17 @@ class FhirBulkExporter(authConfig: Config,
     files.foreach(println)
 
     files
-      .groupBy{ case (entity, _) => entity }
-      .map { case (entity, list) => entity -> list.zipWithIndex}
+      .groupBy { case (entity, _) => entity }
+      .map { case (entity, list) => entity -> list.zipWithIndex }
       .foreach {
         case (_, filesWithIndex) =>
           filesWithIndex.foreach {
             case ((folderName, fileUrl), idx) =>
               val filekey = s"raw/landing/fhir/$folderName/${folderName}_${idx}_$timestamp.json"
               println(s"upload object to: $bucketName/$filekey")
-              s3Client.putObject(bucketName, filekey, getFileContent(fileUrl))
+              val putObj = PutObjectRequest.builder().bucket(bucketName).key(filekey).build()
+              s3Client.putObject(putObj, RequestBody.fromString(getFileContent(fileUrl)))
           }
-    }
+      }
   }
 }
