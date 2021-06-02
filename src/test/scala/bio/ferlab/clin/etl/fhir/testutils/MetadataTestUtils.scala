@@ -20,7 +20,7 @@ object MetadataTestUtils {
     ldm = "CHUSJ",
     sampleId = "submitted_sample_id",
     specimenId = "submitted_specimen_id",
-    specimenType = "BLD",
+    specimenType = "NBL",
     sampleType = Some("DNA"),
     bodySite = "can be null",
     serviceRequestId = "clin_prescription_id",

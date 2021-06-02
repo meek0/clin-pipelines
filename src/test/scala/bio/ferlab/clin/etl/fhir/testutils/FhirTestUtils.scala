@@ -61,7 +61,7 @@ object FhirTestUtils {
 
   }
 
-  def loadSpecimen(patientId: String, lab: String = "CHUSJ", submitterId: String = "1", specimenType: String = "BLD", parent: Option[String] = None)(implicit fhirClient: IGenericClient): String = {
+  def loadSpecimen(patientId: String, lab: String = "CHUSJ", submitterId: String = "1", specimenType: String = "NBL", parent: Option[String] = None)(implicit fhirClient: IGenericClient): String = {
     val sp = new Specimen()
     sp.setSubject(new Reference(s"Patient/$patientId"))
 

@@ -9,22 +9,23 @@ import org.hl7.fhir.r4.model._
 import java.util.Date
 
 trait TSpecimen {
-  def buildResource(patientId: Reference, serviceRequest: Reference, parent: Option[Reference] = None): Either[IdType, Specimen]
+  def buildResource(patientId: Reference, serviceRequest: Reference, organization: Reference, parent: Option[Reference] = None): Either[IdType, Specimen]
 }
 
 case class TExistingSpecimen(sp: Specimen) extends TSpecimen {
   val id: IdType = IdType.of(sp)
 
-  def buildResource(patientId: Reference, serviceRequest: Reference, parent: Option[Reference] = None): Either[IdType, Specimen] = Left(id)
+  def buildResource(patientId: Reference, serviceRequest: Reference, organization: Reference, parent: Option[Reference] = None): Either[IdType, Specimen] = Left(id)
 }
 
 case class TNewSpecimen(lab: String, submitterId: String, specimenType: String, bodySite: String) extends TSpecimen {
 
-  def buildResource(patientId: Reference, serviceRequest: Reference, parent: Option[Reference] = None): Either[IdType, Specimen] = {
+  def buildResource(patientId: Reference, serviceRequest: Reference, organization: Reference, parent: Option[Reference] = None): Either[IdType, Specimen] = {
     val specimen: Specimen = buildBase()
     specimen.setId(IdType.newRandomUuid())
     specimen.setSubject(patientId)
     specimen.getRequest.add(serviceRequest)
+    specimen.getAccessionIdentifier.setAssigner(organization)
     parent.foreach { r => specimen.getParent.add(r) }
     Right(specimen)
 
