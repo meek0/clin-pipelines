@@ -20,15 +20,17 @@ class Auth(conf: KeycloakConf) {
   req.setAudience(conf.audience)
 
   private var expiresAt = 0L
-  private var token = ""
+  private var rpt = ""
+  private var accessToken = ""
 
-  def withToken[T](f: String => T): T = {
+  def withToken[T](f: (String, String) => T): T = {
     if (expiresAt == 0 || expiresAt > Time.currentTime()) {
+      accessToken = authzClient.obtainAccessToken().getToken
       val resp = authzClient.authorization().authorize(req)
       expiresAt = Time.currentTime + resp.getExpiresIn - 5
-      token = resp.getToken
+      rpt = resp.getToken
     }
-    f(token)
+    f(accessToken, rpt)
   }
 
 

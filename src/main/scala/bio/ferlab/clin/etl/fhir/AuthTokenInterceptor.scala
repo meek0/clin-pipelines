@@ -10,9 +10,10 @@ class AuthTokenInterceptor(conf: KeycloakConf) extends IClientInterceptor {
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
   val auth = new Auth(conf)
 
-  override def interceptRequest(theRequest: IHttpRequest): Unit = auth.withToken { token =>
+  override def interceptRequest(theRequest: IHttpRequest): Unit = auth.withToken { (token,rpt) =>
     LOGGER.debug("HTTP request intercepted.  Adding Authorization header.")
     theRequest.addHeader("Authorization", s"Bearer $token")
+    theRequest.addHeader("RPT", s"$rpt")
   }
 
   override def interceptResponse(theResponse: IHttpResponse): Unit = {
