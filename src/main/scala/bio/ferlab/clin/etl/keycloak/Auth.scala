@@ -3,7 +3,7 @@ package bio.ferlab.clin.etl.keycloak
 import bio.ferlab.clin.etl.conf.KeycloakConf
 import org.keycloak.authorization.client.{AuthzClient, Configuration}
 import org.keycloak.common.util.Time
-import org.keycloak.representations.idm.authorization.AuthorizationRequest
+import org.keycloak.representations.idm.authorization.{AuthorizationRequest, PermissionTicketToken}
 
 import scala.collection.JavaConverters._
 
@@ -18,7 +18,6 @@ class Auth(conf: KeycloakConf) {
 
   private val req = new AuthorizationRequest()
   req.setAudience(conf.audience)
-
   private var expiresAt = 0L
   private var rpt = ""
   private var accessToken = ""
