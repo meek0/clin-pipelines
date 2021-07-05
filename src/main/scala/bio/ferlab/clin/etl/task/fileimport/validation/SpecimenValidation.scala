@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
 
 object SpecimenValidation {
   def validateSpecimen(a: Analysis)(implicit client: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[TSpecimen] = {
-    val sp = Option(client.findSpecimenByAccession(new TokenParam(s"https://cqgc.qc.ca/labs/${a.ldm}", a.specimenId)))
+    val sp = Option(client.findSpecimenByAccession(new TokenParam(s"https://cqgc.qc.ca/labs/${a.ldm}", a.ldmSpecimenId)))
     validateOneSpecimen(a, sp, SpecimenType)
   }
 
@@ -27,7 +27,7 @@ object SpecimenValidation {
       .search
       .forResource(classOf[Specimen])
       .encodedJson
-      .where(ACCESSION.exactly().systemAndCode(accessionSystem, analysis.sampleId))
+      .where(ACCESSION.exactly().systemAndCode(accessionSystem, analysis.ldmSampleId))
       .include(INCLUDE_PARENT)
       .returnBundle(classOf[Bundle]).execute
 
@@ -37,7 +37,7 @@ object SpecimenValidation {
     val sampleValidation = validateOneSpecimen(analysis, fhirSample, SampleType)
 
     def specimenAccessionEquals(fsp: Specimen) = {
-      val identifier = new Identifier().setSystem(accessionSystem).setValue(analysis.specimenId)
+      val identifier = new Identifier().setSystem(accessionSystem).setValue(analysis.ldmSpecimenId)
       fsp.getAccessionIdentifier.equalsShallow(identifier)
     }
 
@@ -45,13 +45,13 @@ object SpecimenValidation {
       case (Some(fsp), None) =>
         val specimenAccessionSystem = Option(fsp.getAccessionIdentifier).map(_.getSystem).getOrElse("None")
         val specimenAccessionValue = Option(fsp.getAccessionIdentifier).map(_.getValue).getOrElse("None")
-        s"Sample ${analysis.sampleId} : A parent specimen id=${fsp.getId}, accession_system=$specimenAccessionSystem, accession_value=$specimenAccessionValue has been returned without sample".invalidNel[Any] //should never happened
+        s"Sample ${analysis.ldmSampleId} : A parent specimen id=${fsp.getId}, accession_system=$specimenAccessionSystem, accession_value=$specimenAccessionValue has been returned without sample".invalidNel[Any] //should never happened
       case (None, Some(fsa)) =>
-        s"Sample ${analysis.sampleId} : no parent specimen has been found".invalidNel[Any] //should never happened
+        s"Sample ${analysis.ldmSampleId} : no parent specimen has been found".invalidNel[Any] //should never happened
       case (Some(fsp), Some(_)) if !specimenAccessionEquals(fsp) =>
         val specimenAccessionSystem = Option(fsp.getAccessionIdentifier).map(_.getSystem).getOrElse("None")
         val specimenAccessionValue = Option(fsp.getAccessionIdentifier).map(_.getValue).getOrElse("None")
-        s"Sample ${analysis.sampleId} : parent specimen are not the same (${analysis.specimenId} <-> ${specimenAccessionValue} AND (${accessionSystem} <-> $specimenAccessionSystem)".invalidNel[Any]
+        s"Sample ${analysis.ldmSampleId} : parent specimen are not the same (${analysis.ldmSpecimenId} <-> ${specimenAccessionValue} AND (${accessionSystem} <-> $specimenAccessionSystem)".invalidNel[Any]
       case (Some(_), Some(_)) => Valid()
       case (None, None) => Valid()
     }
@@ -60,7 +60,7 @@ object SpecimenValidation {
 
   private def validateOneSpecimen(a: Analysis, specimen: Option[Specimen], label: SpecimenSampleType)(implicit client: IGenericClient): ValidatedNel[String, TSpecimen] = specimen match {
     case None =>
-      val id = if (label == SpecimenType) a.specimenId else a.sampleId
+      val id = if (label == SpecimenType) a.ldmSpecimenId else a.ldmSampleId
       val stype = if (label == SpecimenType) a.specimenType else a.sampleType.getOrElse(a.specimenType)
       val s = TNewSpecimen(a.ldm, id, stype, a.bodySite)
       val outcome = s.validateBaseResource
@@ -92,8 +92,8 @@ object SpecimenValidation {
 
   private def validatePatient(sp: Specimen, a: Analysis, label: SpecimenSampleType): ValidationResult[Analysis] = {
     val specimenSubjectId = sp.getSubject.getReference.replace("Patient/", "")
-    if (specimenSubjectId != a.patient.id) {
-      s"$label id=${a.specimenId} : does not belong to the same patient (${a.patient.id} <-> $specimenSubjectId)".invalidNel
+    if (specimenSubjectId != a.patient.clinId) {
+      s"$label id=${a.ldmSpecimenId} : does not belong to the same patient (${a.patient.clinId} <-> $specimenSubjectId)".invalidNel
     } else {
       a.validNel
     }
@@ -102,7 +102,7 @@ object SpecimenValidation {
   private def validateSpecimenType(sp: Specimen, a: Analysis, label: SpecimenSampleType): ValidationResult[Analysis] = {
     val specimenType = Option(sp.getType).map(cc => cc.getCodingFirstRep.getCode)
     if (!specimenType.contains(a.specimenType)) {
-      s"$label id=${a.specimenId} : does not have the same type (${a.specimenType} <-> ${specimenType.getOrElse("None")})".invalidNel
+      s"$label id=${a.ldmSpecimenId} : does not have the same type (${a.specimenType} <-> ${specimenType.getOrElse("None")})".invalidNel
     }
     else {
       a.validNel

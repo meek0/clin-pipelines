@@ -11,9 +11,9 @@ import org.hl7.fhir.r4.model.IdType
 object ServiceRequestValidation {
 
   def validateServiceRequest(a: Analysis)(implicit client: IClinFhirClient): ValidatedNel[String, TServiceRequest] = {
-    val fhirServiceRequest = opt(client.getServiceRequestById(new IdType(a.serviceRequestId)))
+    val fhirServiceRequest = opt(client.getServiceRequestById(new IdType(a.clinServiceRequestId)))
     fhirServiceRequest match {
-      case None => s"ServiceRequest id=${a.serviceRequestId} does not exist".invalidNel[TServiceRequest]
+      case None => s"ServiceRequest id=${a.clinServiceRequestId} does not exist".invalidNel[TServiceRequest]
       case Some(fsr) => TServiceRequest(fsr).validNel[String]
     }
   }

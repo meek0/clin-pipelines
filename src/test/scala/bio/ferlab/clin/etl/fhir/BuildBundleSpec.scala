@@ -15,7 +15,7 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
     val orgId = FhirTestUtils.loadOrganizations()
     val serviceRequestId = FhirTestUtils.loadServiceRequest(ptId)
     val meta = defaultMetadata.copy(analyses = Seq(
-      defaultAnalysis.copy(patient = defaultPatient(ptId), serviceRequestId = serviceRequestId)
+      defaultAnalysis.copy(patient = defaultPatient(ptId), clinServiceRequestId = serviceRequestId)
     ))
     val files = Seq(
       FileEntry("bucket","file1.cram", Some("md5"), 10, "1", "application/octet-stream", ""),

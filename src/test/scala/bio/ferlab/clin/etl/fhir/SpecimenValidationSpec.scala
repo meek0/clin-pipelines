@@ -18,11 +18,11 @@ class SpecimenValidationSpec extends FlatSpec with Matchers with FhirServerSuite
     val spId2 = FhirTestUtils.loadSpecimen(ptId2, "CHUSJ", "2")
     val metadata = defaultMetadata.copy(
       analyses = Seq(
-        defaultAnalysis.copy(specimenId = "1", ldm = "CHUSJ", patient = defaultPatient("not_the_good_one_1")),
-        defaultAnalysis.copy(specimenId = "2", ldm = "CHUSJ", patient = defaultPatient("not_the_good_one_2"))
+        defaultAnalysis.copy(ldmSpecimenId = "1", ldm = "CHUSJ", patient = defaultPatient("not_the_good_one_1")),
+        defaultAnalysis.copy(ldmSpecimenId = "2", ldm = "CHUSJ", patient = defaultPatient("not_the_good_one_2"))
       )
     )
-    val analysis = defaultAnalysis.copy(specimenId = "1", ldm = "CHUSJ", patient = defaultPatient("not_the_good_one_1"))
+    val analysis = defaultAnalysis.copy(ldmSpecimenId = "1", ldm = "CHUSJ", patient = defaultPatient("not_the_good_one_1"))
     validateSpecimen(analysis) shouldBe Invalid(
       NonEmptyList.of(
         s"Specimen id=1 : does not belong to the same patient (not_the_good_one_1 <-> $ptId1)"

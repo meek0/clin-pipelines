@@ -21,18 +21,18 @@
   "analyses": [
     {
       "patient": {
-        "id": "_PATIENT_ID_",
+        "clinId": "_PATIENT_ID_",
         "firstName": "John",
         "lastName": "Doe",
         "sex": "male"
       },
       "ldm": "CHUSJ",
-      "sampleId": "submitted_sample_id3",
-      "specimenId": "submitted_specimen_id3",
+      "ldmSampleId": "submitted_sample_id3",
+      "ldmSpecimenId": "submitted_specimen_id3",
       "specimenType": "NBL",
       "sampleType": "NBL",
       "bodySite": "can be null",
-      "serviceRequestId": "_SERVICE_REQUEST_ID_",
+      "clinServiceRequestId": "_SERVICE_REQUEST_ID_",
       "labAliquotId": "nanuq_sample_id",
       "files": {
         "cram": "file1.cram",

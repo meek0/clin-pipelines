@@ -21,18 +21,18 @@
   "analyses": [
     {
       "patient": {
-        "id": "1",
+        "clinId": "1",
         "firstName": "Jane",
         "lastName": "River",
         "sex": "female"
       },
       "ldm": "CHUSJ",
-      "sampleId": "submitted_sample_id3",
-      "specimenId": "submitted_specimen_id3",
+      "ldmSampleId": "submitted_sample_id3",
+      "ldmSpecimenId": "submitted_specimen_id3",
       "specimenType": "Echantillon  de sang",
       "sampleType": "BadSampleType",
       "bodySite": "can be null",
-      "serviceRequestId": "99999",
+      "clinServiceRequestId": "99999",
       "labAliquotId": "nanuq_sample_id",
       "files": {
         "cram": "fileXXXX.cram",
@@ -44,18 +44,18 @@
     },
     {
       "patient": {
-        "id": "2",
+        "clinId": "2",
         "firstName": "Jane",
         "lastName": "River",
         "sex": "female"
       },
       "ldm": "CHUSJ",
-      "sampleId": "submitted_sample_id3",
-      "specimenId": "submitted_specimen_id3",
+      "ldmSampleId": "submitted_sample_id3",
+      "ldmSpecimenId": "submitted_specimen_id3",
       "specimenType": "Echantillon  de sang",
       "sampleType": "BadSampleType",
       "bodySite": "can be null",
-      "serviceRequestId": "99999",
+      "clinServiceRequestId": "99999",
       "labAliquotId": "nanuq_sample_id",
       "files": {
         "cram": "fileXXXX.cram",
