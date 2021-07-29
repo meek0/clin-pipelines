@@ -29,6 +29,17 @@ object FhirTestUtils {
     id.getIdPart
   }
 
+  def loadCQGCOrganization()(implicit fhirClient: IGenericClient):String = {
+    val cqgc: Organization = new Organization()
+    cqgc.setId("222")
+    cqgc.setName("CQGC")
+    cqgc.setAlias(Collections.singletonList(new StringType("CQGC")))
+
+    val cqgcId: IIdType = fhirClient.create().resource(cqgc).execute().getId
+    LOGGER.info("CQGC Organization created with id : " + cqgcId.getIdPart)
+    cqgcId.getIdPart
+  }
+
   def loadPatients(lastName: String = "Doe", firstName: String = "John", identifier: String = "PT-000001", isActive: Boolean = true, birthDate: LocalDate = LocalDate.of(2000, 12, 21), gender: AdministrativeGender = Enumerations.AdministrativeGender.MALE)(implicit fhirClient: IGenericClient): IIdType = {
     val pt: Patient = new Patient()
     val id1: Resource = pt.setId(identifier)
@@ -61,11 +72,11 @@ object FhirTestUtils {
 
   }
 
-  def loadSpecimen(patientId: String, lab: String = "CHUSJ", submitterId: String = "1", specimenType: String = "NBL", parent: Option[String] = None)(implicit fhirClient: IGenericClient): String = {
+  def loadSpecimen(patientId: String, lab: String = "CHUSJ", submitterId: String = "1", specimenType: String = "NBL", parent: Option[String] = None, level:String="specimen")(implicit fhirClient: IGenericClient): String = {
     val sp = new Specimen()
     sp.setSubject(new Reference(s"Patient/$patientId"))
 
-    sp.getAccessionIdentifier.setSystem(s"https://cqgc.qc.ca/labs/$lab").setValue(submitterId)
+    sp.getAccessionIdentifier.setSystem(s"https://cqgc.qc.ca/labs/$lab/$level").setValue(submitterId)
 
     sp.getType.addCoding()
       .setSystem("http://terminology.hl7.org/CodeSystem/v2-0487")

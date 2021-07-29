@@ -26,6 +26,8 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       val fhirServiceRequestId = s"ServiceRequest/$serviceRequestId"
       val organizationId = FhirTestUtils.loadOrganizations()
       val fhirOrganizationId = s"Organization/$organizationId"
+      val cqgcOrganizationId = FhirTestUtils.loadCQGCOrganization()
+      val fhirCQGCOrganizationId = s"Organization/$cqgcOrganizationId"
       val templateMetadata = Source.fromResource("good/metadata.json").mkString
       val metadata = templateMetadata.replace("_PATIENT_ID_", patientId).replace("_SERVICE_REQUEST_ID_", serviceRequestId)
       val putMetadata = PutObjectRequest.builder().bucket(inputBucket).key(s"$inputPrefix/metadata.json").build()
@@ -42,7 +44,7 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
 
       // Validate specimens
       val searchSpecimens = searchFhir("Specimen")
-      searchSpecimens.getTotal shouldBe 2
+      searchSpecimens.getTotal shouldBe 3
       searchSpecimens.getEntry.asScala.foreach { be =>
         val s = be.getResource.asInstanceOf[Specimen]
         s.getSubject.getReference shouldBe fhirPatientId
@@ -57,21 +59,31 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       val specimen = optSpecimen.get
       specimen.getSubject.getReference shouldBe fhirPatientId
       specimen.getRequestFirstRep.getReference shouldBe fhirServiceRequestId
-      specimen.getAccessionIdentifier.getSystem shouldBe "https://cqgc.qc.ca/labs/CHUSJ"
+      specimen.getAccessionIdentifier.getSystem shouldBe "https://cqgc.qc.ca/labs/CHUSJ/specimen"
       specimen.getAccessionIdentifier.getValue shouldBe "submitted_specimen_id3"
+      specimen.getAccessionIdentifier.getAssigner.getReference shouldBe fhirOrganizationId
 
       //Validate sample
-      val optSample = fullSpecimens.collectFirst { case s if s.hasParent => s }
+      val optSample = fullSpecimens.collectFirst { case s if s.hasParent && s.getAccessionIdentifier != null && s.getAccessionIdentifier.getSystem == "https://cqgc.qc.ca/labs/CHUSJ/sample" => s }
       optSample shouldBe defined
       val sample = optSample.get
       sample.getParentFirstRep.getReference shouldBe id(specimen)
       sample.getSubject.getReference shouldBe fhirPatientId
       sample.getRequestFirstRep.getReference shouldBe fhirServiceRequestId
-      sample.getAccessionIdentifier.getSystem shouldBe "https://cqgc.qc.ca/labs/CHUSJ"
       sample.getAccessionIdentifier.getValue shouldBe "submitted_sample_id3"
+      sample.getAccessionIdentifier.getAssigner.getReference shouldBe fhirOrganizationId
+
+      val optAliquot = fullSpecimens.collectFirst { case s if s.hasParent && s.getAccessionIdentifier != null && s.getAccessionIdentifier.getSystem == "https://cqgc.qc.ca/labs/CQGC/aliquot" => s }
+      optAliquot shouldBe defined
+      val aliquot = optAliquot.get
+      aliquot.getParentFirstRep.getReference shouldBe id(sample)
+      aliquot.getSubject.getReference shouldBe fhirPatientId
+      aliquot.getRequestFirstRep.getReference shouldBe fhirServiceRequestId
+      aliquot.getAccessionIdentifier.getValue shouldBe "nanuq_sample_id"
+      aliquot.getAccessionIdentifier.getAssigner.getReference shouldBe fhirCQGCOrganizationId
 
       //Validate Service request
-      val specimenIds = Seq(id(specimen), id(sample))
+      val specimenIds = Seq(id(specimen), id(sample), id(aliquot))
       val updatedSr = searchFhir("ServiceRequest")
       updatedSr.getTotal shouldBe 1
       updatedSr.getEntry.asScala.foreach { be =>
@@ -85,20 +97,21 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       val documentReferences = read(searchDr, classOf[DocumentReference])
       documentReferences.foreach { d =>
         val attachment = d.getContent.asScala.map { content =>
-          val attachment= content.getAttachment
+          val attachment = content.getAttachment
           val objectKey = attachment.getUrl.replace(ferloadConf.url, "").replace("/", "")
           val objectFullKey = s"$outputPrefix/$objectKey"
           //Object exist
-//          assert(s3.doesObjectExist(outputBucket, objectFullKey), s"DocumentReference with key $objectKey does not exist in object store")
-//          val objectMetadata = s3.getObject(outputBucket, objectFullKey).getObjectMetadata
-//
-//          //Size
-//          attachment.getSize shouldBe objectMetadata.getContentLength
-//
-//          //MD5
-//          new String(attachment.getHash) shouldBe objectMetadata.getETag
+          //          assert(s3.doesObjectExist(outputBucket, objectFullKey), s"DocumentReference with key $objectKey does not exist in object store")
+          //          val objectMetadata = s3.getObject(outputBucket, objectFullKey).getObjectMetadata
+          //
+          //          //Size
+          //          attachment.getSize shouldBe objectMetadata.getContentLength
+          //
+          //          //MD5
+          //          new String(attachment.getHash) shouldBe objectMetadata.getETag
           d.getSubject.getReference shouldBe fhirPatientId
           d.getCustodian.getReference shouldBe fhirOrganizationId
+          d.getContext.getRelatedFirstRep.getReference shouldBe id(aliquot)
         }
       }
       //Expected title

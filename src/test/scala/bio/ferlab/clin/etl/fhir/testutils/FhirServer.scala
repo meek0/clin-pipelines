@@ -6,7 +6,7 @@ import bio.ferlab.clin.etl.fhir.testutils.containers.FhirServerContainer
 import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.parser.IParser
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
-import org.scalatest.{BeforeAndAfterAll, TestSuite}
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, TestSuite}
 
 trait FhirServer {
   val fhirPort: Int = FhirServerContainer.startIfNotRunning()
@@ -21,14 +21,15 @@ trait FhirServer {
 
 }
 
-trait FhirServerSuite extends FhirServer with TestSuite with BeforeAndAfterAll {
+trait FhirServerSuite extends FhirServer with TestSuite with BeforeAndAfterAll with BeforeAndAfter {
   implicit val ferloadConf: FerloadConf = FerloadConf("https://objectstore.cqgc.qc.ca")
-  override def beforeAll(): Unit = {
+
+  before {
     FhirTestUtils.init()
   }
 
-  override def afterAll(): Unit = {
-   FhirTestUtils.clearAll()
+  after {
+    FhirTestUtils.clearAll()
   }
 }
 

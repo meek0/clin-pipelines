@@ -22,9 +22,9 @@ object MetadataTestUtils {
     ldmSpecimenId = "submitted_specimen_id",
     specimenType = "NBL",
     sampleType = Some("DNA"),
-    bodySite = "can be null",
+    bodySite = "2053",
     clinServiceRequestId = "clin_prescription_id",
-    labAliquotId = Some("nanuq_sample_id"),
+    labAliquotId = "nanuq_sample_id",
     files = defaultFilesAnalysis
   )
   val defaultExperiment: Experiment = Experiment(

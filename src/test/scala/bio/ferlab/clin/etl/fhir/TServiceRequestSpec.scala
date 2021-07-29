@@ -14,20 +14,21 @@ class TServiceRequestSpec extends FlatSpec with Matchers {
     sr.addSpecimen(new Reference("Specimen/3"))
     val tsr = TServiceRequest(sr)
 
-    val r = tsr.buildResource(new Reference("Specimen/1"), new Reference("Specimen/2"))
+    val r = tsr.buildResource(new Reference("Specimen/1"), new Reference("Specimen/2"), new Reference("Specimen/4"))
     r shouldBe defined
-    r.get.getSpecimen.asScala.map(_.getReference) should contain theSameElementsAs Seq("Specimen/1", "Specimen/2", "Specimen/3")
+    r.get.getSpecimen.asScala.map(_.getReference) should contain theSameElementsAs Seq("Specimen/1", "Specimen/2", "Specimen/3", "Specimen/4")
 
 
   }
 
-  "buildResource" should "return None if there is specimen and sample already associated to the service reequest" in {
+  "buildResource" should "return None if there is specimen, sample and aliquot already associated to the service reequest" in {
     val sr = new ServiceRequest()
     sr.addSpecimen(new Reference("Specimen/1"))
     sr.addSpecimen(new Reference("Specimen/2"))
+    sr.addSpecimen(new Reference("Specimen/3"))
     val tsr = TServiceRequest(sr)
 
-    val r = tsr.buildResource(new Reference("Specimen/1"), new Reference("Specimen/2"))
+    val r = tsr.buildResource(new Reference("Specimen/1"), new Reference("Specimen/2"), new Reference("Specimen/3"))
     r shouldBe None
 
   }

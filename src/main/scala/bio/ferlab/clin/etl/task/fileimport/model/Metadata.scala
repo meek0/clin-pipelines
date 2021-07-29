@@ -70,7 +70,7 @@ case class Analysis(
                      sampleType: Option[String],
                      bodySite: String,
                      clinServiceRequestId: String,
-                     labAliquotId: Option[String],
+                     labAliquotId: String,
                      patient: InputPatient,
                      files: FilesAnalysis
                    )
