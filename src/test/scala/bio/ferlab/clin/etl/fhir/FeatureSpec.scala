@@ -132,7 +132,7 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
         t.getOwner.getReference shouldBe fhirOrganizationId
         t.getFocus.getReference shouldBe fhirServiceRequestId
       }
-      tasks.map(_.getCode.getText) should contain theSameElementsAs TTasks.allTypes
+      tasks.map(_.getCode.getCodingFirstRep.getCode) should contain theSameElementsAs TTasks.allTypes
 
     }
 
