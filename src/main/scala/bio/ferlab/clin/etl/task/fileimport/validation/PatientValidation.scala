@@ -13,19 +13,19 @@ import scala.collection.JavaConverters._
 object PatientValidation {
 
   def validatePatient(p: InputPatient)(implicit clinClient: IClinFhirClient): ValidationResult[IdType] = {
-    val fhirPatient = opt(clinClient.getPatientById(new IdType(p.id)))
+    val fhirPatient = opt(clinClient.getPatientById(new IdType(p.clinId)))
 
     fhirPatient match {
-      case None => s"Patient ${p.id} does not exist".invalidNel[IdType]
+      case None => s"Patient ${p.clinId} does not exist".invalidNel[IdType]
       case Some(fp) =>
         val firstName = fp.getNameFirstRep.getGivenAsSingleString
         val lastName = fp.getNameFirstRep.getFamily
         val sex = Option(fp.getGender).map(_.getDisplay).map(_.toLowerCase).getOrElse("")
         allValid(
-          matchProperty("First Name")(p.id, p.firstName, firstName),
-          matchProperty("Last Name")(p.id, p.lastName, lastName),
-          matchProperty("Sex")(p.id, p.sex.toLowerCase, sex),
-          matchActive(p.id, fp.getActive),
+          matchProperty("First Name")(p.clinId, p.firstName, firstName),
+          matchProperty("Last Name")(p.clinId, p.lastName, lastName),
+          matchProperty("Sex")(p.clinId, p.sex.toLowerCase, sex),
+          matchActive(p.clinId, fp.getActive),
         )(IdType.of(fp))
     }
   }

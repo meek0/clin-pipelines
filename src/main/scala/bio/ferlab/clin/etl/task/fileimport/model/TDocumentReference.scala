@@ -133,7 +133,7 @@ trait ToReference[T <: TDocumentReference] {
         validateOutcomes(outcome, dr) { o =>
           val diag = o.getDiagnostics
           val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
-          s"File type=$label, specimen=${a.specimenId}, sample=${a.sampleId}, patient:${a.patient.id} : $loc - $diag"
+          s"File type=$label, specimen=${a.ldmSpecimenId}, sample=${a.ldmSampleId}, patient:${a.patient.clinId} : $loc - $diag"
         }
       }
 

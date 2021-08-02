@@ -67,7 +67,7 @@ case class TTasks(taskExtensions: TaskExtensions) {
 }
 
 object TTasks {
-  val SEQUENCING_ALIGNMENT_ANALYSIS = "Sequencing Alignment Analysis"
+  val SEQUENCING_ALIGNMENT_ANALYSIS = "SA"
 
   val ANALYSED_SAMPLE = "Analysed sample"
 
@@ -79,9 +79,9 @@ object TTasks {
 
   val TBI_FILE = "TBI File"
 
-  val VARIANT_CALLING_ANALYSIS = "Variant Calling Analysis"
+  val VARIANT_CALLING_ANALYSIS = "VC"
 
-  val SEQUENCING_QC_ANALYSIS = "Sequencing QC Analysis"
+  val SEQUENCING_QC_ANALYSIS = "QC"
 
   val QC_FILE = "QC File"
 

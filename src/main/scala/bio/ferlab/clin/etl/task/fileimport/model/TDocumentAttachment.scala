@@ -25,7 +25,7 @@ trait ToAttachment[T <: TDocumentAttachment] {
 
   def validateFile(files: Map[String, FileEntry], a: Analysis): ValidatedNel[String, T] = {
     val key = analysisFileName(a)
-    files.get(key).map(f => buildFile(f).validNel[String]).getOrElse(s"File $key does not exist : type=$label, specimen=${a.specimenId}, sample=${a.sampleId}, patient:${a.patient.id}".invalidNel[T])
+    files.get(key).map(f => buildFile(f).validNel[String]).getOrElse(s"File $key does not exist : type=$label, specimen=${a.ldmSpecimenId}, sample=${a.ldmSampleId}, patient:${a.patient.clinId}".invalidNel[T])
   }
 }
 

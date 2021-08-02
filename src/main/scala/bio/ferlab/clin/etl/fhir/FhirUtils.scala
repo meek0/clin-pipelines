@@ -18,6 +18,7 @@ object FhirUtils {
     object CodingSystems {
       val SPECIMEN_TYPE = s"$baseFhirServer/CodeSystem/specimen-type"
       val DR_TYPE = s"$baseFhirServer/CodeSystem/data-type"
+      val ANALYSIS_TYPE = s"$baseFhirServer/CodeSystem/analysis-type"
       val DR_CATEGORY = s"$baseFhirServer/CodeSystem/data-category"
       val DR_FORMAT = s"$baseFhirServer/CodeSystem/document-format"
       val EXPERIMENTAL_STRATEGY = s"$baseFhirServer/CodeSystem/experimental-strategy"

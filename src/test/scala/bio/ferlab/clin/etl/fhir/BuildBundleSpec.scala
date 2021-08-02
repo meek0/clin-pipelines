@@ -12,10 +12,11 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
 
   "it" should "Build" in {
     val ptId = FhirTestUtils.loadPatients().getIdPart
-    val orgId = FhirTestUtils.loadOrganizations()
+    FhirTestUtils.loadOrganizations()
+    FhirTestUtils.loadCQGCOrganization()
     val serviceRequestId = FhirTestUtils.loadServiceRequest(ptId)
     val meta = defaultMetadata.copy(analyses = Seq(
-      defaultAnalysis.copy(patient = defaultPatient(ptId), serviceRequestId = serviceRequestId)
+      defaultAnalysis.copy(patient = defaultPatient(ptId), clinServiceRequestId = serviceRequestId)
     ))
     val files = Seq(
       FileEntry("bucket","file1.cram", Some("md5"), 10, "1", "application/octet-stream", ""),
@@ -27,11 +28,7 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
     val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files)
 
     result.isValid shouldBe true
-    val saveResult = result.map(b =>
-      b.save()
 
-    )
-    println(saveResult)
 
   }
 

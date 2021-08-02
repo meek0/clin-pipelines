@@ -18,13 +18,13 @@ object MetadataTestUtils {
   val defaultAnalysis: Analysis = Analysis(
     patient = defaultPatient("clin_id"),
     ldm = "CHUSJ",
-    sampleId = "submitted_sample_id",
-    specimenId = "submitted_specimen_id",
+    ldmSampleId = "submitted_sample_id",
+    ldmSpecimenId = "submitted_specimen_id",
     specimenType = "NBL",
     sampleType = Some("DNA"),
-    bodySite = "can be null",
-    serviceRequestId = "clin_prescription_id",
-    labAliquotId = Some("nanuq_sample_id"),
+    bodySite = "2053",
+    clinServiceRequestId = "clin_prescription_id",
+    labAliquotId = "nanuq_sample_id",
     files = defaultFilesAnalysis
   )
   val defaultExperiment: Experiment = Experiment(

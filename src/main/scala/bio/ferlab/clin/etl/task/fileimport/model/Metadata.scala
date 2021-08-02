@@ -64,13 +64,13 @@ object Workflow {
 case class Analysis(
 
                      ldm: String,
-                     sampleId: String,
-                     specimenId: String,
+                     ldmSampleId: String,
+                     ldmSpecimenId: String,
                      specimenType: String,
                      sampleType: Option[String],
                      bodySite: String,
-                     serviceRequestId: String,
-                     labAliquotId: Option[String],
+                     clinServiceRequestId: String,
+                     labAliquotId: String,
                      patient: InputPatient,
                      files: FilesAnalysis
                    )
@@ -80,7 +80,7 @@ object Analysis {
 }
 
 case class InputPatient(
-                         id: String,
+                         clinId: String,
                          firstName: String,
                          lastName: String,
                          sex: String
