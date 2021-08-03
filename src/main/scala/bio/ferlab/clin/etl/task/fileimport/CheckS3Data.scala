@@ -43,7 +43,7 @@ object CheckS3Data {
 
   def loadRawFileEntries(bucket: String, prefix: String)(implicit s3Client: S3Client): Seq[RawFileEntry] = {
     val fileEntries = ls(bucket, prefix)
-      .filter(f => f.filename != "" && f.filename != "_SUCCESS" && f.filename != "metadata.json" && !f.filename.toLowerCase().startsWith("combined_vcf") && f.filename.toLowerCase().endsWith("extra_results.tgz"))
+      .filter(f => f.filename != "" && f.filename != "_SUCCESS" && f.filename != "metadata.json" && !f.filename.toLowerCase().startsWith("combined_vcf") && !f.filename.toLowerCase().endsWith("extra_results.tgz"))
     fileEntries
   }
 
