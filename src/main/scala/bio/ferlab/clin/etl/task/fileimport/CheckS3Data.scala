@@ -1,6 +1,7 @@
 package bio.ferlab.clin.etl.task.fileimport
 
 import bio.ferlab.clin.etl.isValid
+import bio.ferlab.clin.etl.s3.S3Utils.getContent
 import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, Metadata, RawFileEntry}
 import cats.data.ValidatedNel
 import org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM
@@ -45,15 +46,6 @@ object CheckS3Data {
     val fileEntries = ls(bucket, prefix)
       .filter(f => f.filename != "" && f.filename != "_SUCCESS" && f.filename != "metadata.json" && !f.filename.toLowerCase().startsWith("combined_vcf") && !f.filename.toLowerCase().endsWith("extra_results.tgz"))
     fileEntries
-  }
-
-  def getContent(bucket: String, key: String)(implicit s3Client: S3Client): String = {
-    val objectRequest = GetObjectRequest
-      .builder()
-      .key(key)
-      .bucket(bucket)
-      .build()
-    new String(s3Client.getObject(objectRequest).readAllBytes())
   }
 
   def loadFileEntries(m: Metadata, fileEntries: Seq[RawFileEntry], generateId: () => String = () => UUID.randomUUID().toString)(implicit s3Client: S3Client): Seq[FileEntry] = {

@@ -2,6 +2,8 @@ package bio.ferlab.clin.etl.s3
 
 import bio.ferlab.clin.etl.conf.AWSConf
 import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.model.{GetObjectRequest, PutObjectRequest}
 import software.amazon.awssdk.services.s3.{S3Client, S3Configuration}
 
 import java.net.URI
@@ -23,4 +25,24 @@ object S3Utils {
       .serviceConfiguration(confBuilder).build()
     s3
   }
+
+
+  def getContent(bucket: String, key: String)(implicit s3Client: S3Client): String = {
+    val objectRequest = GetObjectRequest
+      .builder()
+      .key(key)
+      .bucket(bucket)
+      .build()
+    new String(s3Client.getObject(objectRequest).readAllBytes())
+  }
+
+  def writeContent(bucket: String, key: String, content: String)(implicit s3Client: S3Client): Unit = {
+    val objectRequest = PutObjectRequest.builder()
+      .bucket(bucket)
+      .key(key)
+      .build()
+    s3Client.putObject(objectRequest, RequestBody.fromString(content))
+  }
+
+
 }
