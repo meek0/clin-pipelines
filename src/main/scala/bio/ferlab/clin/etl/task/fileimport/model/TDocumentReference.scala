@@ -51,7 +51,7 @@ trait TDocumentReference extends DocumentReferenceType {
       a.setUrl(s"${ferloadConf.url}/${d.objectStoreId}")
       d.md5.map( md5sum => a.setHash(md5sum.getBytes()))
       a.setTitle(d.title)
-      a.setSizeElement(new UnsignedIntType(d.size))
+//      a.setSizeElement(new UnsignedIntType(d.size))
       val drcc = new DocumentReferenceContentComponent(a)
       drcc.getFormat.setSystem(CodingSystems.DR_FORMAT).setCode(d.format)
       drcc
