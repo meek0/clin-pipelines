@@ -15,7 +15,7 @@ import scala.io.Source
 
 object FhirTestUtils {
   val DEFAULT_ZONE_ID: ZoneId = ZoneId.of("UTC")
-  val ROOT_REMOTE_EXTENSION = "https://raw.githubusercontent.com/Ferlab-Ste-Justine/clin-fhir/master/site_root/input/resources/"
+  val ROOT_REMOTE_EXTENSION = "https://raw.githubusercontent.com/Ferlab-Ste-Justine/clin-fhir/full-size/site_root/input/resources/"
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
   def loadOrganizations()(implicit fhirClient: IGenericClient): String = {
@@ -124,6 +124,7 @@ object FhirTestUtils {
     Seq(
       "extensions/StructureDefinition-workflow.json",
       "extensions/StructureDefinition-sequencing-experiment.json",
+      "extensions/StructureDefinition-full-size.json",
       "profiles/StructureDefinition-cqgc-analysis-task.json",
 
     ).foreach(downloadAndCreate)

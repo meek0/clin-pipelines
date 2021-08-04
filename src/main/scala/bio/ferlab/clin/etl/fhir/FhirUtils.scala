@@ -28,6 +28,7 @@ object FhirUtils {
     object Extensions {
       val WORKFLOW = s"$baseFhirServer/StructureDefinition/workflow"
       val SEQUENCING_EXPERIMENT = s"$baseFhirServer/StructureDefinition/sequencing-experiment"
+      val FULL_SIZE = s"$baseFhirServer/StructureDefinition/full-size"
     }
 
   }

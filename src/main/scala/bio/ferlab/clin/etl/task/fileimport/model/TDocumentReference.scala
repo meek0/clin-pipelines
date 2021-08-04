@@ -3,7 +3,7 @@ package bio.ferlab.clin.etl.task.fileimport.model
 import bio.ferlab.clin.etl.ValidationResult
 import bio.ferlab.clin.etl.conf.FerloadConf
 import bio.ferlab.clin.etl.fhir.FhirUtils
-import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
+import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.{CodingSystems, Extensions}
 import bio.ferlab.clin.etl.fhir.FhirUtils.validateOutcomes
 import bio.ferlab.clin.etl.task.fileimport.model.TDocumentAttachment.valid
 import ca.uhn.fhir.rest.client.api.IGenericClient
@@ -51,7 +51,10 @@ trait TDocumentReference extends DocumentReferenceType {
       a.setUrl(s"${ferloadConf.url}/${d.objectStoreId}")
       d.md5.map( md5sum => a.setHash(md5sum.getBytes()))
       a.setTitle(d.title)
-//      a.setSizeElement(new UnsignedIntType(d.size))
+
+      val fullSize = new Extension(Extensions.FULL_SIZE, new DecimalType(d.size))
+      a.addExtension(fullSize)
+
       val drcc = new DocumentReferenceContentComponent(a)
       drcc.getFormat.setSystem(CodingSystems.DR_FORMAT).setCode(d.format)
       drcc
