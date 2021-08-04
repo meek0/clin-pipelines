@@ -19,7 +19,19 @@ import scala.concurrent.duration.{Duration, DurationInt}
 
 object FhirBulkExporter {
 
-  val ALL_ENTITIES: String = Set("Organization", "Patient", "Practitioner", "PractitionerRole").mkString(",")
+  val ALL_ENTITIES: String =
+    Set(
+      "ClinicalImpression",
+      "Group",
+      "Observation",
+      "Organization",
+      "Patient",
+      "Practitioner",
+      "PractitionerRole",
+      "ServiceRequest",
+      "Specimen",
+      "Task")
+    .mkString(",")
 
   case class ExportOutputFile(`type`: String, url: String)
 
