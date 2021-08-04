@@ -1,9 +1,11 @@
 package bio.ferlab.clin.etl.fhir.testutils
 
 import bio.ferlab.clin.etl.conf.AWSConf
+import bio.ferlab.clin.etl.fhir.testutils.FhirTestUtils.getClass
 import bio.ferlab.clin.etl.fhir.testutils.containers.MinioContainer
 import bio.ferlab.clin.etl.s3.S3Utils
 import org.scalatest.{BeforeAndAfterAll, TestSuite}
+import org.slf4j.{Logger, LoggerFactory}
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.{CreateBucketRequest, DeleteObjectRequest, ListObjectsRequest, PutObjectRequest}
@@ -15,9 +17,9 @@ import scala.util.Random
 
 trait MinioServer {
   private val minioPort = MinioContainer.startIfNotRunning()
-  protected val minioEndpoint = s"http://localhost:${minioPort}"
+  protected val minioEndpoint = s"http://localhost:$minioPort"
   implicit val s3: S3Client = S3Utils.buildS3Client(AWSConf(MinioContainer.accessKey, MinioContainer.secretKey, minioEndpoint, pathStyleAccess = true))
-
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass)
   val inputBucket = s"clin-import"
   val outputBucket = s"clin-repository"
   createBuckets()
@@ -33,9 +35,9 @@ trait MinioServer {
 
   def withS3Objects[T](block: (String, String) => T): Unit = {
     val inputPrefix = s"run_${Random.nextInt(10000)}"
-    println(s"Use input prefix $inputPrefix : $minioEndpoint/minio/$inputBucket/$inputPrefix")
+    LOGGER.info(s"Use input prefix $inputPrefix : $minioEndpoint/minio/$inputBucket/$inputPrefix")
     val outputPrefix = s"files_${Random.nextInt(10000)}"
-    println(s"Use output prefix $outputPrefix : : $minioEndpoint/minio/$outputBucket/$outputPrefix")
+    LOGGER.info(s"Use output prefix $outputPrefix : : $minioEndpoint/minio/$outputBucket/$outputPrefix")
     try {
       block(inputPrefix, outputPrefix)
     } finally {
@@ -85,7 +87,7 @@ trait MinioServerSuite extends MinioServer with TestSuite with BeforeAndAfterAll
 }
 
 object StartMinioServer extends App with MinioServer {
-  println(s"Minio is started : $minioEndpoint")
+  LOGGER.info(s"Minio is started : $minioEndpoint")
   while (true) {
 
   }

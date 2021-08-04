@@ -3,13 +3,14 @@ package bio.ferlab.clin.etl.fhir
 import bio.ferlab.clin.etl.FileImport
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
 import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, WholeStackSuite}
+import bio.ferlab.clin.etl.s3.S3Utils
 import bio.ferlab.clin.etl.task.fileimport.model.TTasks
 import ca.uhn.fhir.rest.api.SummaryEnum
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model._
 import org.scalatest.{FlatSpec, Matchers}
 import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.{HeadObjectRequest, PutObjectRequest}
 
 import scala.collection.JavaConverters._
 import scala.io.Source
@@ -32,14 +33,11 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       val metadata = templateMetadata.replace("_PATIENT_ID_", patientId).replace("_SERVICE_REQUEST_ID_", serviceRequestId)
       val putMetadata = PutObjectRequest.builder().bucket(inputBucket).key(s"$inputPrefix/metadata.json").build()
       s3.putObject(putMetadata, RequestBody.fromString(metadata))
-
-      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix)
-
-      println(result)
+      val reportPath = s"$inputPrefix/logs"
+      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false)
       //Validate documents that has been copied
       result.isValid shouldBe true
       val resultFiles = list(outputBucket, outputPrefix)
-      println(s"Files=${resultFiles.mkString(",")}")
       resultFiles.size shouldBe 5
 
       // Validate specimens
@@ -133,7 +131,10 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
         t.getFocus.getReference shouldBe fhirServiceRequestId
       }
       tasks.map(_.getCode.getCodingFirstRep.getCode) should contain theSameElementsAs TTasks.allTypes
-
+      val bundleJson = s"$reportPath/bundle.json"
+      assert(S3Utils.exists(inputBucket, bundleJson), s"Bundle json file $bundleJson does not exist")
+      val fileCSV = s"$reportPath/files.csv"
+      assert(S3Utils.exists(inputBucket, fileCSV), s"File CSV $fileCSV does not exist")
     }
 
 
@@ -141,11 +142,12 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
   it should "return errors" in {
     withS3Objects { (inputPrefix, outputPrefix) =>
       transferFromResources(inputPrefix, "bad")
-      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix)
+      val reportPath = s"$inputPrefix/logs"
+      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false)
 
       //Validate documents that has been copied
-      println(result)
       result.isValid shouldBe false
+
     }
   }
 

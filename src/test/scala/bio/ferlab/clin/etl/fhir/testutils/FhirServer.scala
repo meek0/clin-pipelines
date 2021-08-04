@@ -2,11 +2,13 @@ package bio.ferlab.clin.etl.fhir.testutils
 
 import bio.ferlab.clin.etl.conf.FerloadConf
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
+import bio.ferlab.clin.etl.fhir.testutils.FhirTestUtils.getClass
 import bio.ferlab.clin.etl.fhir.testutils.containers.FhirServerContainer
 import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.parser.IParser
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, TestSuite}
+import org.slf4j.{Logger, LoggerFactory}
 
 trait FhirServer {
   val fhirPort: Int = FhirServerContainer.startIfNotRunning()
@@ -34,7 +36,8 @@ trait FhirServerSuite extends FhirServer with TestSuite with BeforeAndAfterAll w
 }
 
 object StartFhirServer extends App with FhirServer {
-  println("Fhir Server is started")
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass)
+  LOGGER.info("Fhir Server is started")
   while (true) {
 
   }

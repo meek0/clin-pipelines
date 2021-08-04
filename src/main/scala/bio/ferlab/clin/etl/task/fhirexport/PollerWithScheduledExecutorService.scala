@@ -1,5 +1,7 @@
 package bio.ferlab.clin.etl.task.fhirexport
 
+import org.slf4j.{Logger, LoggerFactory}
+
 import java.util.concurrent.{ScheduledExecutorService, TimeUnit}
 import scala.concurrent.{Future, Promise}
 import scala.util.control.NonFatal
@@ -10,7 +12,7 @@ import scala.util.control.NonFatal
  * https://github.com/swaldman/mchange-commons-scala/blob/master/src/main/scala/com/mchange/sc/v2/concurrent/ScheduledExecutorServicePoller.scala
  */
 class PollerWithScheduledExecutorService(val ses: ScheduledExecutorService) extends Poller {
-
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass)
   def addTask[T](task: Poller.Task[T]): Future[T] = {
 
     val promise = Promise[T]()
@@ -22,7 +24,7 @@ class PollerWithScheduledExecutorService(val ses: ScheduledExecutorService) exte
     val task = twd.task
     val deadline = twd.deadline
 
-    println(s"Polling: ${twd.task} - timeout in: ${deadline - System.currentTimeMillis}ms")
+    LOGGER.info(s"Polling: ${twd.task} - timeout in: ${deadline - System.currentTimeMillis}ms")
 
     val runnable = new Runnable {
       def run(): Unit = {

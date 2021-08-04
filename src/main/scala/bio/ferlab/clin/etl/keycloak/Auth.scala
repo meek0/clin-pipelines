@@ -23,10 +23,12 @@ class Auth(conf: KeycloakConf) {
   private var accessToken = ""
 
   def withToken[T](f: (String, String) => T): T = {
-    if (expiresAt == 0 || expiresAt > Time.currentTime()) {
+
+    if (expiresAt == 0 || expiresAt < Time.currentTime()) {
       accessToken = authzClient.obtainAccessToken().getToken
       val resp = authzClient.authorization().authorize(req)
-      expiresAt = Time.currentTime + resp.getExpiresIn - 5
+      val expiresIn = resp.getExpiresIn
+      expiresAt = Time.currentTime() + expiresIn - 5
       rpt = resp.getToken
     }
     f(accessToken, rpt)

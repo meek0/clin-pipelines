@@ -16,13 +16,14 @@ import cats.data.ValidatedNel
 import cats.implicits._
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
 import org.hl7.fhir.r4.model.IdType
+import org.slf4j.{Logger, LoggerFactory}
 
 object BuildBundle {
 
 
-
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass)
   def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
-    println("################# Validate Resources ##################")
+    LOGGER.info("################# Validate Resources ##################")
     val taskExtensions = validateTaskExtension(metadata)
     val cqgcOrg = validateCQGCOrganization()
     val mapFiles = files.map(f => (f.filename, f)).toMap

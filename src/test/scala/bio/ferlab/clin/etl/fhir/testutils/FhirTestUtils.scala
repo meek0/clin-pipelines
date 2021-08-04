@@ -118,7 +118,7 @@ object FhirTestUtils {
       fhirClient.create().resource(content).execute()
     }
 
-    println("Init fhir container with extensions ...")
+    LOGGER.info("Init fhir container with extensions ...")
 
     //Sequential
     Seq(
