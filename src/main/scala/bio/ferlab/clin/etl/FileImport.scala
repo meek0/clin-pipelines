@@ -33,11 +33,11 @@ object FileImport extends App {
 
   def writeAheadLog(inputBucket: String, reportPath: String, bundle: TBundle, files: Seq[FileEntry])(implicit s3: S3Client, client: IGenericClient): Unit = {
     S3Utils.writeContent(inputBucket, s"$reportPath/bundle.json", bundle.print())
-    val filesToCSV = files.map(f => s"${f.key},${f.id}").mkString
+    val filesToCSV = files.map(f => s"${f.key},${f.id}").mkString("\n")
     S3Utils.writeContent(inputBucket, s"$reportPath/files.csv", filesToCSV)
   }
 
-  def run(inputBucket: String, inputPrefix: String, outputBucket: String, outputPrefix: String, reportPath: String, dryRun: Boolean = false)(implicit s3: S3Client, client: IGenericClient, clinFhirClient: IClinFhirClient, ferloadConf: FerloadConf) = {
+  def run(inputBucket: String, inputPrefix: String, outputBucket: String, outputPrefix: String, reportPath: String, dryRun: Boolean)(implicit s3: S3Client, client: IGenericClient, clinFhirClient: IClinFhirClient, ferloadConf: FerloadConf) = {
     val metadata: ValidatedNel[String, Metadata] = Metadata.validateMetadataFile(inputBucket, inputPrefix)
     metadata.andThen { m: Metadata =>
       val rawFileEntries = CheckS3Data.loadRawFileEntries(inputBucket, inputPrefix)

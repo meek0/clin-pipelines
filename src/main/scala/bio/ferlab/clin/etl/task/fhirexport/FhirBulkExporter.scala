@@ -4,6 +4,7 @@ import bio.ferlab.clin.etl.conf.{AWSConf, KeycloakConf}
 import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
 import bio.ferlab.clin.etl.task.fhirexport.FhirBulkExporter._
 import bio.ferlab.clin.etl.task.fhirexport.Poller.Task
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Reads._
 import play.api.libs.json.{Json, _}
 import software.amazon.awssdk.core.sync.RequestBody
@@ -34,7 +35,7 @@ class FhirBulkExporter(authConfig: KeycloakConf,
                        storeConfig: AWSConf) extends BulkExport {
 
   val exportUrl: String => String = { entities => s"$fhirUrl/$$export?_type=$entities&_outputFormat=application/ndjson" }
-
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass)
   override def getAuthentication: String = {
     val backend = HttpURLConnectionBackend()
     val response = basicRequest
@@ -94,12 +95,12 @@ class FhirBulkExporter(authConfig: KeycloakConf,
         )
 
       case StatusCode.Accepted =>
-        println(s"Export Progress: ${response.headers.find(_.name == "X-Progress").map(_.value).getOrElse("unknown")}")
+        LOGGER.info(s"Export Progress: ${response.headers.find(_.name == "X-Progress").map(_.value).getOrElse("unknown")}")
         None
 
       case s =>
-        println(s"Unexpected status code: $s")
-        println(s"With body: ${response.body}")
+        LOGGER.info(s"Unexpected status code: $s")
+        LOGGER.info(s"With body: ${response.body}")
         None
     }
 
@@ -133,7 +134,7 @@ class FhirBulkExporter(authConfig: KeycloakConf,
     val formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
     val timestamp = LocalDateTime.now().format(formatter)
 
-    files.foreach(println)
+    files.foreach(f=>LOGGER.info(f.toString()))
 
     files
       .groupBy { case (entity, _) => entity }
@@ -143,7 +144,7 @@ class FhirBulkExporter(authConfig: KeycloakConf,
           filesWithIndex.foreach {
             case ((folderName, fileUrl), idx) =>
               val filekey = s"raw/landing/fhir/$folderName/${folderName}_${idx}_$timestamp.json"
-              println(s"upload object to: $bucketName/$filekey")
+              LOGGER.info(s"upload object to: $bucketName/$filekey")
               val putObj = PutObjectRequest.builder().bucket(bucketName).key(filekey).build()
               s3Client.putObject(putObj, RequestBody.fromString(getFileContent(fileUrl)))
           }

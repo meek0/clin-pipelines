@@ -36,7 +36,7 @@ object CheckS3Data {
   }
 
   def validateFileEntries(rawFileEntries: Seq[RawFileEntry], fileEntries: Seq[FileEntry]): ValidatedNel[String, Seq[FileEntry]] = {
-    println("################# Validate File entries ##################")
+    LOGGER.info("################# Validate File entries ##################")
     val fileEntriesNotInAnalysis = rawFileEntries.filterNot(r => r.isChecksum || fileEntries.exists(f => f.key == r.key))
     val errorFilesNotExist = fileEntriesNotInAnalysis.map(f => s"File ${f.filename} not found in metadata JSON file.")
     isValid(fileEntries, errorFilesNotExist)
@@ -44,7 +44,12 @@ object CheckS3Data {
 
   def loadRawFileEntries(bucket: String, prefix: String)(implicit s3Client: S3Client): Seq[RawFileEntry] = {
     val fileEntries = ls(bucket, prefix)
-      .filter(f => f.filename != "" && f.filename != "_SUCCESS" && f.filename != "metadata.json" && !f.filename.toLowerCase().startsWith("combined_vcf") && !f.filename.toLowerCase().endsWith("extra_results.tgz"))
+      .filter(f => !f.key.contains("logs")
+        && f.filename != ""
+        && f.filename != "_SUCCESS"
+        && f.filename != "metadata.json"
+        && !f.filename.toLowerCase().startsWith("combined_vcf")
+        && !f.filename.toLowerCase().endsWith("extra_results.tgz"))
     fileEntries
   }
 
@@ -84,7 +89,7 @@ object CheckS3Data {
   }
 
   def revert(files: Seq[FileEntry], bucketDest: String, pathDest: String)(implicit s3Client: S3Client): Unit = {
-    println("################# Reverting Copy Files ##################")
+    LOGGER.info("################# !!!! ERROR : Reverting Copy Files !!! ##################")
     files.foreach { f =>
       val del = DeleteObjectRequest.builder().bucket(bucketDest).key(s"$pathDest/${f.id}").build()
       s3Client.deleteObject(del)
@@ -92,7 +97,7 @@ object CheckS3Data {
   }
 
   def copyFiles(files: Seq[FileEntry], bucketDest: String, pathDest: String)(implicit s3Client: S3Client): Unit = {
-    println("################# Copy Files ##################")
+    LOGGER.info("################# Copy Files ##################")
     files.foreach { f =>
       val encodedUrl = URLEncoder.encode(f.bucket + "/" + f.key, StandardCharsets.UTF_8.toString)
       val cp = CopyObjectRequest.builder()

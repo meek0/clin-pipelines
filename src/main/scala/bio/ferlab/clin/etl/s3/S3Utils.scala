@@ -5,7 +5,7 @@ import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCrede
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.{GetObjectRequest, PutObjectRequest}
 import software.amazon.awssdk.services.s3.{S3Client, S3Configuration}
-
+import software.amazon.awssdk.services.s3.model.{HeadObjectRequest, NoSuchKeyException}
 import java.net.URI
 
 object S3Utils {
@@ -44,5 +44,13 @@ object S3Utils {
     s3Client.putObject(objectRequest, RequestBody.fromString(content))
   }
 
+  def exists(bucket: String, key: String)(implicit s3Client: S3Client): Boolean =
+    try {
+      s3Client.headObject(HeadObjectRequest.builder.bucket(bucket).key(key).build)
+      true
+    } catch {
+      case _: NoSuchKeyException =>
+        false
+    }
 
 }
