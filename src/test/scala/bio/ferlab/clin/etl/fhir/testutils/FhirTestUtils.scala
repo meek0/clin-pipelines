@@ -124,6 +124,7 @@ object FhirTestUtils {
     Seq(
       "extensions/StructureDefinition-workflow.json",
       "extensions/StructureDefinition-sequencing-experiment.json",
+      "extensions/StructureDefinition-full-size.json",
       "profiles/StructureDefinition-cqgc-analysis-task.json",
 
     ).foreach(downloadAndCreate)

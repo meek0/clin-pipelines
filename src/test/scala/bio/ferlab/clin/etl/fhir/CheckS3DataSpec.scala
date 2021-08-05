@@ -125,10 +125,10 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
 
       CheckS3Data.loadFileEntries(defaultMetadata, rawFiles, generatorId) shouldBe Seq(
         fileEntry(s"$inputPrefix/file1.cram", "id_1", "file1.cram", Some("md5 cram file")),
-        fileEntry(s"$inputPrefix/file1.crai", "id_2", "file1.crai"),
-        fileEntry(s"$inputPrefix/file2.vcf", "id_3", "file2.vcf", Some("md5 vcf file")),
-        fileEntry(s"$inputPrefix/file2.tbi", "id_4", "file2.tbi"),
-        fileEntry(s"$inputPrefix/file3.tgz", "id_5", "file3.tgz")
+        fileEntry(s"$inputPrefix/file1.crai", "id_1.crai", "file1.crai"),
+        fileEntry(s"$inputPrefix/file2.vcf", "id_2", "file2.vcf", Some("md5 vcf file")),
+        fileEntry(s"$inputPrefix/file2.tbi", "id_2.tbi", "file2.tbi"),
+        fileEntry(s"$inputPrefix/file3.tgz", "id_3", "file3.tgz")
       )
     }
   }

@@ -23,11 +23,13 @@ object FhirUtils {
       val DR_FORMAT = s"$baseFhirServer/CodeSystem/document-format"
       val EXPERIMENTAL_STRATEGY = s"$baseFhirServer/CodeSystem/experimental-strategy"
       val GENOME_BUILD = s"$baseFhirServer/CodeSystem/genome-build"
+      val OBJECT_STORE = "http://objecstore.cqgc.qc.ca"
     }
 
     object Extensions {
       val WORKFLOW = s"$baseFhirServer/StructureDefinition/workflow"
       val SEQUENCING_EXPERIMENT = s"$baseFhirServer/StructureDefinition/sequencing-experiment"
+      val FULL_SIZE = s"$baseFhirServer/StructureDefinition/full-size"
     }
 
   }
@@ -40,7 +42,7 @@ object FhirUtils {
   }
 
 
-  def validateOutcomes[T](outcome: OperationOutcome, result: T)(err: (OperationOutcome.OperationOutcomeIssueComponent) => String): ValidatedNel[String, T] = {
+  def validateOutcomes[T](outcome: OperationOutcome, result: T)(err: OperationOutcome.OperationOutcomeIssueComponent => String) = {
     val issues = outcome.getIssue.asScala
     val errors = issues.collect {
       case o if o.getSeverity.ordinal() <= OperationOutcome.IssueSeverity.ERROR.ordinal => err(o)

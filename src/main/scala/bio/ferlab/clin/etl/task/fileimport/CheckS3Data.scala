@@ -57,9 +57,9 @@ object CheckS3Data {
     val (checksums, files) = fileEntries.partition(_.isChecksum)
     val mapOfIds = m.analyses.flatMap { a =>
       val cramId: String = generateId()
-      val craiId: String = generateId()
+      val craiId: String = s"$cramId.crai"
       val vcfId: String = generateId()
-      val tbiId: String = generateId()
+      val tbiId: String = s"$vcfId.tbi"
       val qcId: String = generateId()
 
       Seq(

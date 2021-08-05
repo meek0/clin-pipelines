@@ -2,7 +2,8 @@ package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.fhir.testutils.FhirServerSuite
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils.defaultAnalysis
-import bio.ferlab.clin.etl.task.fileimport.model.{CRAI, CRAM, FileEntry, QC, QualityControl, SequencingAlignment, TBI, TDocumentReferences, VCF, VariantCalling}
+import bio.ferlab.clin.etl.task.fileimport.model.VariantCalling.QualityControl
+import bio.ferlab.clin.etl.task.fileimport.model.{CRAI, CRAM, FileEntry, QC, SequencingAlignment, TBI, TDocumentReferences, VCF, VariantCalling}
 import bio.ferlab.clin.etl.task.fileimport.validation.DocumentReferencesValidation
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
