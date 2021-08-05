@@ -5,7 +5,8 @@ import bio.ferlab.clin.etl.conf.FerloadConf
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.{CodingSystems, Extensions}
 import bio.ferlab.clin.etl.fhir.FhirUtils.validateOutcomes
-import bio.ferlab.clin.etl.task.fileimport.model.TDocumentAttachment.valid
+import bio.ferlab.clin.etl.task.fileimport.model.TDocumentAttachment.{idFromList, valid}
+import bio.ferlab.clin.etl.task.fileimport.model.VariantCalling.ToReference
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.implicits._
 import org.hl7.fhir.r4.model.DocumentReference.{DocumentReferenceContentComponent, DocumentReferenceContextComponent}
@@ -38,6 +39,7 @@ trait TDocumentReference extends DocumentReferenceType {
 
   private def buildBase()(implicit ferloadConf: FerloadConf) = {
     val dr = new DocumentReference()
+    dr.getMasterIdentifier.setSystem(CodingSystems.OBJECT_STORE).setValue(id)
     dr.setStatus(DocumentReferenceStatus.CURRENT)
     dr.getType.addCoding()
       .setSystem(CodingSystems.DR_TYPE)
@@ -49,7 +51,7 @@ trait TDocumentReference extends DocumentReferenceType {
       val a = new Attachment()
       a.setContentType(d.contentType)
       a.setUrl(s"${ferloadConf.url}/${d.objectStoreId}")
-      d.md5.map( md5sum => a.setHash(md5sum.getBytes()))
+      d.md5.map(md5sum => a.setHash(md5sum.getBytes()))
       a.setTitle(d.title)
 
       val fullSize = new Extension(Extensions.FULL_SIZE, new DecimalType(d.size))
@@ -71,11 +73,13 @@ object TDocumentReference {
 trait DocumentReferenceType {
   val documentType: String
   val category: String
+  val id: String
 }
 
 case class SequencingAlignment(document: Seq[TDocumentAttachment]) extends TDocumentReference {
   override val documentType: String = "AR"
   override val category: String = "SR"
+  override val id: String = idFromList[CRAM](document)
 }
 
 object SequencingAlignment {
@@ -85,12 +89,14 @@ object SequencingAlignment {
     protected override def build(documents: Seq[TDocumentAttachment]): SequencingAlignment = SequencingAlignment(documents)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[CRAM], valid[CRAI])
+
   }
 }
 
 case class VariantCalling(document: Seq[TDocumentAttachment]) extends TDocumentReference {
   override val documentType: String = "SNV"
   override val category: String = "SNV"
+  override val id: String = idFromList[VCF](document)
 }
 
 object VariantCalling {
@@ -100,49 +106,52 @@ object VariantCalling {
     protected override def build(documents: Seq[TDocumentAttachment]): VariantCalling = VariantCalling(documents)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[VCF], valid[TBI])
+
+
   }
-}
 
-case class QualityControl(document: Seq[TDocumentAttachment]) extends TDocumentReference {
-  override val documentType: String = "QC"
-  override val category: String = "RE"
-}
-
-object QualityControl {
-  implicit case object builder extends ToReference[QualityControl] {
-    override val label = "QC"
-
-    protected override def build(documents: Seq[TDocumentAttachment]): QualityControl = QualityControl(documents)
-
-    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[QC])
+  case class QualityControl(document: Seq[TDocumentAttachment]) extends TDocumentReference {
+    override val documentType: String = "QC"
+    override val category: String = "RE"
+    override val id: String = idFromList[QC](document)
   }
-}
 
-trait ToReference[T <: TDocumentReference] {
-  def label: String
+  object QualityControl {
+    implicit case object builder extends ToReference[QualityControl] {
+      override val label = "QC"
 
-  protected def build(documents: Seq[TDocumentAttachment]): T
+      protected override def build(documents: Seq[TDocumentAttachment]): QualityControl = QualityControl(documents)
 
-  def attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]]
+      override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[QC])
+    }
+  }
 
-  def attach(files: Map[String, FileEntry], a: Analysis): Seq[ValidationResult[TDocumentAttachment]] =
-    attachments.map(v => v(files, a))
+  trait ToReference[T <: TDocumentReference] {
+    def label: String
 
-  def validate(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = {
-    attach(files, a).toList.sequence
-      .andThen { attachments =>
-        val dr = build(attachments)
-        val outcome = dr.validateBaseResource()
-        validateOutcomes(outcome, dr) { o =>
-          val diag = o.getDiagnostics
-          val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
-          s"File type=$label, specimen=${a.ldmSpecimenId}, sample=${a.ldmSampleId}, patient:${a.patient.clinId} : $loc - $diag"
+    protected def build(documents: Seq[TDocumentAttachment]): T
+
+    def attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]]
+
+    def attach(files: Map[String, FileEntry], a: Analysis): Seq[ValidationResult[TDocumentAttachment]] =
+      attachments.map(v => v(files, a))
+
+    def validate(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = {
+      attach(files, a).toList.sequence
+        .andThen { attachments =>
+          val dr: T = build(attachments)
+          val outcome = dr.validateBaseResource()
+          validateOutcomes(outcome, dr) { o =>
+            val diag = o.getDiagnostics
+            val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
+            s"File type=$label, specimen=${a.ldmSpecimenId}, sample=${a.ldmSampleId}, patient:${a.patient.clinId} : $loc - $diag"
+          }
         }
-      }
+
+    }
+
 
   }
-
-
 }
 
 

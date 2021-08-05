@@ -1,6 +1,7 @@
 package bio.ferlab.clin.etl.task.fileimport.model
 
 import bio.ferlab.clin.etl.conf.FerloadConf
+import bio.ferlab.clin.etl.task.fileimport.model.VariantCalling.QualityControl
 import org.hl7.fhir.r4.model.{Reference, Resource}
 
 case class TDocumentReferences(sequencingAlignment: SequencingAlignment, variantCalling: VariantCalling, qc: QualityControl) {

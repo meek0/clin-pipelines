@@ -3,6 +3,8 @@ package bio.ferlab.clin.etl.task.fileimport.model
 import cats.data.ValidatedNel
 import cats.implicits._
 
+import scala.reflect.macros.Attachments
+
 trait TDocumentAttachment {
   val format: String
   val objectStoreId: String
@@ -14,6 +16,8 @@ trait TDocumentAttachment {
 
 object TDocumentAttachment {
   def valid[T <: TDocumentAttachment](files: Map[String, FileEntry], a: Analysis)(implicit toAttachment: ToAttachment[T]): ValidatedNel[String, T] = toAttachment.validateFile(files, a)
+
+  def idFromList[T <: TDocumentAttachment : Manifest](attachments: Seq[TDocumentAttachment]): String = attachments.collectFirst { case a: T => a.objectStoreId }.get
 }
 
 trait ToAttachment[T <: TDocumentAttachment] {
