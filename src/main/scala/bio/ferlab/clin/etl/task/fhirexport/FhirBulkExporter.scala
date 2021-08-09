@@ -59,6 +59,8 @@ class FhirBulkExporter(authConfig: KeycloakConf,
       .post(uri"${authConfig.url}")
       .send(backend)
 
+    println(response)
+
     backend.close
 
     if (StatusCode.Ok == response.code && response.body.toString.trim.nonEmpty) {
