@@ -59,8 +59,6 @@ class FhirBulkExporter(authConfig: KeycloakConf,
       .post(uri"${authConfig.url}")
       .send(backend)
 
-    println(response)
-
     backend.close
 
     if (StatusCode.Ok == response.code && response.body.toString.trim.nonEmpty) {
@@ -140,9 +138,7 @@ class FhirBulkExporter(authConfig: KeycloakConf,
     response.body.right.get
   }
 
-  override def uploadFiles(files: List[(String, String)]): Unit = {
-
-    val bucketName: String = "clin"
+  override def uploadFiles(bucketName: String, files: List[(String, String)]): Unit = {
     val s3Client: S3Client = buildS3Client(storeConfig)
 
     val formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")

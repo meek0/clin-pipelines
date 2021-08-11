@@ -10,7 +10,7 @@ trait BulkExport {
 
   def checkPollingStatus(pollingUrl: String, interval: Duration, timeout: Duration): List[(String, String)]
 
-  def uploadFiles(files: List[(String, String)]): Unit
+  def uploadFiles(bucket_name: String, files: List[(String, String)]): Unit
 
 }
 
