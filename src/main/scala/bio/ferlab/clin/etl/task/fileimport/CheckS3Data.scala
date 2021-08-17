@@ -48,7 +48,8 @@ object CheckS3Data {
         && f.filename != ""
         && f.filename != "_SUCCESS"
         && f.filename != "metadata.json"
-        && !f.filename.toLowerCase().startsWith("combined_vcf")
+        && !f.filename.toLowerCase().contains("hard-filtered.formatted.norm.vep.vcf.gz")
+        && !f.filename.toLowerCase().contains("hard-filtered.vcf.gz")
         && !f.filename.toLowerCase().endsWith("extra_results.tgz"))
     fileEntries
   }

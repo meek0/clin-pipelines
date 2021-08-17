@@ -22,6 +22,7 @@ object BuildBundle {
 
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
+
   def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
     LOGGER.info("################# Validate Resources ##################")
     val taskExtensions = validateTaskExtension(metadata)
@@ -46,7 +47,7 @@ object BuildBundle {
     allResources.map(TBundle)
   }
 
-  def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, aliquot: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions, cqgcOrg:IdType)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
+  def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, aliquot: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions, cqgcOrg: IdType)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
     val tasks = TTasks(taskExtensions)
     val specimenResource = specimen.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference())
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference(), Some(specimenResource.toReference()))
@@ -73,25 +74,9 @@ object BuildBundle {
       be
     }
 
-    val bundleEntriesToCreate: Seq[BundleEntryComponent] = bundleEntriesSpecimen ++ resourcesToCreate.map { fhirResource =>
-      val be = new BundleEntryComponent()
-      be.setFullUrl(fhirResource.getIdElement.getValue)
-        .setResource(fhirResource)
-        .getRequest
-        .setUrl(fhirResource.fhirType())
-        .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST)
-      be
-    }
+    val bundleEntriesToCreate: Seq[BundleEntryComponent] = bundleEntriesSpecimen ++ bundleCreate(resourcesToCreate)
 
-    val bundleEntriesToUpdate = resourcesToUpdate.map { fhirResource =>
-      val be = new BundleEntryComponent()
-      be.setFullUrl(fhirResource.getIdElement.getIdPart)
-        .setResource(fhirResource)
-        .getRequest
-        .setUrl(fhirResource.getIdElement.getValue)
-        .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
-      be
-    }
+    val bundleEntriesToUpdate = bundleUpdate(resourcesToUpdate)
     (bundleEntriesToCreate ++ bundleEntriesToUpdate).toList
 
 

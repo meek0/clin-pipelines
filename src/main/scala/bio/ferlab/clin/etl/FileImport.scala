@@ -12,6 +12,8 @@ import cats.data.ValidatedNel
 import cats.implicits.catsSyntaxTuple2Semigroupal
 import software.amazon.awssdk.services.s3.S3Client
 
+import java.time.LocalDateTime
+
 
 object FileImport extends App {
   withSystemExit {

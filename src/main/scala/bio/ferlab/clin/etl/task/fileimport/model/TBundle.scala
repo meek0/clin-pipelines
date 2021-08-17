@@ -5,6 +5,8 @@ import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.time.LocalDateTime
+
 
 case class TBundle(resources: List[BundleEntryComponent]) {
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
@@ -16,6 +18,7 @@ case class TBundle(resources: List[BundleEntryComponent]) {
   }
 
   def save()(implicit client: IGenericClient): Bundle = {
+    println(LocalDateTime.now())
     LOGGER.info("################# Save Bundle ##################")
     val resp = client.transaction.withBundle(bundle).execute
     resp

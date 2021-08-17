@@ -8,8 +8,8 @@ object FhirClient {
   def buildFhirClients(fhirConf:FhirConf, keycloakConf:KeycloakConf) = {
     val fhirServerUrl = fhirConf.url
     val fhirContext: FhirContext = FhirContext.forR4()
-    fhirContext.getRestfulClientFactory.setConnectTimeout(120 * 1000)
-    fhirContext.getRestfulClientFactory.setSocketTimeout(120 * 1000)
+    fhirContext.getRestfulClientFactory.setConnectTimeout(600 * 1000)
+    fhirContext.getRestfulClientFactory.setSocketTimeout(600 * 1000)
     fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING)
     fhirContext.getRestfulClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER)
 

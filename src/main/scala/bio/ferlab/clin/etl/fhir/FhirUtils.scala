@@ -3,7 +3,7 @@ package bio.ferlab.clin.etl.fhir
 import bio.ferlab.clin.etl.isValid
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import ca.uhn.fhir.rest.server.exceptions.{PreconditionFailedException, UnprocessableEntityException}
-import cats.data.ValidatedNel
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
 import org.hl7.fhir.r4.model.{IdType, OperationOutcome, Reference, Resource}
 
 import scala.collection.JavaConverters._
@@ -48,6 +48,42 @@ object FhirUtils {
       case o if o.getSeverity.ordinal() <= OperationOutcome.IssueSeverity.ERROR.ordinal => err(o)
     }
     isValid(result, errors)
+  }
+
+  def bundleCreate(resources: Seq[Resource]): Seq[BundleEntryComponent] = resources.map {
+    fhirResource =>
+      val be = new BundleEntryComponent()
+      be.setFullUrl(fhirResource.getIdElement.getValue)
+        .setResource(fhirResource)
+        .getRequest
+        .setUrl(fhirResource.fhirType())
+        .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST)
+      be
+
+  }
+
+  def bundleUpdate(resources: Seq[Resource]): Seq[BundleEntryComponent] = resources.map {
+    bundleEntryUpdate
+  }
+
+  def bundleEntryUpdate: Resource => BundleEntryComponent = {
+    fhirResource =>
+      val be = new BundleEntryComponent()
+      be.setFullUrl(fhirResource.getIdElement.getIdPart)
+        .setResource(fhirResource)
+        .getRequest
+        .setUrl(fhirResource.getIdElement.getValue)
+        .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
+      be
+  }
+
+  def bundleDelete(resources: Seq[Resource]): Seq[BundleEntryComponent] = resources.map { fhirResource =>
+    val be = new BundleEntryComponent()
+    be
+      .getRequest
+      .setUrl(fhirResource.toReference().getReference)
+      .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE)
+    be
   }
 
   implicit class EitherResourceExtension(v: Either[IdType, Resource]) {
