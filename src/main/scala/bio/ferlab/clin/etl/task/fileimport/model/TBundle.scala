@@ -18,7 +18,6 @@ case class TBundle(resources: List[BundleEntryComponent]) {
   }
 
   def save()(implicit client: IGenericClient): Bundle = {
-    println(LocalDateTime.now())
     LOGGER.info("################# Save Bundle ##################")
     val resp = client.transaction.withBundle(bundle).execute
     resp
