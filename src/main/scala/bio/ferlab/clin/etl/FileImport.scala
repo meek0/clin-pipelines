@@ -28,7 +28,7 @@ object FileImport extends App {
         val (clinClient, client) = buildFhirClients(conf.fhir, conf.keycloak)
         val bucket = conf.aws.bucketName
         withReport(bucket, prefix) { reportPath =>
-          run(bucket, prefix, conf.aws.outputBucketName, conf.aws.ouputPrefix, reportPath, dryRun)(s3Client, client, clinClient, conf.ferload)
+          run(bucket, prefix, conf.aws.outputBucketName, conf.aws.outputPrefix, reportPath, dryRun)(s3Client, client, clinClient, conf.ferload)
         }
       }
     }
