@@ -6,9 +6,9 @@ import pureconfig.ConfigReader.Result
 import pureconfig._
 import pureconfig.generic.auto._
 
-case class AWSConf(accessKey: String, secretKey: String, endpoint: String, pathStyleAccess: Boolean, bucketName: String)
+case class AWSConf(accessKey: String, secretKey: String, endpoint: String, pathStyleAccess: Boolean, bucketName: String, outputBucketName: String, ouptutPrefix: String)
 
-case class KeycloakConf(realm: String, url: String, clientKey: String, clientSecret: String, audience:String)
+case class KeycloakConf(realm: String, url: String, clientKey: String, clientSecret: String, audience: String)
 
 case class FhirConf(url: String)
 

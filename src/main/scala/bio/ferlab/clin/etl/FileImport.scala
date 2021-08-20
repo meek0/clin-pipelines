@@ -19,15 +19,16 @@ object FileImport extends App {
   withSystemExit {
     withLog {
       withConf { conf =>
-        val (bucket, prefix, bucketDest, prefixDest, dryRun) = args match {
-          case Array(b, p, bd, pd) => (b, p, bd, pd, false)
-          case Array(b, p, bd, pd, "true") => (b, p, bd, pd, true)
-          case Array(b, p, bd, pd, "false") => (b, p, bd, pd, false)
+        val (prefix, dryRun) = args match {
+          case Array(b) => (b, false)
+          case Array(b, "true") => (b, true)
+          case Array(b, "false") => (b, false)
         }
         implicit val s3Client: S3Client = buildS3Client(conf.aws)
         val (clinClient, client) = buildFhirClients(conf.fhir, conf.keycloak)
+        val bucket = conf.aws.bucketName
         withReport(bucket, prefix) { reportPath =>
-          run(bucket, prefix, bucketDest, prefixDest, reportPath, dryRun)(s3Client, client, clinClient, conf.ferload)
+          run(bucket, prefix, conf.aws.outputBucketName, conf.aws.ouptutPrefix, reportPath, dryRun)(s3Client, client, clinClient, conf.ferload)
         }
       }
     }
