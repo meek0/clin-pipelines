@@ -33,6 +33,9 @@ Configuration (Typesafe Config) is defined in file [application.conf](src/main/r
 Some attributes can be overridden by environment variables. For instance :
 - `AWS_ACCESS_KEY` / `AWS_SECRET_KEY` : credentials for object store
 - `AWS_ENDPOINT` : object store url
+- `AWS_BUCKET_NAME`: Bucket where are input files
+- `AWS_OUTPUT_BUCKET_NAME`: Bucket where copy output files
+- `AWS_OUTPUT_PREFIX`: Prefix where to copy output files
 - `KEYCLOAK_URL` : Keycloak authentication server url
 - `KEYCLOAK_CLIENT_KEY` / `KEYCLOAK_CLIENT_SECRET` : Credentials for keycloak
 - `KEYCLOAK_REALM` 

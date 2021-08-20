@@ -19,7 +19,7 @@ trait MinioServer {
   private val minioPort = MinioContainer.startIfNotRunning()
 
   protected val minioEndpoint = s"http://localhost:${minioPort}"
-  implicit val s3: S3Client = S3Utils.buildS3Client(AWSConf(MinioContainer.accessKey, MinioContainer.secretKey, minioEndpoint, pathStyleAccess = true, ""))
+  implicit val s3: S3Client = S3Utils.buildS3Client(AWSConf(MinioContainer.accessKey, MinioContainer.secretKey, minioEndpoint, pathStyleAccess = true, "", "", ""))
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
   val inputBucket = s"clin-import"
   val outputBucket = s"clin-repository"
