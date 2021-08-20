@@ -1,3 +1,4 @@
+
 name := "clin-pipelines"
 
 version := "0.1"
@@ -24,9 +25,10 @@ libraryDependencies ++= Seq(
 
 Test / fork := true
 
-assemblyMergeStrategy in assembly := {
+assembly / assemblyMergeStrategy:= {
   case PathList("META-INF", xs@_*) => MergeStrategy.discard
   case x => MergeStrategy.first
 }
-test in assembly := {}
-assemblyJarName in assembly := "clin-pipelines.jar"
+assembly / test := {}
+
+assembly / assemblyJarName:= "clin-pipelines.jar"
