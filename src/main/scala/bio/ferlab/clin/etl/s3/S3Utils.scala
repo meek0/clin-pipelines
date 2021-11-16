@@ -4,10 +4,9 @@ import bio.ferlab.clin.etl.conf.AWSConf
 import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.http.apache.ApacheHttpClient
-import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
-import software.amazon.awssdk.services.s3.model.{GetObjectRequest, PutObjectRequest}
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.s3.model.{GetObjectRequest, HeadObjectRequest, NoSuchKeyException, PutObjectRequest}
 import software.amazon.awssdk.services.s3.{S3Client, S3Configuration}
-import software.amazon.awssdk.services.s3.model.{HeadObjectRequest, NoSuchKeyException}
 
 import java.net.URI
 
@@ -25,6 +24,7 @@ object S3Utils {
     val s3: S3Client = S3Client.builder()
       .credentialsProvider(staticCredentialsProvider)
       .endpointOverride(endpoint)
+      .region(Region.US_EAST_1)
       .serviceConfiguration(confBuilder)
       .httpClient(ApacheHttpClient.create())
       .build()

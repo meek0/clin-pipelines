@@ -56,11 +56,11 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
     withS3Objects { (inputPrefix, outputPrefix) =>
       transferFromResources(inputPrefix, "good")
       val files = Seq(
-        fileEntry(s"$inputPrefix/file1.cram", "abc", "file1.cram"),
-        fileEntry(s"$inputPrefix/file1.crai", "def", "file1.crai"),
-        fileEntry(s"$inputPrefix/file2.vcf", "ghi", "file2.vcf")
+        fileEntry(s"$inputPrefix/file1.cram", s"$outputPrefix/abc", "file1.cram"),
+        fileEntry(s"$inputPrefix/file1.crai", s"$outputPrefix/def", "file1.crai"),
+        fileEntry(s"$inputPrefix/file2.vcf", s"$outputPrefix/ghi", "file2.vcf")
       )
-      CheckS3Data.copyFiles(files, outputBucket, outputPrefix)
+      CheckS3Data.copyFiles(files, outputBucket)
       list(outputBucket, outputPrefix) should contain theSameElementsAs Seq(s"$outputPrefix/abc", s"$outputPrefix/def", s"$outputPrefix/ghi")
     }
   }
@@ -69,11 +69,11 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
     withS3Objects { (inputPrefix, outputPrefix) =>
       transferFromResources(outputPrefix, "revert", outputBucket)
       val files = Seq(
-        fileEntry(s"$inputPrefix/file1.cram", "file1", "file1.cram"),
-        fileEntry(s"$inputPrefix/file1.crai", "file2", "file1.crai"),
-        fileEntry(s"$inputPrefix/file2.vcf", "file3", "file2.vcf")
+        fileEntry(s"$inputPrefix/file1.cram", s"$outputPrefix/file1", "file1.cram"),
+        fileEntry(s"$inputPrefix/file1.crai", s"$outputPrefix/file2", "file1.crai"),
+        fileEntry(s"$inputPrefix/file2.vcf", s"$outputPrefix/file3", "file2.vcf")
       )
-      CheckS3Data.revert(files, outputBucket, outputPrefix)
+      CheckS3Data.revert(files, outputBucket)
       list(outputBucket, outputPrefix) shouldBe empty
     }
   }
@@ -106,7 +106,7 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
   }
 
   "loadFileEntries" should "return file entries based on raw data" in {
-    withS3Objects { (inputPrefix, _) =>
+    withS3Objects { (inputPrefix, outputPrefix) =>
       transferFromResources(inputPrefix, "good")
       var i = 0
       val generatorId = () => {
@@ -123,12 +123,12 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
         rawFileEntry(s"$inputPrefix/file3.tgz")
       )
 
-      CheckS3Data.loadFileEntries(defaultMetadata, rawFiles, generatorId) shouldBe Seq(
-        fileEntry(s"$inputPrefix/file1.cram", "id_1", "file1.cram", Some("md5 cram file")),
-        fileEntry(s"$inputPrefix/file1.crai", "id_1.crai", "file1.crai"),
-        fileEntry(s"$inputPrefix/file2.vcf", "id_2", "file2.vcf", Some("md5 vcf file")),
-        fileEntry(s"$inputPrefix/file2.tbi", "id_2.tbi", "file2.tbi"),
-        fileEntry(s"$inputPrefix/file3.tgz", "id_3", "file3.tgz")
+      CheckS3Data.loadFileEntries(defaultMetadata, rawFiles, outputPrefix, generatorId) shouldBe Seq(
+        fileEntry(s"$inputPrefix/file1.cram", s"$outputPrefix/id_1", "file1.cram", Some("md5 cram file")),
+        fileEntry(s"$inputPrefix/file1.crai", s"$outputPrefix/id_1.crai", "file1.crai"),
+        fileEntry(s"$inputPrefix/file2.vcf", s"$outputPrefix/id_2", "file2.vcf", Some("md5 vcf file")),
+        fileEntry(s"$inputPrefix/file2.tbi", s"$outputPrefix/id_2.tbi", "file2.tbi"),
+        fileEntry(s"$inputPrefix/file3.tgz", s"$outputPrefix/id_3", "file3.tgz")
       )
     }
   }

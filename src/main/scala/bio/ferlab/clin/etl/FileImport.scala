@@ -44,7 +44,7 @@ object FileImport extends App {
     val metadata: ValidatedNel[String, Metadata] = Metadata.validateMetadataFile(inputBucket, inputPrefix)
     metadata.andThen { m: Metadata =>
       val rawFileEntries = CheckS3Data.loadRawFileEntries(inputBucket, inputPrefix)
-      val fileEntries = CheckS3Data.loadFileEntries(m, rawFileEntries)
+      val fileEntries = CheckS3Data.loadFileEntries(m, rawFileEntries, outputPrefix)
       val results = (BuildBundle.validate(m, fileEntries), CheckS3Data.validateFileEntries(rawFileEntries, fileEntries))
       if (!dryRun) {
         results
@@ -53,11 +53,11 @@ object FileImport extends App {
               //In case something bad happen in the distributed transaction, we store the modification brings to the resource (FHIR and S3 objects)
               writeAheadLog(inputBucket, reportPath, bundle, files)
 
-              CheckS3Data.copyFiles(files, outputBucket, outputPrefix)
+              CheckS3Data.copyFiles(files, outputBucket)
               bundle.save()
             } catch {
               case e: Exception =>
-                CheckS3Data.revert(files, outputBucket, outputPrefix)
+                CheckS3Data.revert(files, outputBucket)
                 throw e
             }
           }

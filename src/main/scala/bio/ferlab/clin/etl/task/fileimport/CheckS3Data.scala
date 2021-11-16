@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets
 import java.util.UUID
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
+
 object CheckS3Data {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
@@ -54,14 +55,14 @@ object CheckS3Data {
     fileEntries
   }
 
-  def loadFileEntries(m: Metadata, fileEntries: Seq[RawFileEntry], generateId: () => String = () => UUID.randomUUID().toString)(implicit s3Client: S3Client): Seq[FileEntry] = {
+  def loadFileEntries(m: Metadata, fileEntries: Seq[RawFileEntry], outputPrefix: String, generateId: () => String = () => UUID.randomUUID().toString)(implicit s3Client: S3Client): Seq[FileEntry] = {
     val (checksums, files) = fileEntries.partition(_.isChecksum)
     val mapOfIds = m.analyses.flatMap { a =>
-      val cramId: String = generateId()
+      val cramId: String = s"$outputPrefix/${generateId()}"
       val craiId: String = s"$cramId.crai"
-      val vcfId: String = generateId()
+      val vcfId: String = s"$outputPrefix/${generateId()}"
       val tbiId: String = s"$vcfId.tbi"
-      val qcId: String = generateId()
+      val qcId: String = s"$outputPrefix/${generateId()}"
 
       Seq(
         a.files.cram -> (cramId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cram)),
@@ -89,15 +90,15 @@ object CheckS3Data {
     s""""attachment; filename="$f"""""
   }
 
-  def revert(files: Seq[FileEntry], bucketDest: String, pathDest: String)(implicit s3Client: S3Client): Unit = {
+  def revert(files: Seq[FileEntry], bucketDest: String)(implicit s3Client: S3Client): Unit = {
     LOGGER.info("################# !!!! ERROR : Reverting Copy Files !!! ##################")
     files.foreach { f =>
-      val del = DeleteObjectRequest.builder().bucket(bucketDest).key(s"$pathDest/${f.id}").build()
+      val del = DeleteObjectRequest.builder().bucket(bucketDest).key(f.id).build()
       s3Client.deleteObject(del)
     }
   }
 
-  def copyFiles(files: Seq[FileEntry], bucketDest: String, pathDest: String)(implicit s3Client: S3Client): Unit = {
+  def copyFiles(files: Seq[FileEntry], bucketDest: String)(implicit s3Client: S3Client): Unit = {
     LOGGER.info("################# Copy Files ##################")
     files.foreach { f =>
       val encodedUrl = URLEncoder.encode(f.bucket + "/" + f.key, StandardCharsets.UTF_8.toString)
@@ -106,7 +107,7 @@ object CheckS3Data {
         .contentType(f.contentType)
         .contentDisposition(f.contentDisposition)
         .destinationBucket(bucketDest)
-        .destinationKey(s"$pathDest/${f.id}")
+        .destinationKey(f.id)
         .metadataDirective(MetadataDirective.REPLACE)
         .build()
 

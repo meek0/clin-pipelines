@@ -144,7 +144,7 @@ object FhirTestUtils {
       "terminology/ValueSet-data-category.json",
       "terminology/ValueSet-blood-relationship.json",
       "terminology/ValueSet-analysis-type.json",
-      "terminology/ValueSet-age-at-onset.json").par.foreach(downloadAndCreate)
+      "terminology/ValueSet-age-at-onset.json").foreach(downloadAndCreate)
 
 
   }
