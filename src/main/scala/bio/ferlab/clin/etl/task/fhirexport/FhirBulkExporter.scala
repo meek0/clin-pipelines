@@ -6,7 +6,7 @@ import bio.ferlab.clin.etl.task.fhirexport.FhirBulkExporter._
 import bio.ferlab.clin.etl.task.fhirexport.Poller.Task
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Reads._
-import play.api.libs.json.{Json, _}
+import play.api.libs.json._
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
