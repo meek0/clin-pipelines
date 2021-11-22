@@ -37,9 +37,9 @@
       "files": {
         "cram": "file1.cram",
         "crai": "file1.crai",
-        "snv_vcf": "file2.vcf",
+        "snv_vcf": "file2_snv.vcf",
         "snv_tbi": "file2.tbi",
-        "cnv_vcf": "file4.tbi",
+        "cnv_vcf": "file4_cnv.tbi",
         "qc": "file3.json"
       }
     }
