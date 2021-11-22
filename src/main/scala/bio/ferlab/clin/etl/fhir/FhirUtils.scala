@@ -4,7 +4,7 @@ import bio.ferlab.clin.etl.isValid
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import ca.uhn.fhir.rest.server.exceptions.{PreconditionFailedException, UnprocessableEntityException}
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
-import org.hl7.fhir.r4.model.{IdType, OperationOutcome, Reference, Resource}
+import org.hl7.fhir.r4.model.{IdType, OperationOutcome, Reference, Resource, Specimen}
 
 import scala.collection.JavaConverters._
 import scala.util.Try
@@ -100,6 +100,18 @@ object FhirUtils {
     def toReference(): Reference = {
 
       val ref = new Reference(IdType.of(v).toUnqualifiedVersionless)
+      v.getResourceType.name() match {
+        case "Specimen" =>
+          val s = v.asInstanceOf[Specimen]
+          val ldmId = s.getAccessionIdentifier.getValue
+          val display = if (s.getParent == null || s.getParent.size() == 0) {
+            s"Submitter Specimen ID: $ldmId"
+          } else {
+            s"Submitter Sample ID: $ldmId"
+          }
+          ref.setDisplay(display)
+        case _ =>
+      }
       ref
     }
 

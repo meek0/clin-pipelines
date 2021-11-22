@@ -29,10 +29,6 @@ object SpecimenValidation {
     validateResourceWithParent(analysis, SampleType)
   }
 
-  def validateAliquot(analysis: Analysis)(implicit client: IGenericClient): ValidationResult[TSpecimen] = {
-    validateResourceWithParent(analysis, AliquotType)
-  }
-
   def validateResourceWithParent(analysis: Analysis, sampleType: SampleAliquotType)(implicit client: IGenericClient): ValidationResult[TSpecimen] = {
     val (id, currentAccessionSystem, parentId) = sampleType match {
       case SampleType => (analysis.ldmSampleId, accessionSystem(analysis.ldm, sampleType), analysis.ldmSpecimenId)

@@ -40,9 +40,9 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       val resultFiles = list(outputBucket, outputPrefix)
       resultFiles.size shouldBe 5
 
-      // Validate specimens
+      // Validate specimen and sample
       val searchSpecimens = searchFhir("Specimen")
-      searchSpecimens.getTotal shouldBe 3
+      searchSpecimens.getTotal shouldBe 2
       searchSpecimens.getEntry.asScala.foreach { be =>
         val s = be.getResource.asInstanceOf[Specimen]
         s.getSubject.getReference shouldBe fhirPatientId
@@ -71,17 +71,9 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       sample.getAccessionIdentifier.getValue shouldBe "submitted_sample_id3"
       sample.getAccessionIdentifier.getAssigner.getReference shouldBe fhirOrganizationId
 
-      val optAliquot = fullSpecimens.collectFirst { case s if s.hasParent && s.getAccessionIdentifier != null && s.getAccessionIdentifier.getSystem == "https://cqgc.qc.ca/labs/CQGC/aliquot" => s }
-      optAliquot shouldBe defined
-      val aliquot = optAliquot.get
-      aliquot.getParentFirstRep.getReference shouldBe id(sample)
-      aliquot.getSubject.getReference shouldBe fhirPatientId
-      aliquot.getRequestFirstRep.getReference shouldBe fhirServiceRequestId
-      aliquot.getAccessionIdentifier.getValue shouldBe "nanuq_sample_id"
-      aliquot.getAccessionIdentifier.getAssigner.getReference shouldBe fhirCQGCOrganizationId
 
       //Validate Service request
-      val specimenIds = Seq(id(specimen), id(sample), id(aliquot))
+      val specimenIds = Seq(id(specimen), id(sample))
       val updatedSr = searchFhir("ServiceRequest")
       updatedSr.getTotal shouldBe 1
       updatedSr.getEntry.asScala.foreach { be =>
@@ -101,7 +93,8 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
           objectKey should startWith(outputPrefix)
           d.getSubject.getReference shouldBe fhirPatientId
           d.getCustodian.getReference shouldBe fhirOrganizationId
-          d.getContext.getRelatedFirstRep.getReference shouldBe id(aliquot)
+          d.getContext.getRelatedFirstRep.getReference shouldBe id(sample)
+          d.getContext.getRelatedFirstRep.getDisplay shouldBe s"Submitter Sample ID: submitted_sample_id3"
         }
       }
       //Expected title
