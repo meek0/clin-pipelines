@@ -2,11 +2,18 @@ package bio.ferlab.clin.etl.task.fileimport.model
 
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
 import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskOutputComponent}
-import org.hl7.fhir.r4.model.{CodeableConcept, Extension, IdType, Reference, Resource}
+import org.hl7.fhir.r4.model.{CodeableConcept, Extension, IdType, Reference, Resource, StringType}
 import TTask._
 import bio.ferlab.clin.etl.fhir.FhirUtils.ResourceExtension
 
-case class TaskExtensions(workflowExtension: Extension, experimentExtension: Extension)
+case class TaskExtensions(workflowExtension: Extension, experimentExtension: Extension) {
+  def forAliquot(labAliquotId: String): TaskExtensions = {
+    val expExtension = experimentExtension.copy()
+    expExtension.addExtension(new Extension("labAliquotId", new StringType(labAliquotId)))
+    this.copy(experimentExtension = expExtension)
+    //    labAliquotId.foreach(v => expExtension.addExtension(new Extension("labAliquotId", new StringType(v))))
+  }
+}
 
 case class TTask(taskExtensions: TaskExtensions) {
 

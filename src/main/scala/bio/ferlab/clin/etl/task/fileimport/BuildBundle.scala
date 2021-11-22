@@ -26,7 +26,6 @@ object BuildBundle {
   def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
     LOGGER.info("################# Validate Resources ##################")
     val taskExtensions = validateTaskExtension(metadata)
-    val cqgcOrg = validateCQGCOrganization()
     val mapFiles = files.map(f => (f.filename, f)).toMap
     val allResources: ValidatedNel[String, List[BundleEntryComponent]] = metadata.analyses.toList.map { a =>
 
@@ -37,8 +36,7 @@ object BuildBundle {
         validateSpecimen(a),
         validateSample(a),
         validateFiles(mapFiles, a),
-        taskExtensions,
-        cqgcOrg
+        taskExtensions.map(_.forAliquot(a.labAliquotId)),
         ).mapN(createResources)
 
     }.combineAll
@@ -46,7 +44,7 @@ object BuildBundle {
     allResources.map(TBundle)
   }
 
-  def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions, cqgcOrg: IdType)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
+  def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
     val task = TTask(taskExtensions)
     val specimenResource = specimen.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference())
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference(), Some(specimenResource.toReference()))
