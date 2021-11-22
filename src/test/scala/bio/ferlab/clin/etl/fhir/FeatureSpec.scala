@@ -94,10 +94,12 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       searchDr.getTotal shouldBe 3
       val documentReferences = read(searchDr, classOf[DocumentReference])
       documentReferences.foreach { d =>
-        val attachment = d.getContent.asScala.map { content =>
+        d.getMasterIdentifier.getValue should startWith(outputPrefix)
+        d.getContent.asScala.map { content =>
           val attachment = content.getAttachment
-          val objectKey = attachment.getUrl.replace(ferloadConf.url, "").replace("/", "")
-          val objectFullKey = s"$outputPrefix/$objectKey"
+          val objectKey = attachment.getUrl.replace(ferloadConf.url, "").replaceFirst("/", "")
+          objectKey should startWith(outputPrefix)
+
           //Object exist
           //          assert(s3.doesObjectExist(outputBucket, objectFullKey), s"DocumentReference with key $objectKey does not exist in object store")
           //          val objectMetadata = s3.getObject(outputBucket, objectFullKey).getObjectMetadata
@@ -114,6 +116,7 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       }
       //Expected title
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file3.json")
+
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only (CodingSystems.DR_TYPE)
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("AR", "SNV", "QC")
