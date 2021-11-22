@@ -15,7 +15,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
 import cats.implicits._
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
-import org.hl7.fhir.r4.model.IdType
+import org.hl7.fhir.r4.model.{IdType, Resource}
 import org.slf4j.{Logger, LoggerFactory}
 
 object BuildBundle {
@@ -48,18 +48,15 @@ object BuildBundle {
   }
 
   def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, aliquot: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions, cqgcOrg: IdType)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
-    val tasks = TTasks(taskExtensions)
+    val task = TTask(taskExtensions)
     val specimenResource = specimen.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference())
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference(), Some(specimenResource.toReference()))
     val aliquotResource = aliquot.buildResource(patient.toReference(), serviceRequest.sr.toReference(), cqgcOrg.toReference(), Some(sampleResource.toReference()))
     val documentReferencesResources: DocumentReferencesResources = files.buildResources(patient.toReference(), organization.toReference(), aliquotResource.toReference())
     val serviceRequestResource = serviceRequest.buildResource(specimenResource.toReference(), sampleResource.toReference(), aliquotResource.toReference())
-    val taskResources = tasks.buildResources(serviceRequest.sr.toReference(), patient.toReference(), organization.toReference(), aliquotResource.toReference(), documentReferencesResources)
+    val taskResource: Resource = task.buildResource(serviceRequest.sr.toReference(), patient.toReference(), organization.toReference(), aliquotResource.toReference(), documentReferencesResources)
 
-    val resourcesToCreate = (
-      documentReferencesResources.resources()
-        ++ taskResources
-      ).toList
+    val resourcesToCreate = (documentReferencesResources.resources() :+ taskResource).toList
 
     val resourcesToUpdate = Seq(serviceRequestResource).flatten
 

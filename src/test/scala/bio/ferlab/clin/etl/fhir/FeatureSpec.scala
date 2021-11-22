@@ -4,13 +4,13 @@ import bio.ferlab.clin.etl.FileImport
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
 import bio.ferlab.clin.etl.fhir.testutils.{FhirTestUtils, WholeStackSuite}
 import bio.ferlab.clin.etl.s3.S3Utils
-import bio.ferlab.clin.etl.task.fileimport.model.TTasks
+import bio.ferlab.clin.etl.task.fileimport.model.TTask
 import ca.uhn.fhir.rest.api.SummaryEnum
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model._
 import org.scalatest.{FlatSpec, Matchers}
 import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.services.s3.model.{HeadObjectRequest, PutObjectRequest}
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 
 import scala.collection.JavaConverters._
 import scala.io.Source
@@ -99,16 +99,6 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
           val attachment = content.getAttachment
           val objectKey = attachment.getUrl.replace(ferloadConf.url, "").replaceFirst("/", "")
           objectKey should startWith(outputPrefix)
-
-          //Object exist
-          //          assert(s3.doesObjectExist(outputBucket, objectFullKey), s"DocumentReference with key $objectKey does not exist in object store")
-          //          val objectMetadata = s3.getObject(outputBucket, objectFullKey).getObjectMetadata
-          //
-          //          //Size
-          //          attachment.getSize shouldBe objectMetadata.getContentLength
-          //
-          //          //MD5
-          //          new String(attachment.getHash) shouldBe objectMetadata.getETag
           d.getSubject.getReference shouldBe fhirPatientId
           d.getCustodian.getReference shouldBe fhirOrganizationId
           d.getContext.getRelatedFirstRep.getReference shouldBe id(aliquot)
@@ -118,22 +108,23 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file3.json")
 
       //Expected code systems
-      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only (CodingSystems.DR_TYPE)
+      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("AR", "SNV", "QC")
-      documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only (CodingSystems.DR_CATEGORY)
+      documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only CodingSystems.DR_CATEGORY
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only("SR", "SNV", "RE")
-      documentReferences.flatMap(d => d.getContent.asScala.map(_.getFormat.getSystem)) should contain only (CodingSystems.DR_FORMAT)
+      documentReferences.flatMap(d => d.getContent.asScala.map(_.getFormat.getSystem)) should contain only CodingSystems.DR_FORMAT
 
       //Validate tasks
       val searchTasks = searchFhir("Task")
-      searchTasks.getTotal shouldBe 3
+      searchTasks.getTotal shouldBe 1
       val tasks = read(searchTasks, classOf[Task])
       tasks.foreach { t =>
         t.getFor.getReference shouldBe fhirPatientId
         t.getOwner.getReference shouldBe fhirOrganizationId
         t.getFocus.getReference shouldBe fhirServiceRequestId
+        t.getOutput.size() shouldBe 3
       }
-      tasks.map(_.getCode.getCodingFirstRep.getCode) should contain theSameElementsAs TTasks.allTypes
+      tasks.map(_.getCode.getCodingFirstRep.getCode) should contain only TTask.EXOME_GERMLINE_ANALYSIS
       val bundleJson = s"$reportPath/bundle.json"
       assert(S3Utils.exists(inputBucket, bundleJson), s"Bundle json file $bundleJson does not exist")
       val fileCSV = s"$reportPath/files.csv"
