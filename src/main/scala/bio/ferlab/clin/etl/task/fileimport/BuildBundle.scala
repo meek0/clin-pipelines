@@ -9,13 +9,13 @@ import bio.ferlab.clin.etl.task.fileimport.validation.DocumentReferencesValidati
 import bio.ferlab.clin.etl.task.fileimport.validation.OrganizationValidation.{validateCQGCOrganization, validateOrganization}
 import bio.ferlab.clin.etl.task.fileimport.validation.PatientValidation.validatePatient
 import bio.ferlab.clin.etl.task.fileimport.validation.ServiceRequestValidation.validateServiceRequest
-import bio.ferlab.clin.etl.task.fileimport.validation.SpecimenValidation.{validateAliquot, validateSample, validateSpecimen}
+import bio.ferlab.clin.etl.task.fileimport.validation.SpecimenValidation.{validateSample, validateSpecimen}
 import bio.ferlab.clin.etl.task.fileimport.validation.TaskExtensionValidation._
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
 import cats.implicits._
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
-import org.hl7.fhir.r4.model.IdType
+import org.hl7.fhir.r4.model.{IdType, Resource}
 import org.slf4j.{Logger, LoggerFactory}
 
 object BuildBundle {
@@ -26,7 +26,6 @@ object BuildBundle {
   def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
     LOGGER.info("################# Validate Resources ##################")
     val taskExtensions = validateTaskExtension(metadata)
-    val cqgcOrg = validateCQGCOrganization()
     val mapFiles = files.map(f => (f.filename, f)).toMap
     val allResources: ValidatedNel[String, List[BundleEntryComponent]] = metadata.analyses.toList.map { a =>
 
@@ -36,10 +35,8 @@ object BuildBundle {
         validateServiceRequest(a),
         validateSpecimen(a),
         validateSample(a),
-        validateAliquot(a),
         validateFiles(mapFiles, a),
-        taskExtensions,
-        cqgcOrg
+        taskExtensions.map(_.forAliquot(a.labAliquotId)),
         ).mapN(createResources)
 
     }.combineAll
@@ -47,23 +44,19 @@ object BuildBundle {
     allResources.map(TBundle)
   }
 
-  def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, aliquot: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions, cqgcOrg: IdType)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
-    val tasks = TTasks(taskExtensions)
+  def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
+    val task = TTask(taskExtensions)
     val specimenResource = specimen.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference())
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference(), Some(specimenResource.toReference()))
-    val aliquotResource = aliquot.buildResource(patient.toReference(), serviceRequest.sr.toReference(), cqgcOrg.toReference(), Some(sampleResource.toReference()))
-    val documentReferencesResources: DocumentReferencesResources = files.buildResources(patient.toReference(), organization.toReference(), aliquotResource.toReference())
-    val serviceRequestResource = serviceRequest.buildResource(specimenResource.toReference(), sampleResource.toReference(), aliquotResource.toReference())
-    val taskResources = tasks.buildResources(serviceRequest.sr.toReference(), patient.toReference(), organization.toReference(), aliquotResource.toReference(), documentReferencesResources)
+    val documentReferencesResources: DocumentReferencesResources = files.buildResources(patient.toReference(), organization.toReference(), sampleResource.toReference())
+    val serviceRequestResource = serviceRequest.buildResource(specimenResource.toReference(), sampleResource.toReference())
+    val taskResource: Resource = task.buildResource(serviceRequest.sr.toReference(), patient.toReference(), organization.toReference(), sampleResource.toReference(), documentReferencesResources)
 
-    val resourcesToCreate = (
-      documentReferencesResources.resources()
-        ++ taskResources
-      ).toList
+    val resourcesToCreate = (documentReferencesResources.resources() :+ taskResource).toList
 
     val resourcesToUpdate = Seq(serviceRequestResource).flatten
 
-    val bundleEntriesSpecimen = Seq(specimenResource.toOption, sampleResource.toOption, aliquotResource.toOption).flatten.map { s =>
+    val bundleEntriesSpecimen = Seq(specimenResource.toOption, sampleResource.toOption).flatten.map { s =>
       val be = new BundleEntryComponent()
       be.setFullUrl(s.getIdElement.getValue)
         .setResource(s)
