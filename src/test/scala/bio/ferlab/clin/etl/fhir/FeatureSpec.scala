@@ -38,7 +38,7 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       //Validate documents that has been copied
       result.isValid shouldBe true
       val resultFiles = list(outputBucket, outputPrefix)
-      resultFiles.size shouldBe 5
+      resultFiles.size shouldBe 7
 
       // Validate specimen and sample
       val searchSpecimens = searchFhir("Specimen")
@@ -83,7 +83,7 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
 
       //Validate DocumentReference
       val searchDr = searchFhir("DocumentReference")
-      searchDr.getTotal shouldBe 3
+      searchDr.getTotal shouldBe 4
       val documentReferences = read(searchDr, classOf[DocumentReference])
       documentReferences.foreach { d =>
         d.getMasterIdentifier.getValue should startWith(outputPrefix)
@@ -98,13 +98,13 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
         }
       }
       //Expected title
-      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file3.json")
+      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file3.json")
 
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE
-      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("AR", "SNV", "QC")
+      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("AR", "SNV", "CNV", "QC")
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only CodingSystems.DR_CATEGORY
-      documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only("SR", "SNV", "RE")
+      documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only("SR", "SNV", "CNV", "RE")
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getFormat.getSystem)) should contain only CodingSystems.DR_FORMAT
 
       //Validate tasks

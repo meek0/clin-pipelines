@@ -60,15 +60,19 @@ object CheckS3Data {
     val mapOfIds = m.analyses.flatMap { a =>
       val cramId: String = s"$outputPrefix/${generateId()}"
       val craiId: String = s"$cramId.crai"
-      val vcfId: String = s"$outputPrefix/${generateId()}"
-      val tbiId: String = s"$vcfId.tbi"
+      val snvVcfId: String = s"$outputPrefix/${generateId()}"
+      val snvTbiId: String = s"$snvVcfId.tbi"
+      val cnvVcfId: String = s"$outputPrefix/${generateId()}"
+      val cnvTbiId: String = s"$cnvVcfId.tbi"
       val qcId: String = s"$outputPrefix/${generateId()}"
 
       Seq(
         a.files.cram -> (cramId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cram)),
         a.files.crai -> (craiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.crai)),
-        a.files.snv_vcf -> (vcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.snv_vcf)),
-        a.files.snv_tbi -> (tbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.snv_tbi)),
+        a.files.snv_vcf -> (snvVcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.snv_vcf)),
+        a.files.snv_tbi -> (snvTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.snv_tbi)),
+        a.files.cnv_vcf -> (cnvVcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_vcf)),
+        a.files.cnv_tbi -> (cnvTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_tbi)),
         a.files.qc -> (qcId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.qc))
       )
 

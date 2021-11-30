@@ -6,7 +6,6 @@ import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.{CodingSystems, Extensions}
 import bio.ferlab.clin.etl.fhir.FhirUtils.validateOutcomes
 import bio.ferlab.clin.etl.task.fileimport.model.TDocumentAttachment.{idFromList, valid}
-import bio.ferlab.clin.etl.task.fileimport.model.VariantCalling.ToReference
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.implicits._
 import org.hl7.fhir.r4.model.DocumentReference.{DocumentReferenceContentComponent, DocumentReferenceContextComponent}
@@ -96,7 +95,7 @@ object SequencingAlignment {
 case class VariantCalling(document: Seq[TDocumentAttachment]) extends TDocumentReference {
   override val documentType: String = "SNV"
   override val category: String = "SNV"
-  override val id: String = idFromList[VCF](document)
+  override val id: String = idFromList[SNV_VCF](document)
 }
 
 object VariantCalling {
@@ -105,53 +104,70 @@ object VariantCalling {
 
     protected override def build(documents: Seq[TDocumentAttachment]): VariantCalling = VariantCalling(documents)
 
-    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[VCF], valid[TBI])
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[SNV_VCF], valid[SNV_TBI])
 
 
   }
+}
 
-  case class QualityControl(document: Seq[TDocumentAttachment]) extends TDocumentReference {
-    override val documentType: String = "QC"
-    override val category: String = "RE"
-    override val id: String = idFromList[QC](document)
+case class CopyNumberVariant(document: Seq[TDocumentAttachment]) extends TDocumentReference {
+  override val documentType: String = "CNV"
+  override val category: String = "CNV"
+  override val id: String = idFromList[CNV_VCF](document)
+}
+
+object CopyNumberVariant {
+  implicit case object builder extends ToReference[CopyNumberVariant] {
+    override val label = "Copy Number Variant (VCF and TBI)"
+
+    protected override def build(documents: Seq[TDocumentAttachment]): CopyNumberVariant = CopyNumberVariant(documents)
+
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[CNV_VCF], valid[CNV_TBI])
+
   }
+}
 
-  object QualityControl {
-    implicit case object builder extends ToReference[QualityControl] {
-      override val label = "QC"
+case class QualityControl(document: Seq[TDocumentAttachment]) extends TDocumentReference {
+  override val documentType: String = "QC"
+  override val category: String = "RE"
+  override val id: String = idFromList[QC](document)
+}
 
-      protected override def build(documents: Seq[TDocumentAttachment]): QualityControl = QualityControl(documents)
+object QualityControl {
+  implicit case object builder extends ToReference[QualityControl] {
+    override val label = "QC"
 
-      override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[QC])
-    }
+    protected override def build(documents: Seq[TDocumentAttachment]): QualityControl = QualityControl(documents)
+
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[QC])
   }
+}
 
-  trait ToReference[T <: TDocumentReference] {
-    def label: String
+trait ToReference[T <: TDocumentReference] {
+  def label: String
 
-    protected def build(documents: Seq[TDocumentAttachment]): T
+  protected def build(documents: Seq[TDocumentAttachment]): T
 
-    def attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]]
+  def attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]]
 
-    def attach(files: Map[String, FileEntry], a: Analysis): Seq[ValidationResult[TDocumentAttachment]] =
-      attachments.map(v => v(files, a))
+  def attach(files: Map[String, FileEntry], a: Analysis): Seq[ValidationResult[TDocumentAttachment]] =
+    attachments.map(v => v(files, a))
 
-    def validate(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = {
-      attach(files, a).toList.sequence
-        .andThen { attachments =>
-          val dr: T = build(attachments)
-          val outcome = dr.validateBaseResource()
-          validateOutcomes(outcome, dr) { o =>
-            val diag = o.getDiagnostics
-            val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
-            s"File type=$label, specimen=${a.ldmSpecimenId}, sample=${a.ldmSampleId}, patient:${a.patient.clinId} : $loc - $diag"
-          }
+  def validate(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = {
+    attach(files, a).toList.sequence
+      .andThen { attachments =>
+        val dr: T = build(attachments)
+        val outcome = dr.validateBaseResource()
+        validateOutcomes(outcome, dr) { o =>
+          val diag = o.getDiagnostics
+          val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
+          s"File type=$label, specimen=${a.ldmSpecimenId}, sample=${a.ldmSampleId}, patient:${a.patient.clinId} : $loc - $diag"
         }
-
-    }
-
+      }
 
   }
+
+
 }
 
 

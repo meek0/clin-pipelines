@@ -2,8 +2,7 @@ package bio.ferlab.clin.etl.fhir
 
 import bio.ferlab.clin.etl.fhir.testutils.FhirServerSuite
 import bio.ferlab.clin.etl.fhir.testutils.MetadataTestUtils.defaultAnalysis
-import bio.ferlab.clin.etl.task.fileimport.model.VariantCalling.QualityControl
-import bio.ferlab.clin.etl.task.fileimport.model.{CRAI, CRAM, FileEntry, QC, SequencingAlignment, TBI, TDocumentReferences, VCF, VariantCalling}
+import bio.ferlab.clin.etl.task.fileimport.model.{CNV_TBI, CNV_VCF, CRAI, CRAM, CopyNumberVariant, FileEntry, QC, QualityControl, SNV_TBI, SNV_VCF, SequencingAlignment, TDocumentReferences, VariantCalling}
 import bio.ferlab.clin.etl.task.fileimport.validation.DocumentReferencesValidation
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
@@ -35,12 +34,15 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
       "file1.crai" -> fileEntry(key = "file1.crai"),
       "file2.vcf" -> fileEntry(key = "file2.vcf"),
       "file2.tbi" -> fileEntry(key = "file2.tbi"),
+      "file4.vcf" -> fileEntry(key = "file4.vcf"),
+      "file4.tbi" -> fileEntry(key = "file4.tbi"),
       "file3.tgz" -> fileEntry(key = "file3.tgz")
     )
     DocumentReferencesValidation.validateFiles(files, defaultAnalysis) shouldBe Valid(
       TDocumentReferences(
         SequencingAlignment(List(CRAM("id", "file1.cram", Some("md5"), 10, "application/octet-stream"), CRAI("id", "file1.crai", Some("md5"), 10, "application/octet-stream"))),
-        VariantCalling(List(VCF("id", "file2.vcf", Some("md5"), 10, "application/octet-stream"), TBI("id", "file2.tbi", Some("md5"), 10, "application/octet-stream"))),
+        VariantCalling(List(SNV_VCF("id", "file2.vcf", Some("md5"), 10, "application/octet-stream"), SNV_TBI("id", "file2.tbi", Some("md5"), 10, "application/octet-stream"))),
+        CopyNumberVariant(List(CNV_VCF("id", "file4.vcf", Some("md5"), 10, "application/octet-stream"), CNV_TBI("id", "file4.tbi", Some("md5"), 10, "application/octet-stream"))),
         QualityControl(List(QC("id", "file3.tgz", Some("md5"), 10, "application/octet-stream")))
       )
     )

@@ -23,6 +23,9 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
         RawFileEntry(inputBucket, s"$prefix/file2.tbi", 9),
         RawFileEntry(inputBucket, s"$prefix/file2.vcf", 9),
         RawFileEntry(inputBucket, s"$prefix/file2.vcf.md5sum", 12),
+        RawFileEntry(inputBucket, s"$prefix/file4.tbi", 9),
+        RawFileEntry(inputBucket, s"$prefix/file4.vcf", 9),
+        RawFileEntry(inputBucket, s"$prefix/file4.vcf.md5sum", 12),
         RawFileEntry(inputBucket, s"$prefix/file3.json", 8)
       )
       fileEntries should contain theSameElementsAs expected
