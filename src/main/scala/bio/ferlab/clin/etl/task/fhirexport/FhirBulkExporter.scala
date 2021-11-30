@@ -1,6 +1,8 @@
 package bio.ferlab.clin.etl.task.fhirexport
 
 import bio.ferlab.clin.etl.conf.{AWSConf, KeycloakConf}
+import bio.ferlab.clin.etl.fhir.AuthTokenInterceptor
+import bio.ferlab.clin.etl.keycloak.Auth
 import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
 import bio.ferlab.clin.etl.task.fhirexport.FhirBulkExporter._
 import bio.ferlab.clin.etl.task.fhirexport.Poller.Task
@@ -11,7 +13,7 @@ import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import sttp.client3.{HttpURLConnectionBackend, basicRequest, _}
-import sttp.model.{MediaType, StatusCode}
+import sttp.model.StatusCode
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -48,35 +50,22 @@ class FhirBulkExporter(authConfig: KeycloakConf,
 
   val exportUrl: String => String = { entities => s"$fhirUrl/$$export?_type=$entities&_outputFormat=application/ndjson" }
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
+  val auth: Auth = new AuthTokenInterceptor(authConfig).auth
+
   override def getAuthentication: String = {
-    val backend = HttpURLConnectionBackend()
-    val response = basicRequest
-      .contentType(MediaType.ApplicationXWwwFormUrlencoded)
-      .body(
-        "grant_type" -> "client_credentials",
-        "client_id" -> authConfig.clientKey,
-        "client_secret" -> authConfig.clientSecret)
-      .post(uri"${authConfig.url}")
-      .send(backend)
-
-    backend.close
-
-    if (StatusCode.Ok == response.code && response.body.toString.trim.nonEmpty) {
-      (Json.parse(response.body.right.get) \ "access_token").as[String]
-    } else {
-      throw new RuntimeException(s"Failed to obtain access token from Keycloak.\n${response.body.left.get}")
-    }
+    auth.withToken { (_, rpt) => rpt }
   }
 
   override def requestBulkExportFor(entities: String): String = {
     val backend = HttpURLConnectionBackend()
-    val response = basicRequest
-      .headers(Map(
-        "Authorization" -> s"Bearer $getAuthentication",
-        "Prefer" -> "respond-async"
-      ))
-      .get(uri"${exportUrl(entities)}")
-      .send(backend)
+    val response =
+      basicRequest
+        .headers(Map(
+          "Authorization" -> s"Bearer $getAuthentication",
+          "Prefer" -> "respond-async"
+        ))
+        .get(uri"${exportUrl(entities)}")
+        .send(backend)
 
     backend.close
     response.code match {

@@ -15,7 +15,7 @@ object FhirExport extends App {
         )
 
         val url = tables match {
-          case "all" => fhirExporter.requestBulkExportFor(FhirBulkExporter.ALL_ENTITIES)
+          case "all" =>    fhirExporter.requestBulkExportFor(FhirBulkExporter.ALL_ENTITIES)
           case entities => fhirExporter.requestBulkExportFor(entities)
         }
 

@@ -2,12 +2,12 @@ package bio.ferlab.clin.etl.task.fileimport.model
 
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.implicits.catsSyntaxValidatedId
-
-import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json, Reads}
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 
 import java.io.ByteArrayInputStream
+import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 object Metadata {
@@ -20,6 +20,7 @@ object Metadata {
       case Failure(e) => s"Error duriung fetching metadata file does not exist, bucket=$bucket, prefix=$prefix, error=${e.getMessage}".invalidNel[Metadata]
       case Success(o) =>
         val bis = new ByteArrayInputStream(o.readAllBytes())
+
         val r = Json.parse(bis).validate[Metadata]
         r match {
           case JsSuccess(m, _) => m.validNel[String]
