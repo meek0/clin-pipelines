@@ -69,7 +69,7 @@ object VCF {
   implicit case object builder extends ToAttachment[VCF] {
     override def label: String = "vcf"
 
-    override def analysisFileName: Analysis => String = a => a.files.vcf
+    override def analysisFileName: Analysis => String = a => a.files.snv_vcf
 
     override def buildFile: FileEntry => VCF = f => VCF(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
   }
@@ -83,7 +83,7 @@ object TBI {
   implicit case object builder extends ToAttachment[TBI] {
     override def label: String = "tbi"
 
-    override def analysisFileName: Analysis => String = a => a.files.tbi
+    override def analysisFileName: Analysis => String = a => a.files.snv_tbi
 
     override def buildFile: FileEntry => TBI = f => TBI(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
   }

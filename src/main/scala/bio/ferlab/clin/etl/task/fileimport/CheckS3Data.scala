@@ -67,8 +67,8 @@ object CheckS3Data {
       Seq(
         a.files.cram -> (cramId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cram)),
         a.files.crai -> (craiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.crai)),
-        a.files.vcf -> (vcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.vcf)),
-        a.files.tbi -> (tbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.tbi)),
+        a.files.snv_vcf -> (vcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.snv_vcf)),
+        a.files.snv_tbi -> (tbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.snv_tbi)),
         a.files.qc -> (qcId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.qc))
       )
 
