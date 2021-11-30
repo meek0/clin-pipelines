@@ -16,7 +16,9 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
     val files = Map(
       "file1.cram" -> fileEntry(key = "file1.cram"),
       "file1.crai" -> fileEntry(key = "file1.crai"),
-      "file2.vcf" -> fileEntry(key = "file2.vcf")
+      "file2.vcf" -> fileEntry(key = "file2.vcf"),
+      "file4.vcf" -> fileEntry(key = "file4.vcf"),
+      "file4.tbi" -> fileEntry(key = "file4.tbi")
     )
     DocumentReferencesValidation.validateFiles(files, defaultAnalysis) shouldBe Invalid(
       NonEmptyList.of(

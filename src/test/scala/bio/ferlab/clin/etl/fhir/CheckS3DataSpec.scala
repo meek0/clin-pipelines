@@ -123,6 +123,9 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
         rawFileEntry(s"$inputPrefix/file2.vcf"),
         rawFileEntry(s"$inputPrefix/file2.vcf.md5sum"),
         rawFileEntry(s"$inputPrefix/file2.tbi"),
+        rawFileEntry(s"$inputPrefix/file4.vcf"),
+        rawFileEntry(s"$inputPrefix/file4.vcf.md5sum"),
+        rawFileEntry(s"$inputPrefix/file4.tbi"),
         rawFileEntry(s"$inputPrefix/file3.tgz")
       )
 
@@ -131,7 +134,9 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
         fileEntry(s"$inputPrefix/file1.crai", s"$outputPrefix/id_1.crai", "file1.crai"),
         fileEntry(s"$inputPrefix/file2.vcf", s"$outputPrefix/id_2", "file2.vcf", Some("md5 vcf file")),
         fileEntry(s"$inputPrefix/file2.tbi", s"$outputPrefix/id_2.tbi", "file2.tbi"),
-        fileEntry(s"$inputPrefix/file3.tgz", s"$outputPrefix/id_3", "file3.tgz")
+        fileEntry(s"$inputPrefix/file4.vcf", s"$outputPrefix/id_3", "file4.vcf", Some("md5 vcf file")),
+        fileEntry(s"$inputPrefix/file4.tbi", s"$outputPrefix/id_3.tbi", "file4.tbi"),
+        fileEntry(s"$inputPrefix/file3.tgz", s"$outputPrefix/id_4", "file3.tgz")
       )
     }
   }
