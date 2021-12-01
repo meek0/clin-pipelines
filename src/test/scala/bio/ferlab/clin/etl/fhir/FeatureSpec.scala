@@ -115,7 +115,7 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
         t.getFor.getReference shouldBe fhirPatientId
         t.getOwner.getReference shouldBe fhirOrganizationId
         t.getFocus.getReference shouldBe fhirServiceRequestId
-        t.getOutput.size() shouldBe 3
+        t.getOutput.size() shouldBe 4
       }
       tasks.map(_.getCode.getCodingFirstRep.getCode) should contain only TTask.EXOME_GERMLINE_ANALYSIS
       val bundleJson = s"$reportPath/bundle.json"

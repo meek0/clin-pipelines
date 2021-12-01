@@ -11,7 +11,6 @@ case class TaskExtensions(workflowExtension: Extension, experimentExtension: Ext
     val expExtension = experimentExtension.copy()
     expExtension.addExtension(new Extension("labAliquotId", new StringType(labAliquotId)))
     this.copy(experimentExtension = expExtension)
-    //    labAliquotId.foreach(v => expExtension.addExtension(new Extension("labAliquotId", new StringType(v))))
   }
 }
 
@@ -34,30 +33,56 @@ case class TTask(taskExtensions: TaskExtensions) {
     input.setValue(sample)
     t.addInput(input)
     val sequencingExperimentOutput = {
+      val code = new CodeableConcept()
+      code.addCoding()
+        .setSystem(CodingSystems.DR_TYPE)
+        .setCode(SequencingAlignment.documentType)
+      code.setText(SequencingAlignment.label)
       val sequencingAlignment = new TaskOutputComponent()
-        .setType(new CodeableConcept().setText(CRAM_FILE)) //TODO Use a terminology
+        .setType(code)
         .setValue(drr.sequencingAlignment.toReference())
       sequencingAlignment
     }
 
     val variantCallOutput = {
+      val code = new CodeableConcept()
+      code.addCoding()
+        .setSystem(CodingSystems.DR_TYPE)
+        .setCode(VariantCalling.documentType)
+      code.setText(VariantCalling.label)
       val variantCalling = new TaskOutputComponent()
-        .setType(new CodeableConcept().setText(VCF_FILE)) //TODO Use a terminology
+        .setType(code)
         .setValue(drr.variantCalling.toReference())
       variantCalling
     }
 
+    val cnvOutput = {
+      val code = new CodeableConcept()
+      code.addCoding()
+        .setSystem(CodingSystems.DR_TYPE)
+        .setCode(CopyNumberVariant.documentType)
+      code.setText(CopyNumberVariant.label)
+      val cnv = new TaskOutputComponent()
+        .setType(code)
+        .setValue(drr.qc.toReference())
+      cnv
+    }
+
     val qualityControlOutput = {
+      val code = new CodeableConcept()
+      code.addCoding()
+        .setSystem(CodingSystems.DR_TYPE)
+        .setCode(QualityControl.documentType)
+      code.setText(QualityControl.label)
       val qc = new TaskOutputComponent()
-        .setType(new CodeableConcept().setText(QC_FILE)) //TODO Use a terminology
+        .setType(code)
         .setValue(drr.qc.toReference())
       qc
     }
 
-    Seq(sequencingExperimentOutput, variantCallOutput, qualityControlOutput).foreach { r =>
+    Seq(sequencingExperimentOutput, variantCallOutput, cnvOutput, qualityControlOutput).foreach { r =>
       t.addOutput(r)
     }
-
 
     t.setId(IdType.newRandomUuid())
     t.addExtension(taskExtensions.workflowExtension)
@@ -70,14 +95,5 @@ object TTask {
   val EXOME_GERMLINE_ANALYSIS = "GEAN"
 
   val ANALYSED_SAMPLE = "Analysed sample"
-
-  val CRAM_FILE = "CRAM File"
-
-  val CRAI_FILE = "CRAI File"
-
-  val VCF_FILE = "VCF File"
-
-  val TBI_FILE = "TBI File"
-
-  val QC_FILE = "QC File"
 }
+
