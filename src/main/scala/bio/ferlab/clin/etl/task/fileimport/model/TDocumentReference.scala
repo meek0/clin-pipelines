@@ -76,14 +76,17 @@ trait DocumentReferenceType {
 }
 
 case class SequencingAlignment(document: Seq[TDocumentAttachment]) extends TDocumentReference {
-  override val documentType: String = "AR"
-  override val category: String = "SR"
+  override val documentType: String = SequencingAlignment.documentType
+  override val category: String = SequencingAlignment.category
   override val id: String = idFromList[CRAM](document)
 }
 
 object SequencingAlignment {
+  val documentType: String = "AR"
+  val category: String = "SR"
+  val label: String = "Sequencing Alignment (CRAM and CRAI)"
   implicit case object builder extends ToReference[SequencingAlignment] {
-    override val label: String = "Sequencing Alignment (CRAM and CRAI)"
+    override val label: String = SequencingAlignment.label
 
     protected override def build(documents: Seq[TDocumentAttachment]): SequencingAlignment = SequencingAlignment(documents)
 
@@ -93,14 +96,17 @@ object SequencingAlignment {
 }
 
 case class VariantCalling(document: Seq[TDocumentAttachment]) extends TDocumentReference {
-  override val documentType: String = "SNV"
-  override val category: String = "SNV"
+  override val documentType: String = VariantCalling.documentType
+  override val category: String = VariantCalling.category
   override val id: String = idFromList[SNV_VCF](document)
 }
 
 object VariantCalling {
+  val documentType: String = "SNV"
+  val category: String = "SNV"
+  val label = "Variant Calling (VCF and TBI)"
   implicit case object builder extends ToReference[VariantCalling] {
-    override val label = "Variant Calling (VCF and TBI)"
+    override val label: String = VariantCalling.label
 
     protected override def build(documents: Seq[TDocumentAttachment]): VariantCalling = VariantCalling(documents)
 
@@ -111,14 +117,17 @@ object VariantCalling {
 }
 
 case class CopyNumberVariant(document: Seq[TDocumentAttachment]) extends TDocumentReference {
-  override val documentType: String = "CNV"
-  override val category: String = "CNV"
+  override val documentType: String = CopyNumberVariant.documentType
+  override val category: String = CopyNumberVariant.category
   override val id: String = idFromList[CNV_VCF](document)
 }
 
 object CopyNumberVariant {
+  val documentType: String = "CNV"
+  val category: String = "CNV"
+  val label = "Copy Number Variant (VCF and TBI)"
   implicit case object builder extends ToReference[CopyNumberVariant] {
-    override val label = "Copy Number Variant (VCF and TBI)"
+    override val label: String = CopyNumberVariant.label
 
     protected override def build(documents: Seq[TDocumentAttachment]): CopyNumberVariant = CopyNumberVariant(documents)
 
@@ -128,14 +137,17 @@ object CopyNumberVariant {
 }
 
 case class QualityControl(document: Seq[TDocumentAttachment]) extends TDocumentReference {
-  override val documentType: String = "QC"
-  override val category: String = "RE"
+  override val documentType: String = QualityControl.documentType
+  override val category: String = QualityControl.category
   override val id: String = idFromList[QC](document)
 }
 
 object QualityControl {
+  val documentType: String = "QC"
+  val category: String = "RE"
+  val label = "QC"
   implicit case object builder extends ToReference[QualityControl] {
-    override val label = "QC"
+    override val label: String = QualityControl.label
 
     protected override def build(documents: Seq[TDocumentAttachment]): QualityControl = QualityControl(documents)
 
