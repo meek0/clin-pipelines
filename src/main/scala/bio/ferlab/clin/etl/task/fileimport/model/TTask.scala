@@ -64,7 +64,7 @@ case class TTask(taskExtensions: TaskExtensions) {
       code.setText(CopyNumberVariant.label)
       val cnv = new TaskOutputComponent()
         .setType(code)
-        .setValue(drr.qc.toReference())
+        .setValue(drr.copyNumberVariant.toReference())
       cnv
     }
 
