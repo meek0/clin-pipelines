@@ -26,9 +26,9 @@
         "lastName": "Doe",
         "sex": "male"
       },
-      "ldm": "CHUSJ",
-      "ldmSampleId": "submitted_sample_id3",
-      "ldmSpecimenId": "submitted_specimen_id3",
+      "ldm": "_ORGANIZATION_ALIAS_",
+      "ldmSampleId": "_LDM_SAMPLE_ID_",
+      "ldmSpecimenId": "_LDM_SPECIMEN_ID_",
       "specimenType": "NBL",
       "sampleType": "NBL",
       "bodySite": "can be null",

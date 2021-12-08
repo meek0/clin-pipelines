@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 import scala.util.Random
 
 trait MinioServer {
-  private val minioPort = MinioContainer.startIfNotRunning()
+  private val (minioPort, _) = MinioContainer.startIfNotRunning()
 
   protected val minioEndpoint = s"http://localhost:${minioPort}"
   implicit val s3: S3Client = S3Utils.buildS3Client(AWSConf(MinioContainer.accessKey, MinioContainer.secretKey, minioEndpoint, pathStyleAccess = true, "", "", ""))

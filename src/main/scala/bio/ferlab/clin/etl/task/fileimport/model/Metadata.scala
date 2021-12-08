@@ -96,4 +96,3 @@ case class FilesAnalysis(cram: String, crai: String, snv_vcf: String, snv_tbi: S
 object FilesAnalysis {
   implicit val reads: Reads[FilesAnalysis] = Json.reads[FilesAnalysis]
 }
-

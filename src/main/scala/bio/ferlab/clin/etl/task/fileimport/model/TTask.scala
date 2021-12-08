@@ -96,4 +96,3 @@ object TTask {
 
   val ANALYSED_SAMPLE = "Analysed sample"
 }
-

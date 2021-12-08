@@ -34,7 +34,7 @@ object FhirBulkExporter {
       "ServiceRequest",
       "Specimen",
       "Task")
-    .mkString(",")
+      .mkString(",")
 
   case class ExportOutputFile(`type`: String, url: String)
 
