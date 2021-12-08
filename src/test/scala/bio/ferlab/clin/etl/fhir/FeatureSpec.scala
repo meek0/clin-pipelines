@@ -19,28 +19,36 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
 
   "run" should "return no errors" in {
     withS3Objects { (inputPrefix, outputPrefix) =>
+
+
       transferFromResources(inputPrefix, "good")
 
       val patientId = FhirTestUtils.loadPatients().getIdPart
       val fhirPatientId = s"Patient/$patientId"
       val serviceRequestId = FhirTestUtils.loadServiceRequest(patientId)
       val fhirServiceRequestId = s"ServiceRequest/$serviceRequestId"
-      val organizationId = FhirTestUtils.loadOrganizations()
+      val organizationAlias = nextId()
+
+      val organizationId = FhirTestUtils.loadOrganizations(organizationAlias)
       val fhirOrganizationId = s"Organization/$organizationId"
-      val cqgcOrganizationId = FhirTestUtils.loadCQGCOrganization()
-      val fhirCQGCOrganizationId = s"Organization/$cqgcOrganizationId"
+      val ldmSpecimenId = nextId()
+      val ldmSampleId = nextId()
       val templateMetadata = Source.fromResource("good/metadata.json").mkString
-      val metadata = templateMetadata.replace("_PATIENT_ID_", patientId).replace("_SERVICE_REQUEST_ID_", serviceRequestId)
+      val metadata = templateMetadata
+        .replace("_PATIENT_ID_", patientId)
+        .replace("_SERVICE_REQUEST_ID_", serviceRequestId)
+        .replace("_ORGANIZATION_ALIAS_", organizationAlias)
+        .replace("_LDM_SPECIMEN_ID_", ldmSpecimenId)
+        .replace("_LDM_SAMPLE_ID_", ldmSampleId)
       val putMetadata = PutObjectRequest.builder().bucket(inputBucket).key(s"$inputPrefix/metadata.json").build()
       s3.putObject(putMetadata, RequestBody.fromString(metadata))
       val reportPath = s"$inputPrefix/logs"
       val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false)
       //Validate documents that has been copied
+
       result.isValid shouldBe true
       val resultFiles = list(outputBucket, outputPrefix)
       resultFiles.size shouldBe 7
-
-      // Validate specimen and sample
       val searchSpecimens = searchFhir("Specimen")
       searchSpecimens.getTotal shouldBe 2
       searchSpecimens.getEntry.asScala.foreach { be =>
@@ -57,18 +65,18 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       val specimen = optSpecimen.get
       specimen.getSubject.getReference shouldBe fhirPatientId
       specimen.getRequestFirstRep.getReference shouldBe fhirServiceRequestId
-      specimen.getAccessionIdentifier.getSystem shouldBe "https://cqgc.qc.ca/labs/CHUSJ/specimen"
-      specimen.getAccessionIdentifier.getValue shouldBe "submitted_specimen_id3"
+      specimen.getAccessionIdentifier.getSystem shouldBe s"https://cqgc.qc.ca/labs/$organizationAlias/specimen"
+      specimen.getAccessionIdentifier.getValue shouldBe ldmSpecimenId
       specimen.getAccessionIdentifier.getAssigner.getReference shouldBe fhirOrganizationId
 
       //Validate sample
-      val optSample = fullSpecimens.collectFirst { case s if s.hasParent && s.getAccessionIdentifier != null && s.getAccessionIdentifier.getSystem == "https://cqgc.qc.ca/labs/CHUSJ/sample" => s }
+      val optSample = fullSpecimens.collectFirst { case s if s.hasParent && s.getAccessionIdentifier != null && s.getAccessionIdentifier.getSystem == s"https://cqgc.qc.ca/labs/$organizationAlias/sample" => s }
       optSample shouldBe defined
       val sample = optSample.get
       sample.getParentFirstRep.getReference shouldBe id(specimen)
       sample.getSubject.getReference shouldBe fhirPatientId
       sample.getRequestFirstRep.getReference shouldBe fhirServiceRequestId
-      sample.getAccessionIdentifier.getValue shouldBe "submitted_sample_id3"
+      sample.getAccessionIdentifier.getValue shouldBe ldmSampleId
       sample.getAccessionIdentifier.getAssigner.getReference shouldBe fhirOrganizationId
 
 
@@ -94,7 +102,7 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
           d.getSubject.getReference shouldBe fhirPatientId
           d.getCustodian.getReference shouldBe fhirOrganizationId
           d.getContext.getRelatedFirstRep.getReference shouldBe id(sample)
-          d.getContext.getRelatedFirstRep.getDisplay shouldBe s"Submitter Sample ID: submitted_sample_id3"
+          d.getContext.getRelatedFirstRep.getDisplay shouldBe s"Submitter Sample ID: $ldmSampleId"
         }
       }
       //Expected title
@@ -139,8 +147,15 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
   }
 
   private def read[T <: IBaseResource](b: Bundle, theClass: Class[T]): Seq[T] = {
+    println("Read resources in bundle")
+    println(parser.encodeResourceToString(b))
     b.getEntry.asScala.map { be =>
-      fhirClient.read().resource(theClass).withUrl(id(be.getResource)).execute()
+
+      val resourceId = id(be.getResource)
+      println(s"Read resource $resourceId")
+      val t: T = fhirClient.read().resource(theClass).withId(resourceId).execute()
+      println(parser.encodeResourceToString(t))
+      t
     }
   }
 
@@ -154,4 +169,5 @@ class FeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
       .summaryMode(SummaryEnum.TRUE)
       .execute()
   }
+
 }

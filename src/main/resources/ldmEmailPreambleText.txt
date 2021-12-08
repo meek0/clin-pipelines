@@ -1,0 +1,3 @@
+Bonjour,
+Nous avons complété le séquençage de plusieurs échantillons soumis par votre laboratoire. Les fichiers inclus dans le manifeste ci-joint sont prêts pour téléchargement. Pour télécharger les fichiers, voir les instructions à [lien github]
+l'équipe du CQGC

@@ -8,15 +8,17 @@ import bio.ferlab.clin.etl.task.fileimport.BuildBundle
 import cats.data.Validated.Valid
 import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}
 
+import scala.util.Random
+
 class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with FhirServerSuite {
 
   "it" should "Build" in {
     val ptId = FhirTestUtils.loadPatients().getIdPart
-    FhirTestUtils.loadOrganizations()
-    FhirTestUtils.loadCQGCOrganization()
+    val organizationAlias = nextId()
+    FhirTestUtils.loadOrganizations(organizationAlias)
     val serviceRequestId = FhirTestUtils.loadServiceRequest(ptId)
     val meta = defaultMetadata.copy(analyses = Seq(
-      defaultAnalysis.copy(patient = defaultPatient(ptId), clinServiceRequestId = serviceRequestId)
+      defaultAnalysis.copy(patient = defaultPatient(ptId), clinServiceRequestId = serviceRequestId, ldm = organizationAlias)
     ))
     val files = Seq(
       FileEntry("bucket","file1.cram", Some("md5"), 10, "1", "application/octet-stream", ""),
@@ -28,7 +30,7 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       FileEntry("bucket","file3.tgz", Some("md5"), 10, "3", "application/octet-stream", "")
     )
     val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files)
-
+    println(result)
     result.isValid shouldBe true
 
 

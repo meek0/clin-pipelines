@@ -15,21 +15,23 @@ trait OurContainer {
 
   private var publicPort: Int = -1
 
-  def startIfNotRunning(): Int = {
+  def startIfNotRunning(): (Int, Boolean) = {
     if (isStarted) {
-      publicPort
+      (publicPort, false)
     } else {
       val runningContainer = container.dockerClient.listContainersCmd().withLabelFilter(Map("name" -> name).asJava).exec().asScala
 
-      runningContainer.toList match {
+      val isNew = runningContainer.toList match {
         case Nil =>
           container.start()
           publicPort = container.mappedPort(port)
+          true
         case List(c) =>
           publicPort = c.ports.collectFirst { case p if p.getPrivatePort == port => p.getPublicPort }.get
+          false
       }
       isStarted = true
-      publicPort
+      (publicPort, isNew)
     }
   }
 

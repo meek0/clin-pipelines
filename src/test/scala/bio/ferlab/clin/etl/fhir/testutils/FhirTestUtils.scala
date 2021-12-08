@@ -6,30 +6,33 @@ import org.hl7.fhir.instance.model.api.{IBaseResource, IIdType}
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender
 import org.hl7.fhir.r4.model._
 import org.slf4j.{Logger, LoggerFactory}
+import play.api.libs.json.{JsValue, Json}
 
 import java.io.File
 import java.net.URL
 import java.time.{LocalDate, ZoneId}
 import java.util.{Collections, Date}
+import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.io.Source
+import scala.util.{Failure, Success, Try}
 
 object FhirTestUtils {
   val DEFAULT_ZONE_ID: ZoneId = ZoneId.of("UTC")
   val ROOT_REMOTE_EXTENSION = "https://raw.githubusercontent.com/Ferlab-Ste-Justine/clin-fhir/master/site_root/input/resources/"
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
-  def loadOrganizations()(implicit fhirClient: IGenericClient): String = {
+  def loadOrganizations(alias:String = "CHUSJ")(implicit fhirClient: IGenericClient): String = {
     val org: Organization = new Organization()
     org.setId("111")
     org.setName("CHU Ste-Justine")
-    org.setAlias(Collections.singletonList(new StringType("CHUSJ")))
+    org.setAlias(Collections.singletonList(new StringType(alias)))
 
     val id: IIdType = fhirClient.create().resource(org).execute().getId
     LOGGER.info("Organization created with id : " + id.getIdPart)
     id.getIdPart
   }
 
-  def loadCQGCOrganization()(implicit fhirClient: IGenericClient):String = {
+  def loadCQGCOrganization()(implicit fhirClient: IGenericClient): String = {
     val cqgc: Organization = new Organization()
     cqgc.setId("222")
     cqgc.setName("CQGC")
@@ -51,7 +54,7 @@ object FhirTestUtils {
     pt.addName().setFamily(lastName).addGiven(firstName)
     pt.setIdElement(IdType.of(id1))
     pt.setGender(gender)
-
+    pt.getMeta.addTag().setCode("test")
     val id = fhirClient.create().resource(pt).execute().getId
 
     LOGGER.info("Patient created with id : " + id.getIdPart)
@@ -72,7 +75,7 @@ object FhirTestUtils {
 
   }
 
-  def loadSpecimen(patientId: String, lab: String = "CHUSJ", submitterId: String = "1", specimenType: String = "NBL", parent: Option[String] = None, level:String="specimen")(implicit fhirClient: IGenericClient): String = {
+  def loadSpecimen(patientId: String, lab: String = "CHUSJ", submitterId: String = "1", specimenType: String = "NBL", parent: Option[String] = None, level: String = "specimen")(implicit fhirClient: IGenericClient): String = {
     val sp = new Specimen()
     sp.setSubject(new Reference(s"Patient/$patientId"))
 
@@ -103,13 +106,26 @@ object FhirTestUtils {
 
   def clearAll()(implicit fhirClient: IGenericClient): Unit = {
     val inParams = new Parameters()
-    inParams.addParameter().setName("expungeEverything").setValue(new BooleanType(true))
-    fhirClient
-      .operation()
-      .onServer()
-      .named("$expunge")
-      .withParameters(inParams)
-      .execute()
+    inParams
+      .addParameter().setName("expungePreviousVersions").setValue(new BooleanType(true))
+    inParams
+      .addParameter().setName("expungeDeletedResources").setValue(new BooleanType(true))
+    Seq("Patient", "DocumentReference", "Organization", "Specimen", "Task", "ServiceRequest").foreach { r =>
+      val t = fhirClient.delete()
+        .resourceConditionalByUrl(s"$r?_lastUpdated=ge2017-01-01&_cascade=delete")
+        .execute()
+
+      println(s"Clean $r")
+      fhirClient
+        .operation()
+        .onType(r)
+        .named("$expunge")
+        .withParameters(inParams)
+        .execute()
+
+    }
+
+
   }
 
   def init()(implicit fhirClient: IGenericClient): Unit = {
@@ -121,23 +137,15 @@ object FhirTestUtils {
     LOGGER.info("Init fhir container with extensions ...")
 
     //Sequential
+
+
     Seq(
-      "extensions/StructureDefinition-workflow.json",
-      "extensions/StructureDefinition-sequencing-experiment.json",
-      "extensions/StructureDefinition-full-size.json",
-      "profiles/StructureDefinition-cqgc-analysis-task.json",
-
-    ).foreach(downloadAndCreate)
-
-    //Parallel
-    Seq("terminology/CodeSystem-variant-type.json",
       "terminology/CodeSystem-specimen-type.json",
       "terminology/CodeSystem-genome-build.json",
       "terminology/CodeSystem-experimental-strategy.json",
       "terminology/CodeSystem-document-format.json",
       "terminology/CodeSystem-data-type.json",
       "terminology/CodeSystem-data-category.json",
-      "terminology/ValueSet-variant-type.json",
       "terminology/ValueSet-specimen-type.json",
       "terminology/ValueSet-genome-build.json",
       "terminology/ValueSet-data-type.json",
@@ -145,6 +153,14 @@ object FhirTestUtils {
       "terminology/ValueSet-blood-relationship.json",
       "terminology/ValueSet-analysis-type.json",
       "terminology/ValueSet-age-at-onset.json").foreach(downloadAndCreate)
+    Seq(
+      "extensions/StructureDefinition-workflow.json",
+      "extensions/StructureDefinition-sequencing-experiment.json",
+      "extensions/StructureDefinition-full-size.json",
+      "profiles/StructureDefinition-cqgc-analysis-task.json",
+      "search/SearchParameter-run-name.json"
+
+    ).foreach(downloadAndCreate)
 
 
   }
@@ -155,13 +171,45 @@ object FhirTestUtils {
       val remoteUrl = new URL(s"$ROOT_REMOTE_EXTENSION/$p")
       val resourcePath = s"${getClass.getResource("/").getPath}/fhir_extensions/$p"
       FileUtils.copyURLToFile(remoteUrl, new File(resourcePath))
-      val content = Source.fromFile(resourcePath).mkString
+      val source = Source.fromFile(resourcePath)
+      val content = source.mkString
+      source.close()
       content
     } else {
-      Source.fromURL(resourceUrl).mkString
+      val source = Source.fromURL(resourceUrl)
+      val content = source.mkString
+      source.close()
+      content
     }
+  }
 
+  def parseJsonFromResource(resourceName: String): Try[JsValue] = {
+    val source = Source.fromResource(resourceName)
+    try {
+      val strJson = source.mkString
+      val parsedJson = Json.parse(strJson)
+      Success(parsedJson)
+    } catch {
+      case e: Exception => {
+        Failure(e)
+      }
+    } finally {
+      source.close()
+    }
+  }
 
+  def getStringJsonFromResource(resourceName: String): Try[String] = {
+    val source = Source.fromResource(resourceName)
+    try {
+      val strJson = source.mkString
+      Success(strJson)
+    } catch {
+      case e: Exception => {
+        Failure(e)
+      }
+    } finally {
+      source.close()
+    }
   }
 }
 

@@ -22,15 +22,18 @@ libraryDependencies ++= Seq(
   "com.softwaremill.sttp.client3" %% "core" % "3.1.0",
   "org.scalatest" %% "scalatest" % "3.0.8" % Test,
   "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.38.8" % "test",
-  "org.testcontainers" % "localstack" % "1.15.2" %"test"
+  "org.testcontainers" % "localstack" % "1.15.2" %"test",
+  "com.typesafe.play" %% "play-mailer" % "8.0.1" ,
+  "com.typesafe.play" %% "play-mailer-guice" % "8.0.1"
 )
 
 Test / fork := true
+Test / testForkedParallel := false
 
 assembly / assemblyMergeStrategy:= {
   case PathList("META-INF", xs@_*) => MergeStrategy.discard
   case x => MergeStrategy.first
 }
 assembly / test := {}
-
+parallelExecution / test := false
 assembly / assemblyJarName:= "clin-pipelines.jar"
