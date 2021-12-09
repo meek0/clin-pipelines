@@ -43,7 +43,7 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
     }
   }
 
-  private def fileEntry(key: String, id: String, filename: String, md5: Option[String] = None) = FileEntry(inputBucket, key, md5, 1, id, "application/octet-stream", s""""attachment; filename="$filename""""")
+  private def fileEntry(key: String, id: String, filename: String, md5: Option[String] = None) = FileEntry(inputBucket, key, md5, 1, id, "application/octet-stream", s"""attachment; filename="$filename"""")
 
   private def rawFileEntry(key: String) = RawFileEntry(inputBucket, key, 1)
 

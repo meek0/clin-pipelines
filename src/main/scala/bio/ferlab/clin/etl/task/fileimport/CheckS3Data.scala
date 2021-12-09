@@ -91,7 +91,7 @@ object CheckS3Data {
 
 
   private def attach(f: String) = {
-    s""""attachment; filename="$f"""""
+    s"""attachment; filename="$f""""
   }
 
   def revert(files: Seq[FileEntry], bucketDest: String)(implicit s3Client: S3Client): Unit = {
