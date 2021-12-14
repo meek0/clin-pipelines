@@ -14,7 +14,7 @@ case class FhirConf(url: String)
 
 case class FerloadConf(url: String)
 
-case class MailerConf(host: String, port: Int, from: String, bcc: String)
+case class MailerConf(host: String, port: Int, user: String, password: String, from: String, bcc: String)
 
 case class Conf(aws: AWSConf, keycloak: KeycloakConf, fhir: FhirConf, ferload: FerloadConf, mailer: MailerConf)
 

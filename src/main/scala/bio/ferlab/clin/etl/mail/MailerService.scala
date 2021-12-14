@@ -31,7 +31,18 @@ class MailerService @Inject()(mailerClient: MailerClient) {
 }
 
 object MailerService {
-  def makeSmtpMailer(conf: Conf) = new SMTPMailer(SMTPConfiguration(conf.mailer.host, conf.mailer.port))
+  val useSSL = false
+  val useTLS = true
+  val TLSRequired = true
+  def makeSmtpMailer(conf: Conf) = new SMTPMailer(SMTPConfiguration(
+    conf.mailer.host,
+    conf.mailer.port,
+    useSSL,
+    useTLS,
+    TLSRequired,
+    Some(conf.mailer.user),
+    Some(conf.mailer.password)
+  ))
 
   def adjustBccType(conf: Conf): Seq[String] =
     if (conf.mailer.bcc.isBlank) Seq.empty
