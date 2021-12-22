@@ -1,42 +1,42 @@
 package bio.ferlab.clin.etl
 
-import bio.ferlab.clin.etl.conf.Conf
+import bio.ferlab.clin.etl.conf.MailerConf
 import bio.ferlab.clin.etl.keycloak.Auth
 import bio.ferlab.clin.etl.mail.MailerService.{adjustBccType, makeSmtpMailer}
 import bio.ferlab.clin.etl.mail.{EmailParams, MailerService}
 import bio.ferlab.clin.etl.task.ldmnotifier.TasksGqlExtractor.{checkIfGqlResponseHasData, fetchTasksFromFhir}
 import bio.ferlab.clin.etl.task.ldmnotifier.TasksMessageComposer.{createMetaDataAttachmentFile, createMsgBody}
-import bio.ferlab.clin.etl.task.ldmnotifier.TasksTransformer.{AliasToEmailAddress, AliasToUrlValues, groupAttachmentUrlsByEachOfOwnerAliases, mapLdmAliasToEmailAddress}
-import bio.ferlab.clin.etl.task.ldmnotifier.model.Task
+import bio.ferlab.clin.etl.task.ldmnotifier.TasksTransformer.groupManifestRowsByLdm
+import bio.ferlab.clin.etl.task.ldmnotifier.model.{ManifestRow, Task}
 import cats.implicits._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
-case class SenderParams(runName: String,
-                        conf: Conf,
-                        aliasToEmailAddress: AliasToEmailAddress,
-                        urlsByAlias: AliasToUrlValues)
-
 object LDMNotifier extends App {
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
-  def sendEmails(params: SenderParams): ValidationResult[List[Unit]] = {
+  def sendEmails(runName: String,
+                 mailerConf: MailerConf,
+                 group: Map[(String, String), Seq[ManifestRow]]
+                ): ValidationResult[List[Unit]] = {
 
-    val mailer = new MailerService(makeSmtpMailer(params.conf))
+    val mailer = new MailerService(makeSmtpMailer(mailerConf))
 
-    params.urlsByAlias.toList.traverse { case (ldmAlias, urls) =>
-      val toLDM = params.aliasToEmailAddress(ldmAlias)
-      val blindCC = adjustBccType(params.conf)
+    group.toList.traverse { case ((_, email), manifestRows) =>
+      val toLDM = email
+      val blindCC = adjustBccType(mailerConf)
 
       withExceptions {
-        mailer.sendEmail(EmailParams(
-          toLDM,
-          params.conf.mailer.from,
-          adjustBccType(params.conf),
-          "Nouvelles données du CQGC",
-          createMsgBody(urls),
-          Seq(createMetaDataAttachmentFile(params.runName, urls))
-        ))
+        mailer.sendEmail(
+          EmailParams(
+            to = toLDM,
+            from = mailerConf.from,
+            bccs = blindCC,
+            subject = "Nouvelles données du CQGC",
+            bodyText = createMsgBody(),
+            attachments = Seq(createMetaDataAttachmentFile(runName, manifestRows))
+          ))
+
         val extraInfoIfAvailable = if (blindCC.isEmpty) "" else s"and ${blindCC.mkString(",")}"
         LOGGER.info(s"email sent to $toLDM $extraInfoIfAvailable")
       }
@@ -61,10 +61,9 @@ object LDMNotifier extends App {
 
         val tasksV: ValidationResult[Seq[Task]] = tasksE.toValidatedNel
 
-        tasksV.flatMap { t: Seq[Task] =>
-          val aliasToEmailAddress = mapLdmAliasToEmailAddress(t)
-          val aliasToUrls = groupAttachmentUrlsByEachOfOwnerAliases(t)
-          sendEmails(SenderParams(runName, conf, aliasToEmailAddress, aliasToUrls))
+        tasksV.flatMap { tasks: Seq[Task] =>
+          val ldmsToManifestRows = groupManifestRowsByLdm(conf.clin.url, tasks)
+          sendEmails(runName = runName, mailerConf = conf.mailer, group = ldmsToManifestRows)
         }
       }
     }

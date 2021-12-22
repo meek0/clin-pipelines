@@ -2,70 +2,202 @@
   "data": {
     "taskList": [
       {
-        "id": "Task/50040/_history/1",
+        "id": "Task/104705/_history/1",
+        "serviceRequestReference": "ServiceRequest/SR0121",
         "owner": {
-          "id": "Organization/LDM1/_history/1",
-          "alias": "LDM1",
-           "email": "LDM1@mail.com"
+          "id": "Organization/LDM-CHUSJ/_history/1",
+          "alias": "LDM-CHUSJ",
+          "email": "clin_test+LDM-CHUSJ@ferlab.bio"
         },
-        "attachments": {
-          "urls": [
-            {
-              "url": "url1-LDM1"
-            }
-          ]
-        }
-      },
-      {
-        "id": "Task/49606/_history/1",
-        "owner": {
-          "id": "Organization/LDM1/_history/1",
-          "alias": "LDM1",
-          "email": "LDM1@mail.com"
-        },
-        "attachments": {
-          "urls": [
-            {
-              "url": "url1-LDM1"
+        "documents": [
+          {
+            "contentList": [
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/9d7f1860-dc3a-4568-a5fa-007c3e3655ec",
+                  "hash64": "YzFkY2U1ZjVmNmE0ZDBhNTlkMzlhY2I5MTlkOGViOGM=",
+                  "title": "16900.cram"
+                },
+                "fileFormat": "CRAM"
+              },
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/9d7f1860-dc3a-4568-a5fa-007c3e3655ec.crai",
+                  "title": "16900.cram.crai"
+                },
+                "fileFormat": "CRAI"
+              }
+            ],
+            "sample": {
+              "sampleId": "NA12891_A"
             },
-            {
-              "url": "url2-LDM1"
-            }
-          ]
-        }
-      },
-      {
-        "id": "Task/49596/_history/1",
-        "owner": {
-          "id": "Organization/LDM2/_history/1",
-          "alias": "LDM2",
-          "email": "LDM2@mail.com"
-        },
-        "attachments": {
-          "urls": [
-            {
-              "url": "url1-LDM2"
-            }
-          ]
-        }
-      },
-      {
-        "id": "Task/49696/_history/1",
-        "owner": {
-          "id": "Organization/LDM3/_history/1",
-          "alias": "LDM3",
-          "email": "LDM3@mail.com"
-        },
-        "attachments": {
-          "urls": [
-            {
-              "url": "url1-LDM3"
+            "patientReference": "Patient/PA00121",
+            "fileType": "AR"
+          },
+          {
+            "contentList": [
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/fbc89c72-a6ca-4b23-9078-f6f566c0ba92",
+                  "hash64": "ZDMwODRkOWY2NGZmYjQxZTRjZWE0ZjJiY2M5ZmQxYjA=",
+                  "title": "16900.hard-filtered.gvcf.gz"
+                },
+                "fileFormat": "VCF"
+              },
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/fbc89c72-a6ca-4b23-9078-f6f566c0ba92.tbi",
+                  "title": "16900.hard-filtered.gvcf.gz.tbi"
+                },
+                "fileFormat": "TBI"
+              }
+            ],
+            "sample": {
+              "sampleId": "NA12891_A"
             },
-            {
-              "url": "url1-LDM3"
-            }
-          ]
-        }
+            "patientReference": "Patient/PA00121",
+            "fileType": "SNV"
+          },
+          {
+            "contentList": [
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/5944c2e6-9614-4712-a762-6825037ab841",
+                  "hash64": "NDIyNTE3YTdiZjIxNTliYmNhMTA5ZDIzMWI1ZWMyYzk=",
+                  "title": "16900.cnv.vcf.gz"
+                },
+                "fileFormat": "VCF"
+              },
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/5944c2e6-9614-4712-a762-6825037ab841.tbi",
+                  "title": "16900.cnv.vcf.gz.tbi"
+                },
+                "fileFormat": "TBI"
+              }
+            ],
+            "sample": {
+              "sampleId": "NA12891_A"
+            },
+            "patientReference": "Patient/PA00121",
+            "fileType": "CNV"
+          },
+          {
+            "contentList": [
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/0400a676-b38e-402a-9cdb-b603d201c433",
+                  "title": "16900.QC.tgz"
+                },
+                "fileFormat": "TGZ"
+              }
+            ],
+            "sample": {
+              "sampleId": "NA12891_A"
+            },
+            "patientReference": "Patient/PA00121",
+            "fileType": "QC"
+          }
+        ]
+      },
+      {
+        "id": "Task/104715/_history/1",
+        "serviceRequestReference": "ServiceRequest/SR0123",
+        "owner": {
+          "id": "Organization/LDM-CHUSJ/_history/1",
+          "alias": "LDM-CHUSJ",
+          "email": "clin_test+LDM-CHUSJ@ferlab.bio"
+        },
+        "documents": [
+          {
+            "contentList": [
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/10b5c747-219c-4f7b-a0cf-e8dee3a22b61",
+                  "hash64": "ZGQ5MjQ3ZWEyZTVjMjkzMTFiMWMyZTU2MTI4ZjFlMzU=",
+                  "title": "16902.cram"
+                },
+                "fileFormat": "CRAM"
+              },
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/10b5c747-219c-4f7b-a0cf-e8dee3a22b61.crai",
+                  "title": "16902.cram.crai"
+                },
+                "fileFormat": "CRAI"
+              }
+            ],
+            "sample": {
+              "sampleId": "NA12892_B"
+            },
+            "patientReference": "Patient/PA00123",
+            "fileType": "AR"
+          },
+          {
+            "contentList": [
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/b43f727c-5ee9-4403-a83f-862da5b05b54",
+                  "hash64": "Mzc4OGM0ZjkwOGNhN2ZmM2NiM2FmNWJjOGI2Mzc3Zjg=",
+                  "title": "16902.hard-filtered.gvcf.gz"
+                },
+                "fileFormat": "VCF"
+              },
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/b43f727c-5ee9-4403-a83f-862da5b05b54.tbi",
+                  "title": "16902.hard-filtered.gvcf.gz.tbi"
+                },
+                "fileFormat": "TBI"
+              }
+            ],
+            "sample": {
+              "sampleId": "NA12892_B"
+            },
+            "patientReference": "Patient/PA00123",
+            "fileType": "SNV"
+          },
+          {
+            "contentList": [
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/b314e495-e368-4fa5-af05-060a390219e7",
+                  "hash64": "NDIyNTE3YTdiZjIxNTliYmNhMTA5ZDIzMWI1ZWMyYzk=",
+                  "title": "16902.cnv.vcf.gz"
+                },
+                "fileFormat": "VCF"
+              },
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/b314e495-e368-4fa5-af05-060a390219e7.tbi",
+                  "title": "16902.cnv.vcf.gz.tbi"
+                },
+                "fileFormat": "TBI"
+              }
+            ],
+            "sample": {
+              "sampleId": "NA12892_B"
+            },
+            "patientReference": "Patient/PA00123",
+            "fileType": "CNV"
+          },
+          {
+            "contentList": [
+              {
+                "attachment": {
+                  "url": "https://ferload.qa.clin.ferlab.bio/blue/513079a1-1642-407c-98d6-b6dc2451cf67",
+                  "title": "16902.QC.tgz"
+                },
+                "fileFormat": "TGZ"
+              }
+            ],
+            "sample": {
+              "sampleId": "NA12892_B"
+            },
+            "patientReference": "Patient/PA00123",
+            "fileType": "QC"
+          }
+        ]
       }
     ]
   }

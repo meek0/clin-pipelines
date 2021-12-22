@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl.mail
 
-import bio.ferlab.clin.etl.conf.Conf
+import bio.ferlab.clin.etl.conf.MailerConf
 import play.api.libs.mailer._
 
 import javax.inject.Inject
@@ -18,15 +18,14 @@ class MailerService @Inject()(mailerClient: MailerClient) {
   private type MessageId = String
 
   def sendEmail(params: EmailParams): MessageId = {
-    val email = Email(
-      params.subject,
-      params.from,
-      Seq(params.to),
+    mailerClient.send(Email(
+      subject = params.subject,
+      from = params.from,
+      to = Seq(params.to),
       attachments = params.attachments,
       bodyText = Some(params.bodyText),
       bcc = params.bccs
-    )
-    mailerClient.send(email)
+    ))
   }
 }
 
@@ -34,17 +33,18 @@ object MailerService {
   val useSSL = false
   val useTLS = true
   val TLSRequired = true
-  def makeSmtpMailer(conf: Conf) = new SMTPMailer(SMTPConfiguration(
-    conf.mailer.host,
-    conf.mailer.port,
+
+  def makeSmtpMailer(mailerConf: MailerConf) = new SMTPMailer(SMTPConfiguration(
+    mailerConf.host,
+    mailerConf.port,
     useSSL,
     useTLS,
     TLSRequired,
-    Some(conf.mailer.user),
-    Some(conf.mailer.password)
+    Some(mailerConf.user),
+    Some(mailerConf.password)
   ))
 
-  def adjustBccType(conf: Conf): Seq[String] =
-    if (conf.mailer.bcc.isBlank) Seq.empty
-    else conf.mailer.bcc.split(",").map(_.trim).toSeq
+  def adjustBccType(mailerConf: MailerConf): Seq[String] =
+    if (mailerConf.bcc.isBlank) Seq.empty
+    else mailerConf.bcc.split(",").map(_.trim).toSeq
 }

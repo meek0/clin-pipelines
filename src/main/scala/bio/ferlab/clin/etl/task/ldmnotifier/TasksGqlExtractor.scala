@@ -8,37 +8,59 @@ import sttp.model.MediaType
 object TasksGqlExtractor {
   private type TasksResponse = Identity[Response[Either[String, String]]]
 
-  val GQL_COUNT_UPPER_BOUND = 1000 //needed right now to make graphql queries work.
+  //Needed right now to make graphql queries work.
+  // If the graphql query generates more results than this <upper bound> it will generate an error.
+  val GQL_COUNT_UPPER_BOUND = 1000
 
   def buildGqlTasksQueryHttpPostBody(runName: String): String = {
     val query =
       s"""
          |{
-         |	taskList: TaskList(run_name: "$runName") {
-         |		id
-         |	    owner @flatten {
-         |		  owner: resource(type: Organization) {
-         |				id
-         |				alias @first @singleton
-         |        telecom @flatten @first @singleton {
+         |  taskList: TaskList(run_name: "$runName") {
+         |    id
+         |    focus @flatten {
+         |      serviceRequestReference: reference
+         |    }
+         |    owner @flatten {
+         |      owner: resource(type: Organization) {
+         |        id
+         |        alias @first @singleton
+         |        contact @flatten @first @singleton {
+         |          telecom @flatten @first @singleton {
          |            email: value
          |          }
-         |			}
-         |		}
-         |		 output @flatten {
-         |			valueReference @flatten {
-         |				attachments: resource(type: DocumentReference) {
-         |                     content @flatten {
-         |						 urls: attachment {
-         |							url
-         |						}
-         |					}
+         |        }
+         |      }
+         |    }
+         |    output @flatten {
+         |	    valueReference @flatten {
+         |		    documents: resource(type: DocumentReference) {
+         |          contentList: content {
+         |					  attachment {
+         |						  url
+         |              hash64: hash
+         |              title
+         |		  		   }
+         |             format @flatten {
+         |              fileFormat: code
+         |             }
+         |				  }
+         |          context @flatten {
+         |            related@first @flatten {
+         |              sample:resource @flatten {
+         |                accessionIdentifier @flatten { sampleId: value }
+         |              }
+         |            }
+         |           }
+         |           subject @flatten { patientReference: reference }
+         |           type @flatten {
+         |            coding @first @flatten { fileType: code }
+         |            }
          |				}
-         |			}
-         |		}
-         |	}
+         |      }
+         |    }
+         |  }
          |}
-         |
          |""".stripMargin
     s"""{ "query": ${JsString(query)} }"""
   }
@@ -69,6 +91,4 @@ object TasksGqlExtractor {
       },
     )
   }
-
-
 }
