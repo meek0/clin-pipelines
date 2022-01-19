@@ -44,9 +44,9 @@ object TasksMessageComposer {
   }
 
   def createMsgBody(): String = {
-    val resourcePath = getClass.getResource("/ldmEmailPreambleText.txt")
-    val source = scala.io.Source.fromFile(resourcePath.getPath)
-    val preamble = try source.mkString finally source.close()
-    preamble
+   """Bonjour,
+     |Nous avons complété le séquençage de plusieurs échantillons soumis par votre laboratoire. Les fichiers inclus dans le manifeste ci-joint sont prêts pour téléchargement. Pour télécharger les fichiers, voir les instructions à https://github.com/Ferlab-Ste-Justine/ferload-client-cli
+     |
+     |L'équipe du CQGC""".stripMargin
   }
 }
