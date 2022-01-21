@@ -30,7 +30,7 @@ class MailerService @Inject()(mailerClient: MailerClient) {
 }
 
 object MailerService {
-  val useSSL = false
+  val useSSL = true
   val useTLS = true
   val TLSRequired = true
 
@@ -40,8 +40,6 @@ object MailerService {
     useSSL,
     useTLS,
     TLSRequired,
-    Some(mailerConf.user),
-    Some(mailerConf.password)
   ))
 
   def adjustBccType(mailerConf: MailerConf): Seq[String] =
