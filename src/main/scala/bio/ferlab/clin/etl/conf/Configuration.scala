@@ -14,7 +14,7 @@ case class FhirConf(url: String)
 
 case class FerloadConf(url: String)
 
-case class MailerConf(host: String, port: Int, from: String, bcc: String)
+case class MailerConf(host: String, port: Int, user: Option[String], password: Option[String], from: String, bcc: String)
 
 case class ClinConf(url: String)
 
