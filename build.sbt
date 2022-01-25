@@ -23,8 +23,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % Test,
   "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.38.8" % "test",
   "org.testcontainers" % "localstack" % "1.15.2" %"test",
-  "com.typesafe.play" %% "play-mailer" % "8.0.1" ,
-  "com.typesafe.play" %% "play-mailer-guice" % "8.0.1"
+  "com.typesafe.play" %% "play-mailer" % "8.0.1"
 )
 
 Test / fork := true
