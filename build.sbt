@@ -30,6 +30,7 @@ Test / fork := true
 Test / testForkedParallel := false
 
 assembly / assemblyMergeStrategy:= {
+  case PathList("META-INF", "mailcap") => MergeStrategy.first
   case PathList("META-INF", xs@_*) => MergeStrategy.discard
   case x => MergeStrategy.first
 }
