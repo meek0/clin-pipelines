@@ -30,7 +30,7 @@ class MailerService @Inject()(mailerClient: MailerClient) {
 }
 
 object MailerService {
-  val useSSL = true
+  val useSSL = false
   val useTLS = true
   val TLSRequired = true
 
