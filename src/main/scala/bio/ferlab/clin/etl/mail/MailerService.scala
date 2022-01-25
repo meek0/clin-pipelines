@@ -28,16 +28,12 @@ class MailerService (mailerClient: MailerClient) {
 }
 
 object MailerService {
-  val useSSL = false
-  val useTLS = true
-  val TLSRequired = true
-
   def makeSmtpMailer(mailerConf: MailerConf) = new SMTPMailer(SMTPConfiguration(
     mailerConf.host,
     mailerConf.port,
-    useSSL,
-    useTLS,
-    TLSRequired,
+    mailerConf.ssl,
+    mailerConf.tls,
+    mailerConf.tlsRequired,
   ))
 
   def adjustBccType(mailerConf: MailerConf): Seq[String] =
