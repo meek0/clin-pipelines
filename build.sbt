@@ -25,14 +25,18 @@ libraryDependencies ++= Seq(
   "org.testcontainers" % "localstack" % "1.15.2" %"test",
   "com.typesafe.play" %% "play-mailer" % "8.0.1"
 )
-
+excludeDependencies ++= Seq(
+  ExclusionRule("com.sun.activation", "jakarta.activation"),
+  ExclusionRule("commons-logging", "commons-logging"), // commons-logging is replaced by jcl-over-slf4j
+)
 Test / fork := true
 Test / testForkedParallel := false
 
 assembly / assemblyMergeStrategy:= {
   case PathList("META-INF", "mailcap") => MergeStrategy.first
   case PathList("META-INF", xs@_*) => MergeStrategy.discard
-  case x => MergeStrategy.first
+  case PathList("module-info.class") => MergeStrategy.discard
+  case x => MergeStrategy.defaultMergeStrategy(x)
 }
 assembly / test := {}
 parallelExecution / test := false
