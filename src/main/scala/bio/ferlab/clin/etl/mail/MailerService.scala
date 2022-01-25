@@ -3,8 +3,6 @@ package bio.ferlab.clin.etl.mail
 import bio.ferlab.clin.etl.conf.MailerConf
 import play.api.libs.mailer._
 
-import javax.inject.Inject
-
 case class EmailParams(
                         to: String,
                         from: String,
@@ -14,7 +12,7 @@ case class EmailParams(
                         attachments: Seq[AttachmentFile]
                       )
 
-class MailerService @Inject()(mailerClient: MailerClient) {
+class MailerService (mailerClient: MailerClient) {
   private type MessageId = String
 
   def sendEmail(params: EmailParams): MessageId = {
