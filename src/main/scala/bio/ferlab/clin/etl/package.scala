@@ -92,6 +92,7 @@ package object etl {
       case Success(a) =>
         a.validNel
       case Failure(e) =>
+        LOGGER.error("Exception occured", e)
         e.getMessage.invalidNel
     }
   }
@@ -103,10 +104,10 @@ package object etl {
     }
 
 
-    override def map[A, B](fa: ValidationResult[A])(f: A => B): ValidationResult[B] =  fa.map(f)
+    override def map[A, B](fa: ValidationResult[A])(f: A => B): ValidationResult[B] = fa.map(f)
 
     @tailrec
-    override def tailRecM[A, B](a: A)(f: A => ValidationResult[Either[A, B]]): ValidationResult[B] =  f(a) match {
+    override def tailRecM[A, B](a: A)(f: A => ValidationResult[Either[A, B]]): ValidationResult[B] = f(a) match {
       case Invalid(e) => e.invalid[B]
       case Valid(Left(a)) => tailRecM(a)(f)
       case Valid(Right(a)) => a.validNel[String]
