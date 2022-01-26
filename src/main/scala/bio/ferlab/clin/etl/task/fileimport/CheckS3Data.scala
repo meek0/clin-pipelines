@@ -82,7 +82,7 @@ object CheckS3Data {
         mapOfIds.get(f.filename).map {
           case (id, contentType, contentDisposition) =>
             val md5sum = checksums.find(c => c.filename.contains(f.filename))
-              .map { c => getContent(c.bucket, c.key) }
+              .map { c => getContent(c.bucket, c.key).strip() }
             FileEntry(f, id, md5sum, contentType, contentDisposition)
         }
       }
