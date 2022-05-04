@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl.s3
 
-import bio.ferlab.clin.etl.fhir.testutils.MinioServerSuite
+import bio.ferlab.clin.etl.testutils.MinioServerSuite
 import cats.data.NonEmptyList
 import cats.data.Validated.Invalid
 import cats.implicits.catsSyntaxValidatedId

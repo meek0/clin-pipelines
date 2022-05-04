@@ -16,7 +16,7 @@ case class TaskExtensions(workflowExtension: Extension, experimentExtension: Ext
 
 case class TTask(taskExtensions: TaskExtensions) {
 
-  def buildResource(serviceRequest: Reference, patient: Reference, organization: Reference, sample: Reference, drr: DocumentReferencesResources): Resource = {
+  def buildResource(serviceRequest: Reference, patient: Reference, owner: Reference, sample: Reference, drr: DocumentReferencesResources): Resource = {
     val t = AnalysisTask()
 
     t.getCode.addCoding()
@@ -26,7 +26,7 @@ case class TTask(taskExtensions: TaskExtensions) {
     t.setFocus(serviceRequest)
     t.setFor(patient)
 
-    t.setOwner(organization)
+    t.setOwner(owner)
 
     val input = new ParameterComponent()
     input.setType(new CodeableConcept().setText(ANALYSED_SAMPLE))

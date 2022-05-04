@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl.task.fileimport.validation
 
-import bio.ferlab.clin.etl.fhir.FhirUtils.validateOutcomes
+import bio.ferlab.clin.etl.fhir.FhirUtils.{firstIncludeEntry, firstMatchEntry, validateOutcomes}
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.task.fileimport.model.TSpecimen.accessionSystem
 import bio.ferlab.clin.etl.task.fileimport.model._
@@ -10,9 +10,8 @@ import ca.uhn.fhir.rest.param.TokenParam
 import cats.data.Validated.Valid
 import cats.data.ValidatedNel
 import cats.implicits._
-import org.hl7.fhir.r4.model.Bundle.SearchEntryMode
 import org.hl7.fhir.r4.model.Specimen.{ACCESSION, INCLUDE_PARENT}
-import org.hl7.fhir.r4.model.{Bundle, Identifier, Specimen}
+import org.hl7.fhir.r4.model.{Bundle, IdType, Identifier, Specimen}
 
 import scala.collection.JavaConverters._
 
@@ -22,20 +21,28 @@ object SpecimenValidation {
 
   def validateSpecimen(a: Analysis)(implicit client: IClinFhirClient, fhirClient: IGenericClient): ValidationResult[TSpecimen] = {
     val sp = Option(client.findSpecimenByAccession(new TokenParam(accessionSystem(a.ldm, SpecimenType), a.ldmSpecimenId)))
-    validateResource(a, sp, SpecimenType)
+
+    validateResource(a, sp, SpecimenType, shouldValidatePatient = shouldValidatePatientForAnalysis(a))
   }
+
+  private def shouldValidatePatientForAnalysis(a: Analysis) =
+    a match {
+      case _: FullAnalysis => false
+      case _ => true
+    }
+
 
   def validateSample(analysis: Analysis)(implicit client: IGenericClient): ValidationResult[TSpecimen] = {
-    validateResourceWithParent(analysis, SampleType)
+    validateResourceWithParent(analysis, SampleType, shouldValidatePatient = shouldValidatePatientForAnalysis(analysis))
   }
 
-  def validateResourceWithParent(analysis: Analysis, sampleType: SampleAliquotType)(implicit client: IGenericClient): ValidationResult[TSpecimen] = {
+  def validateResourceWithParent(analysis: Analysis, sampleType: SampleAliquotType, shouldValidatePatient: Boolean)(implicit client: IGenericClient): ValidationResult[TSpecimen] = {
     val (id, currentAccessionSystem, parentId) = sampleType match {
       case SampleType => (analysis.ldmSampleId, accessionSystem(analysis.ldm, sampleType), analysis.ldmSpecimenId)
       case AliquotType => (analysis.labAliquotId, accessionSystem(CQGC_LAB, sampleType), analysis.ldmSampleId)
     }
 
-    val results = client
+    val results: Bundle = client
       .search
       .forResource(classOf[Specimen])
       .encodedJson
@@ -43,10 +50,10 @@ object SpecimenValidation {
       .include(INCLUDE_PARENT)
       .returnBundle(classOf[Bundle]).execute
 
-    val entries: Seq[Bundle.BundleEntryComponent] = results.getEntry.asScala.toSeq
-    val fhirParent = entries.collectFirst { case be if be.getSearch.getMode == SearchEntryMode.INCLUDE => be.getResource.asInstanceOf[Specimen] }
-    val fhirSample = entries.collectFirst { case be if be.getSearch.getMode == SearchEntryMode.MATCH => be.getResource.asInstanceOf[Specimen] }
-    val sampleValidation = validateResource(analysis, fhirSample, sampleType)
+
+    val fhirParent = firstIncludeEntry[Specimen](results)
+    val fhirSample = firstMatchEntry[Specimen](results)
+    val sampleValidation = validateResource(analysis, fhirSample, sampleType, shouldValidatePatient)
 
     val parentAccessionSystem = accessionSystem(analysis.ldm, sampleType.parentType)
 
@@ -76,7 +83,7 @@ object SpecimenValidation {
     (specimenAccessionSystem, specimenAccessionValue)
   }
 
-  private def validateResource(a: Analysis, specimen: Option[Specimen], specimenType: SpecimenSampleType)(implicit client: IGenericClient): ValidatedNel[String, TSpecimen] = {
+  private def validateResource(a: Analysis, specimen: Option[Specimen], specimenType: SpecimenSampleType, shouldValidatePatient: Boolean)(implicit client: IGenericClient): ValidatedNel[String, TSpecimen] = {
     val (id, stype, ldm) = specimenType match {
       case SpecimenType => (a.ldmSpecimenId, a.specimenType, a.ldm)
       case SampleType => (a.ldmSampleId, a.sampleType.getOrElse(a.specimenType), a.ldm)
@@ -95,25 +102,40 @@ object SpecimenValidation {
         }
 
       case Some(sp) =>
-        val potentialErrors = validatePatient(sp, a, id, specimenType) ++ validateSpecimenType(sp, id, stype, specimenType)
+
+        val potentialErrors = a match {
+          case s: SimpleAnalysis => validatePatient(sp, s, id, specimenType) ++ validateSpecimenType(sp, id, stype, specimenType)
+          case _ => validateSpecimenType(sp, id, stype, specimenType)
+        }
+
         isValid(TExistingSpecimen(sp), potentialErrors)
 
     }
   }
 
-  private def validatePatient(sp: Specimen, a: Analysis, specimenId: String, label: SpecimenSampleType): Seq[String] = {
+  private def validatePatient(sp: Specimen, a: SimpleAnalysis, specimenId: String, label: SpecimenSampleType): Seq[String] = {
     val specimenSubjectId = sp.getSubject.getReference.replace("Patient/", "")
     if (specimenSubjectId != a.patient.clinId) {
-      Seq(s"$label id=${specimenId} : does not belong to the same patient (${a.patient.clinId} <-> $specimenSubjectId)")
+      Seq(s"$label id=$specimenId : does not belong to the same patient (${a.patient.clinId} <-> $specimenSubjectId)")
     } else {
       Nil
     }
   }
 
+  def validateFullPatient(specimen: TSpecimen, patient: TPatient, specimenId: String, label: SpecimenSampleType): ValidationResult[TSpecimen] = {
+    specimen match {
+      case TExistingSpecimen(sp) if new IdType(sp.getSubject.getReference) != patient.id =>
+        s"$label $specimenId for patient ${patient.patient.firstName} ${patient.patient.lastName} : does not belong to the same patient (${patient.id.getIdPart} <-> ${sp.getSubject.getReference})".invalidNel
+      case _ => specimen.validNel
+
+    }
+
+  }
+
   private def validateSpecimenType(sp: Specimen, specimenId: String, specimenType: String, label: SpecimenSampleType): Seq[String] = {
     val existingSpecimenType = Option(sp.getType).map(cc => cc.getCodingFirstRep.getCode)
     if (!existingSpecimenType.contains(specimenType)) {
-      Seq(s"$label id=${specimenId} : does not have the same type (${specimenType} <-> ${existingSpecimenType.getOrElse("None")})")
+      Seq(s"$label id=$specimenId : does not have the same type ($specimenType <-> ${existingSpecimenType.getOrElse("None")})")
     }
     else {
       Nil

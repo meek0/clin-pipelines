@@ -13,9 +13,9 @@ trait TSpecimen {
   def buildResource(patientId: Reference, serviceRequest: Reference, organization: Reference, parent: Option[Reference] = None): Either[IdType, Specimen]
 }
 
-case class TExistingSpecimen(sp: Specimen) extends TSpecimen {
-  val id: IdType = IdType.of(sp)
 
+case class TExistingSpecimen(sp: Specimen) extends TSpecimen with ExistingResource {
+  override val resource: Resource = sp
   def buildResource(patientId: Reference, serviceRequest: Reference, organization: Reference, parent: Option[Reference] = None): Either[IdType, Specimen] = Left(id)
 }
 
@@ -51,5 +51,8 @@ case class TNewSpecimen(lab: String, submitterId: String, specimenType: String, 
 
 object TSpecimen {
 
-  def accessionSystem(lab: String, specimenSampleType: SpecimenSampleType) = s"https://cqgc.qc.ca/labs/$lab/${specimenSampleType.level}"
+  def accessionSystem(lab: String, specimenSampleType: SpecimenSampleType): String = {
+    val labId = lab.replace("Organization/", "")
+    s"https://cqgc.qc.ca/labs/$labId/${specimenSampleType.level}"
+  }
 }

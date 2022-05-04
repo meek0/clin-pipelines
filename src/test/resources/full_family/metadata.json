@@ -1,0 +1,89 @@
+{
+  "submissionSchema": "CQGC_Germline",
+  "experiment": {
+    "platform": "Illumina",
+    "sequencerId": "NB552318",
+    "runName": "runNameExample",
+    "runDate": "2014-09-21T11:50:23-05:00",
+    "runAlias": "runAliasExample",
+    "flowcellId": "0",
+    "isPairedEnd": true,
+    "fragmentSize": 100,
+    "experimentalStrategy": "WXS",
+    "captureKit": "RocheKapaHyperExome",
+    "baitDefinition": "KAPA_HyperExome_hg38_capture_targets"
+  },
+  "workflow": {
+    "name": "Dragen",
+    "version": "1.1.0",
+    "genomeBuild": "GRCh38"
+  },
+  "analyses": [
+    {
+      "patient": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "sex": "male",
+        "birthDate": "06/03/2001",
+        "ep": "_EP_ORGANIZATION_ID_",
+        "designFamily": "TRIO",
+        "familyMember": "PROBAND",
+        "familyId": "_FAMILY_ID_",
+        "status": "AFF",
+        "ramq": "_RAMQ_PROB_",
+        "mrn": "_MRN_PROB_"
+      },
+      "ldm": "_LDM_ORGANIZATION_ID_",
+      "ldmSampleId": "_LDM_PROB_SAMPLE_ID_",
+      "ldmSpecimenId": "_LDM_PROB_SPECIMEN_ID_",
+      "specimenType": "NBL",
+      "sampleType": "NBL",
+      "bodySite": "can be null",
+      "ldmServiceRequestId": "_LDM_SERVICE_REQUEST_ID_",
+      "labAliquotId": "nanuq_sample_id",
+      "panelCode": "MMG",
+      "files": {
+        "cram": "file1.cram",
+        "crai": "file1.crai",
+        "snv_vcf": "file2.vcf",
+        "snv_tbi": "file2.tbi",
+        "cnv_vcf": "file4.vcf",
+        "cnv_tbi": "file4.tbi",
+        "qc": "file3.json"
+      }
+    },
+    {
+      "patient": {
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "sex": "female",
+        "birthDate": "06/03/2001",
+        "ep": "_EP_ORGANIZATION_ID_",
+        "designFamily": "TRIO",
+        "familyMember": "MTH",
+        "familyId": "_FAMILY_ID_",
+        "status": "UNF",
+        "ramq": "_RAMQ_MTH_",
+        "mrn": "_MRN_MTH_"
+      },
+      "ldm": "_LDM_ORGANIZATION_ID_",
+      "ldmSampleId": "_LDM_MTH_SAMPLE_ID_",
+      "ldmSpecimenId": "_LDM_MTH_SPECIMEN_ID_",
+      "specimenType": "NBL",
+      "sampleType": "NBL",
+      "bodySite": "can be null",
+      "ldmServiceRequestId": "_LDM_SERVICE_REQUEST_ID_",
+      "labAliquotId": "nanuq_sample_id",
+      "panelCode": "MMG",
+      "files": {
+        "cram": "file1.cram",
+        "crai": "file1.crai",
+        "snv_vcf": "file2.vcf",
+        "snv_tbi": "file2.tbi",
+        "cnv_vcf": "file4.vcf",
+        "cnv_tbi": "file4.tbi",
+        "qc": "file3.json"
+      }
+    }
+  ]
+}

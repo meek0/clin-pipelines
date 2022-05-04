@@ -1,29 +1,44 @@
 package bio.ferlab.clin.etl.fhir
 
+import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.IDENTIFIER_CODE_SYSTEM
 import bio.ferlab.clin.etl.isValid
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import ca.uhn.fhir.rest.server.exceptions.{PreconditionFailedException, UnprocessableEntityException}
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
-import org.hl7.fhir.r4.model.{IdType, OperationOutcome, Reference, Resource, Specimen}
+import cats.data.ValidatedNel
+import cats.implicits.catsSyntaxValidatedId
+import org.hl7.fhir.r4.model.Bundle.{BundleEntryComponent, SearchEntryMode}
+import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender
+import org.hl7.fhir.r4.model.{Bundle, IdType, Identifier, OperationOutcome, Patient, Person, Reference, Resource, Specimen}
 
 import scala.collection.JavaConverters._
-import scala.util.Try
+import scala.language.reflectiveCalls
+import scala.util.{Failure, Success, Try}
 
 object FhirUtils {
 
   object Constants {
 
     private val baseFhirServer = "http://fhir.cqgc.ferlab.bio"
-
+    object Code {
+      val MR = "MR"
+      val JHN = "JHN"
+    }
     object CodingSystems {
       val SPECIMEN_TYPE = s"$baseFhirServer/CodeSystem/specimen-type"
       val DR_TYPE = s"$baseFhirServer/CodeSystem/data-type"
       val ANALYSIS_TYPE = s"$baseFhirServer/CodeSystem/analysis-type"
+      val ANALYSIS_REQUEST_CODE = "http://fhir.cqgc.ferlab.bio/CodeSystem/analysis-request-code"
       val DR_CATEGORY = s"$baseFhirServer/CodeSystem/data-category"
       val DR_FORMAT = s"$baseFhirServer/CodeSystem/document-format"
       val EXPERIMENTAL_STRATEGY = s"$baseFhirServer/CodeSystem/experimental-strategy"
       val GENOME_BUILD = s"$baseFhirServer/CodeSystem/genome-build"
       val OBJECT_STORE = "http://objecstore.cqgc.qc.ca"
+      val IDENTIFIER_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/v2-0203"
+      val SR_IDENTIFIER = "https://cqgc.qc.ca/service-request"
+      val FAMILY_IDENTIFIER = "https://cqgc.qc.ca/family"
+      val OBSERVATION_INTERPRETATION = "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation"
+      val OBSERVATION_CODE = "http://fhir.cqgc.ferlab.bio/CodeSystem/observation-code"
+      val OBSERVATION_CATEGORY = "http://terminology.hl7.org/CodeSystem/observation-category"
     }
 
     object Extensions {
@@ -31,8 +46,45 @@ object FhirUtils {
       val SEQUENCING_EXPERIMENT = s"$baseFhirServer/StructureDefinition/sequencing-experiment"
       val FULL_SIZE = s"$baseFhirServer/StructureDefinition/full-size"
     }
+    object Profiles {
+      val ANALYSIS_SERVICE_REQUEST = "http://fhir.cqgc.ferlab.bio/StructureDefinition/cqgc-analysis-request"
+      val SEQUENCING_SERVICE_REQUEST = "http://fhir.cqgc.ferlab.bio/StructureDefinition/cqgc-sequencing-request"
+    }
 
   }
+
+  def firstEntry[T](bundle: Bundle, mode: SearchEntryMode): Option[T] = {
+    val entries: Seq[Bundle.BundleEntryComponent] = bundle.getEntry.asScala
+    entries.collectFirst { case be if be.getSearch.getMode == mode => be.getResource.asInstanceOf[T] }
+  }
+
+  type WithIdentifier = {def getIdentifier(): java.util.List[Identifier]}
+
+  def firstEntryWithIdentifierCode[T <: WithIdentifier](mode: SearchEntryMode, code: String, bundle: Bundle): Option[T] = {
+    firstInBundle[T](mode, bundle){
+      r=> matchIdentifierCode(code, r)
+    }
+  }
+  def matchPersonAndPatient(person:Person, patient:Patient): Boolean = {
+    person.getLink.asScala.exists(linkComponent => {
+      new IdType(linkComponent.getTarget.getReference).getIdPart == IdType.of(patient).getIdPart
+    })
+  }
+
+  def matchIdentifierCode[T <: WithIdentifier](code: String, r: T): Boolean = {
+    r.getIdentifier().asScala.exists(i => i.getType.hasCoding(IDENTIFIER_CODE_SYSTEM, code))
+  }
+
+  def firstInBundle[T](mode: SearchEntryMode, bundle: Bundle)(pred: T => Boolean): Option[T] = {
+    bundle.getEntry.asScala.collect { case be if be.getSearch.getMode == mode =>
+      val r = be.getResource.asInstanceOf[T]
+      Some(r).filter(pred)
+    }.flatten.headOption
+  }
+
+  def firstIncludeEntry[T](bundle: Bundle): Option[T] = firstEntry[T](bundle, SearchEntryMode.INCLUDE)
+
+  def firstMatchEntry[T](bundle: Bundle): Option[T] = firstEntry[T](bundle, SearchEntryMode.MATCH)
 
   def validateResource(r: Resource)(implicit client: IGenericClient): OperationOutcome = {
     Try(client.validate().resource(r).execute().getOperationOutcome).recover {
@@ -41,8 +93,26 @@ object FhirUtils {
     }.get.asInstanceOf[OperationOutcome]
   }
 
+  def validateAdministrativeGender(gender: String): ValidatedNel[String, AdministrativeGender] = {
+    Try(AdministrativeGender.fromCode(gender)) match {
+      case Success(gender) => gender.validNel
+      case Failure(_) => s"Invalid gender $gender".invalidNel
+    }
 
-  def validateOutcomes[T](outcome: OperationOutcome, result: T)(err: OperationOutcome.OperationOutcomeIssueComponent => String) = {
+  }
+
+  def validateIdentifier(resourceIdentifier: java.util.List[Identifier], typeCode: String, fieldName: String, currentValue: Option[String]): ValidatedNel[String, Option[String]] = {
+    val firstIdentifier = resourceIdentifier.asScala.collectFirst {
+      case i if i.getType.getCoding.asScala.exists(c => c.getSystem == IDENTIFIER_CODE_SYSTEM && c.getCode == typeCode) => Option(i.getValue)
+    }.flatten
+    (currentValue, firstIdentifier) match {
+      case (Some(a), Some(b)) if a != b => s"$fieldName are not the same ($a <-> $b)".invalidNel
+      case (None, n@Some(_)) => n.validNel
+      case (n, _) => n.validNel
+    }
+  }
+
+  def validateOutcomes[T](outcome: OperationOutcome, result: T)(err: OperationOutcome.OperationOutcomeIssueComponent => String): ValidatedNel[String, T] = {
     val issues = outcome.getIssue.asScala
     val errors = issues.collect {
       case o if o.getSeverity.ordinal() <= OperationOutcome.IssueSeverity.ERROR.ordinal => err(o)

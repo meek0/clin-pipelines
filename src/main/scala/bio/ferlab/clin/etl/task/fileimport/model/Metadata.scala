@@ -11,17 +11,16 @@ import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 object Metadata {
-  implicit val reads: Reads[Metadata] = Json.reads[Metadata]
 
-  def validateMetadataFile(bucket: String, prefix: String)(implicit s3Client: S3Client): ValidatedNel[String, Metadata] = {
+  def validateMetadataFile(bucket: String, prefix: String, full: Boolean = false)(implicit s3Client: S3Client): ValidatedNel[String, Metadata] = {
     val objectName = s"$prefix/metadata.json"
     val get = GetObjectRequest.builder().bucket(bucket).key(objectName).build()
     Try(s3Client.getObject(get)) match {
-      case Failure(e) => s"Error duriung fetching metadata file does not exist, bucket=$bucket, prefix=$prefix, error=${e.getMessage}".invalidNel[Metadata]
+      case Failure(e) => s"Metadata file does not exist, bucket=$bucket, prefix=$prefix, error=${e.getMessage}".invalidNel[Metadata]
       case Success(o) =>
         val bis = new ByteArrayInputStream(o.readAllBytes())
 
-        val r = Json.parse(bis).validate[Metadata]
+        val r = if (full) Json.parse(bis).validate[FullMetadata] else Json.parse(bis).validate[SimpleMetadata]
         r match {
           case JsSuccess(m, _) => m.validNel[String]
           case JsError(errors) =>
@@ -32,7 +31,27 @@ object Metadata {
   }
 }
 
-case class Metadata(experiment: Experiment, workflow: Workflow, analyses: Seq[Analysis])
+sealed trait Metadata {
+  def experiment: Experiment
+
+  def workflow: Workflow
+
+  def analyses: Seq[Analysis]
+}
+
+case class SimpleMetadata(experiment: Experiment, workflow: Workflow, analyses: Seq[SimpleAnalysis]) extends Metadata
+
+object SimpleMetadata {
+  implicit val reads: Reads[SimpleMetadata] = Json.reads[SimpleMetadata]
+}
+
+
+case class FullMetadata(experiment: Experiment, workflow: Workflow, analyses: Seq[FullAnalysis]) extends Metadata
+
+object FullMetadata {
+  implicit val reads: Reads[FullMetadata] = Json.reads[FullMetadata]
+}
+
 
 case class Experiment(
                        platform: Option[String],
@@ -62,33 +81,93 @@ object Workflow {
   implicit val reads: Reads[Workflow] = Json.reads[Workflow]
 }
 
-case class Analysis(
+sealed trait Analysis {
 
-                     ldm: String,
-                     ldmSampleId: String,
-                     ldmSpecimenId: String,
-                     specimenType: String,
-                     sampleType: Option[String],
-                     bodySite: String,
-                     clinServiceRequestId: String,
-                     labAliquotId: String,
-                     patient: InputPatient,
-                     files: FilesAnalysis
-                   )
-
-object Analysis {
-  implicit val reads: Reads[Analysis] = Json.reads[Analysis]
+  val ldm: String
+  val ldmSampleId: String
+  val ldmSpecimenId: String
+  val specimenType: String
+  val sampleType: Option[String]
+  val bodySite: String
+  val labAliquotId: String
+  val patient: InputPatient
+  val files: FilesAnalysis
 }
 
-case class InputPatient(
-                         clinId: String,
-                         firstName: String,
-                         lastName: String,
-                         sex: String
-                       )
 
-object InputPatient {
-  implicit val reads: Reads[InputPatient] = Json.reads[InputPatient]
+case class SimpleAnalysis(
+                           ldm: String,
+                           ldmSampleId: String,
+                           ldmSpecimenId: String,
+                           specimenType: String,
+                           sampleType: Option[String],
+                           bodySite: String,
+                           clinServiceRequestId: String,
+                           labAliquotId: String,
+                           patient: SimplePatient,
+                           files: FilesAnalysis
+                         ) extends Analysis
+
+object SimpleAnalysis {
+  implicit val reads: Reads[SimpleAnalysis] = Json.reads[SimpleAnalysis]
+}
+
+case class FullAnalysis(
+
+                         ldm: String,
+                         ldmSampleId: String,
+                         ldmSpecimenId: String,
+                         specimenType: String,
+                         sampleType: Option[String],
+                         bodySite: String,
+                         ldmServiceRequestId: String,
+                         labAliquotId: String,
+                         patient: FullPatient,
+                         files: FilesAnalysis,
+                         panelCode: String
+                       ) extends Analysis
+
+object FullAnalysis {
+  implicit val reads: Reads[FullAnalysis] = Json.reads[FullAnalysis]
+}
+
+sealed trait InputPatient {
+
+  def firstName: String
+
+  def lastName: String
+
+  def sex: String
+}
+
+case class SimplePatient(
+                          clinId: String,
+                          firstName: String,
+                          lastName: String,
+                          sex: String
+                        ) extends InputPatient
+
+object SimplePatient {
+  implicit val reads: Reads[SimplePatient] = Json.reads[SimplePatient]
+}
+
+case class FullPatient(
+                        firstName: String,
+                        lastName: String,
+                        sex: String,
+                        ramq: Option[String],
+                        birthDate: String,
+                        mrn: Option[String],
+                        ep: String,
+                        designFamily: String,
+                        familyMember: String,
+                        familyId: Option[String],
+                        status: String
+                      ) extends InputPatient{
+}
+
+object FullPatient {
+  implicit val reads: Reads[FullPatient] = Json.reads[FullPatient]
 }
 
 case class FilesAnalysis(cram: String, crai: String, snv_vcf: String, snv_tbi: String, cnv_vcf: String, cnv_tbi: String, qc: String)
