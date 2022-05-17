@@ -9,6 +9,7 @@ import cats.data.ValidatedNel
 import org.hl7.fhir.r4.model.ServiceRequest.{ServiceRequestIntent, ServiceRequestStatus}
 import org.hl7.fhir.r4.model._
 
+import java.util.Date
 import scala.collection.JavaConverters.asScalaBufferConverter
 
 
@@ -53,7 +54,8 @@ case class TAnalysisServiceRequest(analysis: FullAnalysis) {
   sr.setStatus(ServiceRequestStatus.ACTIVE)
   sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.panelCode)))
 
-  analysis.patient.familyId.foreach(f => sr.getCode.addCoding().setSystem(FAMILY_IDENTIFIER).setCode(f))
+  analysis.patient.familyId.foreach(f => sr.addIdentifier(new Identifier().setSystem(FAMILY_IDENTIFIER).setValue(f)))
+  sr.setAuthoredOn(new Date())
 
   def validateBaseResource()(implicit client: IGenericClient): ValidatedNel[String, TAnalysisServiceRequest] = {
     val fakeReference = new Reference("fake")
@@ -88,6 +90,7 @@ case class TSequencingServiceRequest(analysis: FullAnalysis) {
   sr.setStatus(ServiceRequestStatus.ACTIVE)
   sr.getCode.addCoding().setSystem(SR_IDENTIFIER).setCode(analysis.ldmServiceRequestId)
   sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.panelCode)))
+  sr.setAuthoredOn(new Date())
 
   def validateBaseResource()(implicit client: IGenericClient): ValidatedNel[String, TSequencingServiceRequest] = {
     val fakeReference = new Reference("fake")
