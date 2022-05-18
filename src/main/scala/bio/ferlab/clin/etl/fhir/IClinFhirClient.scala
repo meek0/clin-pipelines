@@ -25,6 +25,9 @@ trait IClinFhirClient extends IBasicClient {
   @Search(`type` = classOf[Specimen])
   def findSpecimenByAccession(@RequiredParam(name = Specimen.SP_ACCESSION) theId: TokenParam): Specimen
 
+  @Search(`type` = classOf[Person])
+  def findPersonByRamq(@RequiredParam(name = Person.SP_IDENTIFIER) theId: TokenParam): Person
+
 }
 
 object IClinFhirClient {
