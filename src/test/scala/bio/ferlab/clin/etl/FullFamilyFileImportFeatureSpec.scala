@@ -157,7 +157,7 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
       analysisServiceRequest.getCode.getCodingFirstRep.getCode shouldBe "MMG"
       val familyExtension = analysisServiceRequest.getExtensionByUrl("http://fhir.cqgc.ferlab.bio/StructureDefinition/family-member")
       familyExtension.getExtensionByUrl("parent").getValue.asInstanceOf[Reference].getReference shouldBe motherPatientId
-      familyExtension.getExtensionByUrl("parent-relationship").getValue.asInstanceOf[Coding].getCode shouldBe "MTH"
+      familyExtension.getExtensionByUrl("parent-relationship").getValue.asInstanceOf[CodeableConcept].getCodingFirstRep.getCode  shouldBe "MTH"
       val analysisServiceRequestId = id(analysisServiceRequest)
 
       val sequencingServiceRequests: Seq[ServiceRequest] = serviceRequests.filter {

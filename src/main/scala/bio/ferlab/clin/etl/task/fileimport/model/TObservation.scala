@@ -2,6 +2,7 @@ package bio.ferlab.clin.etl.task.fileimport.model
 
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.{ANALYSIS_REQUEST_CODE, OBSERVATION_CATEGORY, OBSERVATION_CODE, OBSERVATION_INTERPRETATION}
+import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.Profiles.OBSERVATION_PROFILE
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
 import cats.implicits.catsSyntaxValidatedId
@@ -14,6 +15,7 @@ case class TObservation(analysis: FullAnalysis) {
   val id: IdType = IdType.newRandomUuid()
 
   val obs = new Observation()
+  obs.getMeta.addProfile(OBSERVATION_PROFILE)
   obs.setStatus(ObservationStatus.FINAL)
   obs.addCategory(new CodeableConcept(new Coding().setSystem(OBSERVATION_CATEGORY).setCode("exam")))
 

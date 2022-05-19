@@ -37,8 +37,8 @@ case class TAnalysisServiceRequest(analysis: FullAnalysis) {
           .addExtension("parent", new Reference(familyExtension.patientId))
         val coding = new Coding()
         coding.setCode(familyExtension.code)
-        coding.setSystem("http://fhir.cqgc.ferlab.bio/CodeSystem/family-relation")
-        ext.addExtension("parent-relationship", coding)
+        coding.setSystem("http://terminology.hl7.org/CodeSystem/v3-RoleCode")
+        ext.addExtension("parent-relationship", new CodeableConcept().addCoding(coding))
         ext
       }
       extensions.foreach(sr.addExtension)
