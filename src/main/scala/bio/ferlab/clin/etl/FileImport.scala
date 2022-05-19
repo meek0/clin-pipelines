@@ -9,10 +9,9 @@ import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, Metadata, TBundle}
 import bio.ferlab.clin.etl.task.fileimport.{BuildBundle, CheckS3Data}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
-import cats.implicits.catsSyntaxTuple2Semigroupal
+import cats.implicits.{catsSyntaxTuple2Semigroupal, catsSyntaxValidatedId}
+import org.hl7.fhir.r4.model.Bundle
 import software.amazon.awssdk.services.s3.S3Client
-
-import java.time.LocalDateTime
 
 
 object FileImport extends App {
@@ -39,7 +38,7 @@ object FileImport extends App {
     S3Utils.writeContent(inputBucket, s"$reportPath/files.csv", filesToCSV)
   }
 
-  def run(inputBucket: String, inputPrefix: String, outputBucket: String, outputPrefix: String, reportPath: String, dryRun: Boolean, full:Boolean)(implicit s3: S3Client, client: IGenericClient, clinFhirClient: IClinFhirClient, ferloadConf: FerloadConf) = {
+  def run(inputBucket: String, inputPrefix: String, outputBucket: String, outputPrefix: String, reportPath: String, dryRun: Boolean, full: Boolean)(implicit s3: S3Client, client: IGenericClient, clinFhirClient: IClinFhirClient, ferloadConf: FerloadConf): ValidationResult[Bundle] = {
     val metadata: ValidatedNel[String, Metadata] = Metadata.validateMetadataFile(inputBucket, inputPrefix, full)
     metadata.andThen { m: Metadata =>
       val rawFileEntries = CheckS3Data.loadRawFileEntries(inputBucket, inputPrefix)
@@ -47,22 +46,26 @@ object FileImport extends App {
       val results = (BuildBundle.validate(m, fileEntries), CheckS3Data.validateFileEntries(rawFileEntries, fileEntries))
       if (!dryRun) {
         results
-          .mapN { (bundle, files) =>
+          .mapN { (bundle, files) => (bundle, files) }
+          .andThen { case (bundle, files) =>
             try {
               //In case something bad happen in the distributed transaction, we store the modification brings to the resource (FHIR and S3 objects)
               writeAheadLog(inputBucket, reportPath, bundle, files)
-
               CheckS3Data.copyFiles(files, outputBucket)
-              bundle.save()
+              val result = bundle.save()
+              if (result.isInvalid) {
+                CheckS3Data.revert(files, outputBucket)
+              }
+              result
             } catch {
               case e: Exception =>
                 CheckS3Data.revert(files, outputBucket)
                 throw e
             }
           }
+
       } else {
-        results
-          .mapN { (bundle, files) => (bundle, files) }
+        new Bundle().validNel
       }
     }
   }
