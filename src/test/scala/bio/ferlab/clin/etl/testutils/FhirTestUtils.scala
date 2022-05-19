@@ -20,7 +20,7 @@ import scala.util.{Failure, Success, Try}
 
 object FhirTestUtils {
   val DEFAULT_ZONE_ID: ZoneId = ZoneId.of("UTC")
-  val ROOT_REMOTE_EXTENSION = "https://raw.githubusercontent.com/Ferlab-Ste-Justine/clin-fhir/Vincent-Clin2-VS-CS/site_root/input/resources/"
+  val ROOT_REMOTE_EXTENSION = "https://raw.githubusercontent.com/Ferlab-Ste-Justine/clin-fhir/master/site_root/input/resources/"
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
   def loadOrganizations(alias: String = "CHUSJ", name: String = "CHU Ste-Justine", id: String = "111")(implicit fhirClient: IGenericClient): String = {
@@ -187,6 +187,7 @@ object FhirTestUtils {
       "extensions/StructureDefinition-sequencing-experiment.json",
       "extensions/StructureDefinition-full-size.json",
       "profiles/StructureDefinition-cqgc-analysis-task.json",
+      "profiles/StructureDefinition-cqgc-observation.json",
       "profiles/StructureDefinition-cqgc-sequencing-request.json",
       "profiles/StructureDefinition-cqgc-analysis-request.json",
       "search/SearchParameter-run-name.json"
