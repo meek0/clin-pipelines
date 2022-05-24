@@ -87,7 +87,7 @@ case class TSequencingServiceRequest(analysis: FullAnalysis) {
 
   sr.getMeta.addProfile(SEQUENCING_SERVICE_REQUEST)
   sr.setIntent(ServiceRequestIntent.ORDER)
-  sr.setStatus(ServiceRequestStatus.ACTIVE)
+  sr.setStatus(ServiceRequestStatus.COMPLETED)
   sr.getCode.addCoding().setSystem(SR_IDENTIFIER).setCode(analysis.ldmServiceRequestId)
   sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.panelCode)))
   sr.setAuthoredOn(new Date())
