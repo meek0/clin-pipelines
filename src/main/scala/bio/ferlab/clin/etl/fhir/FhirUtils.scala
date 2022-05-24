@@ -26,7 +26,7 @@ object FhirUtils {
     object CodingSystems {
       val SPECIMEN_TYPE = s"$baseFhirServer/CodeSystem/specimen-type"
       val DR_TYPE = s"$baseFhirServer/CodeSystem/data-type"
-      val ANALYSIS_TYPE = s"$baseFhirServer/CodeSystem/analysis-type"
+      val ANALYSIS_TYPE = s"$baseFhirServer/CodeSystem/bioinfo-analysis-code"
       val ANALYSIS_REQUEST_CODE = "http://fhir.cqgc.ferlab.bio/CodeSystem/analysis-request-code"
       val DR_CATEGORY = s"$baseFhirServer/CodeSystem/data-category"
       val DR_FORMAT = s"$baseFhirServer/CodeSystem/document-format"

@@ -177,6 +177,7 @@ object FhirTestUtils {
       "terminology/CodeSystem-document-format.json",
       "terminology/CodeSystem-data-type.json",
       "terminology/CodeSystem-data-category.json",
+      "terminology/CodeSystem-bioinfo-analysis-code.json",
       "terminology/ValueSet-specimen-type.json",
       "terminology/ValueSet-genome-build.json",
       "terminology/ValueSet-data-type.json",
