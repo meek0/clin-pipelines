@@ -92,7 +92,7 @@ case class TTask(taskExtensions: TaskExtensions) {
 }
 
 object TTask {
-  val EXOME_GERMLINE_ANALYSIS = "GEAN"
+  val EXOME_GERMLINE_ANALYSIS = "GEBA"
 
   val ANALYSED_SAMPLE = "Analysed sample"
 }
