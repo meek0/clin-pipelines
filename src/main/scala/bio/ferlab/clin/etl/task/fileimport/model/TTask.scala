@@ -5,6 +5,7 @@ import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskOutputComponent}
 import org.hl7.fhir.r4.model.{CodeableConcept, Extension, IdType, Reference, Resource, StringType}
 import TTask._
 import bio.ferlab.clin.etl.fhir.FhirUtils.ResourceExtension
+import bio.ferlab.clin.etl.task.fileimport.validation.SpecimenValidation.CQGC_LAB
 
 case class TaskExtensions(workflowExtension: Extension, experimentExtension: Extension) {
   def forAliquot(labAliquotId: String): TaskExtensions = {
@@ -16,7 +17,7 @@ case class TaskExtensions(workflowExtension: Extension, experimentExtension: Ext
 
 case class TTask(taskExtensions: TaskExtensions) {
 
-  def buildResource(serviceRequest: Reference, patient: Reference, owner: Reference, sample: Reference, drr: DocumentReferencesResources): Resource = {
+  def buildResource(serviceRequest: Reference, patient: Reference, requester: Reference, sample: Reference, drr: DocumentReferencesResources): Resource = {
     val t = AnalysisTask()
 
     t.getCode.addCoding()
@@ -26,7 +27,8 @@ case class TTask(taskExtensions: TaskExtensions) {
     t.setFocus(serviceRequest)
     t.setFor(patient)
 
-    t.setOwner(owner)
+    t.setRequester(requester)
+    t.setOwner(new Reference(s"Organization/$CQGC_LAB"))
 
     val input = new ParameterComponent()
     input.setType(new CodeableConcept().setText(ANALYSED_SAMPLE))
@@ -37,7 +39,6 @@ case class TTask(taskExtensions: TaskExtensions) {
       code.addCoding()
         .setSystem(CodingSystems.DR_TYPE)
         .setCode(SequencingAlignment.documentType)
-      code.setText(SequencingAlignment.label)
       val sequencingAlignment = new TaskOutputComponent()
         .setType(code)
         .setValue(drr.sequencingAlignment.toReference())
@@ -49,7 +50,6 @@ case class TTask(taskExtensions: TaskExtensions) {
       code.addCoding()
         .setSystem(CodingSystems.DR_TYPE)
         .setCode(VariantCalling.documentType)
-      code.setText(VariantCalling.label)
       val variantCalling = new TaskOutputComponent()
         .setType(code)
         .setValue(drr.variantCalling.toReference())
@@ -61,7 +61,6 @@ case class TTask(taskExtensions: TaskExtensions) {
       code.addCoding()
         .setSystem(CodingSystems.DR_TYPE)
         .setCode(CopyNumberVariant.documentType)
-      code.setText(CopyNumberVariant.label)
       val cnv = new TaskOutputComponent()
         .setType(code)
         .setValue(drr.copyNumberVariant.toReference())
@@ -73,7 +72,6 @@ case class TTask(taskExtensions: TaskExtensions) {
       code.addCoding()
         .setSystem(CodingSystems.DR_TYPE)
         .setCode(QualityControl.documentType)
-      code.setText(QualityControl.label)
       val qc = new TaskOutputComponent()
         .setType(code)
         .setValue(drr.qc.toReference())

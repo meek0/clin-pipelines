@@ -27,6 +27,7 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
       val ldmServiceRequestId = nextId()
       val epOrgId = FhirTestUtils.loadOrganizations(id = "CHUS", alias = "CHUS", name = "CHU Sherbroooke")
       val ldmOrgId = FhirTestUtils.loadOrganizations(id = "LDM-CHUS", alias = "LDM-CHUS", name = "LDM CHU Sherbroooke")
+      FhirTestUtils.loadCQGCOrganization()
       val ldmFhirOrganizationId = s"Organization/$ldmOrgId"
       val ldmProbSpecimenId = nextId()
       val ldmProbSampleId = nextId()
@@ -227,7 +228,8 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
       searchTasks.getTotal shouldBe 2
       val tasks = read(searchTasks, classOf[Task])
       tasks.foreach { t =>
-        t.getOwner.getReference shouldBe ldmFhirOrganizationId
+        t.getRequester.getReference shouldBe ldmFhirOrganizationId
+        t.getOwner.getReference shouldBe "Organization/CQGC"
         t.getOutput.size() shouldBe 4
       }
       tasks.map(_.getCode.getCodingFirstRep.getCode) should contain only TTask.EXOME_GERMLINE_ANALYSIS

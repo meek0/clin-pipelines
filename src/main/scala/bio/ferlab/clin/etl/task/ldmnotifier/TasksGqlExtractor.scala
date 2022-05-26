@@ -21,8 +21,8 @@ object TasksGqlExtractor {
          |    focus @flatten {
          |      serviceRequestReference: reference
          |    }
-         |    owner @flatten {
-         |      owner: resource(type: Organization) {
+         |    requester @flatten {
+         |      requester: resource(type: Organization) {
          |        id
          |        alias @first @singleton
          |        contact @flatten @first @singleton {

@@ -4,7 +4,7 @@
       {
         "id": "Task/104705/_history/1",
         "serviceRequestReference": "ServiceRequest/SR0121",
-        "owner": {
+        "requester": {
           "id": "Organization/LDM-CHUSJ/_history/1",
           "alias": "LDM-CHUSJ",
           "email": "clin_test+LDM-CHUSJ@ferlab.bio"
@@ -103,7 +103,7 @@
       {
         "id": "Task/104715/_history/1",
         "serviceRequestReference": "ServiceRequest/SR0123",
-        "owner": {
+        "requester": {
           "id": "Organization/LDM-CHUSJ/_history/1",
           "alias": "LDM-CHUSJ",
           "email": "clin_test+LDM-CHUSJ@ferlab.bio"
