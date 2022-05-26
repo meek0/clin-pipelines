@@ -36,11 +36,11 @@ object FhirTestUtils {
 
   def loadCQGCOrganization()(implicit fhirClient: IGenericClient): String = {
     val cqgc: Organization = new Organization()
-    cqgc.setId("222")
+    cqgc.setId("CQGC")
     cqgc.setName("CQGC")
     cqgc.setAlias(Collections.singletonList(new StringType("CQGC")))
 
-    val cqgcId: IIdType = fhirClient.create().resource(cqgc).execute().getId
+    val cqgcId: IIdType = fhirClient.update().resource(cqgc).execute().getId
     LOGGER.info("CQGC Organization created with id : " + cqgcId.getIdPart)
     cqgcId.getIdPart
   }

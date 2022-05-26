@@ -25,6 +25,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
       val epOrgId = FhirTestUtils.loadOrganizations(id = "CHUS", alias = "CHUS", name = "CHU Sherbroooke")
       val ldmOrgId = FhirTestUtils.loadOrganizations(id = "LDM-CHUS", alias = "LDM-CHUS", name = "LDM CHU Sherbroooke")
       val ldmFhirOrganizationId = s"Organization/$ldmOrgId"
+      FhirTestUtils.loadCQGCOrganization()
       val ldmSpecimenId = nextId()
       val ldmSampleId = nextId()
       val templateMetadata = Source.fromResource("full/metadata.json").mkString
@@ -154,7 +155,8 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
       val tasks = read(searchTasks, classOf[Task])
       tasks.foreach { t =>
         t.getFor.getReference shouldBe patientId
-        t.getOwner.getReference shouldBe ldmFhirOrganizationId
+        t.getRequester.getReference shouldBe ldmFhirOrganizationId
+        t.getOwner.getReference shouldBe "Organization/CQGC"
         t.getFocus.getReference shouldBe sequencingServiceRequestId
         t.getOutput.size() shouldBe 4
       }

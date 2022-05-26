@@ -23,6 +23,7 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
       val fhirPatientId = s"Patient/$patientId"
       val serviceRequestId = FhirTestUtils.loadServiceRequest(patientId)
       val fhirServiceRequestId = s"ServiceRequest/$serviceRequestId"
+      FhirTestUtils.loadCQGCOrganization()
       val organizationAlias = nextId()
 
       val organizationId = FhirTestUtils.loadOrganizations(organizationAlias)
@@ -117,7 +118,8 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
       val tasks = read(searchTasks, classOf[Task])
       tasks.foreach { t =>
         t.getFor.getReference shouldBe fhirPatientId
-        t.getOwner.getReference shouldBe fhirOrganizationId
+        t.getRequester.getReference shouldBe fhirOrganizationId
+        t.getOwner.getReference shouldBe "Organization/CQGC"
         t.getFocus.getReference shouldBe fhirServiceRequestId
         t.getOutput.size() shouldBe 4
       }

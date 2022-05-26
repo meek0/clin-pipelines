@@ -10,7 +10,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
     val Task1Ldm1 = Task(
       id = "task1",
       serviceRequestReference = "ServiceRequest/1",
-      owner = Owner(id = "LDM1", alias = "LDM1", email = "LDM1@mail.com"),
+      requester = Requester(id = "LDM1", alias = "LDM1", email = "LDM1@mail.com"),
       documents = Seq(
         Document(
           contentList = Seq(
@@ -39,7 +39,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
     )
     val Task2Ldm1 = Task(
       id = "task2",
-      owner = Owner(id = "LDM1", alias = "LDM1", email = "LDM1@mail.com"),
+      requester = Requester(id = "LDM1", alias = "LDM1", email = "LDM1@mail.com"),
       serviceRequestReference = "ServiceRequest/2",
       documents = Seq(
         Document(
@@ -69,7 +69,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
     )
     val Task3Ldm2 = Task(
       id = "task3",
-      owner = Owner(id = "LDM2", alias = "LDM2", email = "LDM2@mail.com"),
+      requester = Requester(id = "LDM2", alias = "LDM2", email = "LDM2@mail.com"),
       serviceRequestReference = "ServiceRequest/3",
       documents = Seq(
         Document(

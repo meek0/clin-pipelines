@@ -55,7 +55,7 @@ object TasksTransformer {
   def groupManifestRowsByLdm(clinUrl: String, tasks: Seq[Task]): Map[(String, String), Seq[ManifestRow]] = {
     tasks.map(task =>
       (
-        (task.owner.alias, task.owner.email),
+        (task.requester.alias, task.requester.email),
         makeManifestRows(
           task.documents,
           Map("clinUrl" -> clinUrl, "serviceRequestReference" -> task.serviceRequestReference)
