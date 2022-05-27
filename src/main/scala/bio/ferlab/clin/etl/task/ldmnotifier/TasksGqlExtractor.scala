@@ -26,7 +26,7 @@ object TasksGqlExtractor {
          |        id
          |        alias @first @singleton
          |        contact @flatten @first @singleton {
-         |          telecom @flatten @first @singleton {
+         |          telecom(fhirpath: "system='email'") @flatten @first @singleton {
          |            email: value
          |          }
          |        }
