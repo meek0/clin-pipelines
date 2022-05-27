@@ -27,9 +27,10 @@ object TFullServiceRequest {
 }
 
 case class TAnalysisServiceRequest(analysis: FullAnalysis) {
-  def buildResource(patient: Reference, familyExtensions: Option[Seq[FamilyExtension]], clinicalImpressions:Seq[Reference]): Resource = {
+  def buildResource(patient: Reference, familyExtensions: Option[Seq[FamilyExtension]], clinicalImpressions:Seq[Reference], ldm:Reference): Resource = {
     sr.setId(id)
     sr.setSubject(patient)
+    sr.addPerformer(ldm)
     familyExtensions.foreach { fel =>
       val extensions: Seq[Extension] = fel.map { familyExtension =>
         val ext = new Extension("http://fhir.cqgc.ferlab.bio/StructureDefinition/family-member")
@@ -73,10 +74,11 @@ case class TAnalysisServiceRequest(analysis: FullAnalysis) {
 }
 
 case class TSequencingServiceRequest(analysis: FullAnalysis) {
-  def buildResource(analysisServiceRequest: Option[Reference], patient:Reference, specimen: Reference, sample: Reference): Resource = {
+  def buildResource(analysisServiceRequest: Option[Reference], patient:Reference, specimen: Reference, sample: Reference, ldm:Reference): Resource = {
     sr.setId(id)
     analysisServiceRequest.foreach(sr.addBasedOn)
     sr.addSpecimen(specimen)
+    sr.addPerformer(ldm)
     sr.addSpecimen(sample)
     sr.setSubject(patient)
     sr

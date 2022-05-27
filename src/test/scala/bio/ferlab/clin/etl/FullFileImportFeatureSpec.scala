@@ -104,6 +104,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
       analysisServiceRequest.getSubject.getReference shouldBe patientId
       analysisServiceRequest.getCode.getCodingFirstRep.getSystem shouldBe CodingSystems.ANALYSIS_REQUEST_CODE
       analysisServiceRequest.getCode.getCodingFirstRep.getCode shouldBe "MMG"
+      analysisServiceRequest.getPerformerFirstRep.getReference shouldBe ldmFhirOrganizationId
 
       val analysisServiceRequestId = id(analysisServiceRequest)
 
@@ -117,6 +118,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
         r.getSubject.getReference shouldBe patientId
         r.getCode.getCodingFirstRep.getSystem shouldBe CodingSystems.ANALYSIS_REQUEST_CODE
         r.getCode.getCodingFirstRep.getCode shouldBe "MMG"
+        r.getPerformerFirstRep.getReference shouldBe ldmFhirOrganizationId
       }
       val sequencingServiceRequestId = id(sequencingServiceRequests.head)
       sample.getRequestFirstRep.getReference shouldBe sequencingServiceRequestId
