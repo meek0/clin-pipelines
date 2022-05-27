@@ -15,7 +15,7 @@ object DocumentReferencesValidation {
       validate[SequencingAlignment](files, a),
       validate[VariantCalling](files, a),
       validate[CopyNumberVariant](files, a),
-      validate[QualityControl](files, a)
+      validate[SupplementDocument](files, a)
       ).mapN(TDocumentReferences)
 
   }

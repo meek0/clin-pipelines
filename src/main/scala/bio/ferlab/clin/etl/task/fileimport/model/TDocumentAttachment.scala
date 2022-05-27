@@ -117,16 +117,16 @@ object CNV_TBI {
   }
 }
 
-case class QC(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+case class Supplement(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
   override val format: String = "TGZ"
 }
 
-object QC {
-  implicit case object builder extends ToAttachment[QC] {
-    override def label: String = "qc"
+object Supplement {
+  implicit case object builder extends ToAttachment[Supplement] {
+    override def label: String = "supplement"
 
-    override def analysisFileName: Analysis => String = a => a.files.qc
+    override def analysisFileName: Analysis => String = a => a.files.supplement
 
-    override def buildFile: FileEntry => QC = f => QC(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+    override def buildFile: FileEntry => Supplement = f => Supplement(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
   }
 }

@@ -73,7 +73,7 @@ object CheckS3Data {
         a.files.snv_tbi -> (snvTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.snv_tbi)),
         a.files.cnv_vcf -> (cnvVcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_vcf)),
         a.files.cnv_tbi -> (cnvTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_tbi)),
-        a.files.qc -> (qcId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.qc))
+        a.files.supplement -> (qcId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.supplement))
       )
 
     }.toMap

@@ -39,7 +39,7 @@
         "crai": "file1.crai",
         "vcf": "file2.vcf",
         "tbi": "file2.tbi",
-        "qc": "file3.json"
+        "supplement": "file3.json"
       }
     }
   ]
