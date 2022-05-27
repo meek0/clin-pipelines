@@ -22,7 +22,7 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
     DocumentReferencesValidation.validateFiles(files, defaultAnalysis) shouldBe Invalid(
       NonEmptyList.of(
         s"File file2.tbi does not exist : type=tbi, specimen=submitted_specimen_id, sample=submitted_sample_id",
-        "File file3.tgz does not exist : type=qc, specimen=submitted_specimen_id, sample=submitted_sample_id"
+        "File file3.tgz does not exist : type=supplement, specimen=submitted_specimen_id, sample=submitted_sample_id"
       )
     )
 
@@ -44,7 +44,7 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
         SequencingAlignment(List(CRAM("id", "file1.cram", Some("md5"), 10, "application/octet-stream"), CRAI("id", "file1.crai", Some("md5"), 10, "application/octet-stream"))),
         VariantCalling(List(SNV_VCF("id", "file2.vcf", Some("md5"), 10, "application/octet-stream"), SNV_TBI("id", "file2.tbi", Some("md5"), 10, "application/octet-stream"))),
         CopyNumberVariant(List(CNV_VCF("id", "file4.vcf", Some("md5"), 10, "application/octet-stream"), CNV_TBI("id", "file4.tbi", Some("md5"), 10, "application/octet-stream"))),
-        QualityControl(List(QC("id", "file3.tgz", Some("md5"), 10, "application/octet-stream")))
+        SupplementDocument(List(Supplement("id", "file3.tgz", Some("md5"), 10, "application/octet-stream")))
       )
     )
 

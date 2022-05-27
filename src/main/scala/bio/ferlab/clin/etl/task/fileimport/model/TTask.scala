@@ -67,18 +67,18 @@ case class TTask(taskExtensions: TaskExtensions) {
       cnv
     }
 
-    val qualityControlOutput = {
+    val supplementOutput = {
       val code = new CodeableConcept()
       code.addCoding()
         .setSystem(CodingSystems.DR_TYPE)
-        .setCode(QualityControl.documentType)
-      val qc = new TaskOutputComponent()
+        .setCode(SupplementDocument.documentType)
+      val sup = new TaskOutputComponent()
         .setType(code)
-        .setValue(drr.qc.toReference())
-      qc
+        .setValue(drr.supplement.toReference())
+      sup
     }
 
-    Seq(sequencingExperimentOutput, variantCallOutput, cnvOutput, qualityControlOutput).foreach { r =>
+    Seq(sequencingExperimentOutput, variantCallOutput, cnvOutput, supplementOutput).foreach { r =>
       t.addOutput(r)
     }
 

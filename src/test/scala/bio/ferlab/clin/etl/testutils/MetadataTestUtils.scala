@@ -47,7 +47,7 @@ object MetadataTestUtils {
     snv_tbi = "file2.tbi",
     cnv_vcf = "file4.vcf",
     cnv_tbi = "file4.tbi",
-    qc = "file3.tgz"
+    supplement = "file3.tgz"
   )
   val defaultAnalysis: SimpleAnalysis = SimpleAnalysis(
     patient = defaultPatient("clin_id"),

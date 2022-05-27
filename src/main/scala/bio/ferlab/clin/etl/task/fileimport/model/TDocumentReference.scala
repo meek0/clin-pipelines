@@ -130,20 +130,20 @@ object CopyNumberVariant {
   }
 }
 
-case class QualityControl(document: Seq[TDocumentAttachment]) extends TDocumentReference {
-  override val documentType: String = QualityControl.documentType
-  override val id: String = idFromList[QC](document)
+case class SupplementDocument(document: Seq[TDocumentAttachment]) extends TDocumentReference {
+  override val documentType: String = SupplementDocument.documentType
+  override val id: String = idFromList[Supplement](document)
 }
 
-object QualityControl {
+object SupplementDocument {
   val documentType: String = "SSUP"
-  val label = "QC"
-  implicit case object builder extends ToReference[QualityControl] {
-    override val label: String = QualityControl.label
+  val label = "Supplement"
+  implicit case object builder extends ToReference[SupplementDocument] {
+    override val label: String = SupplementDocument.label
 
-    protected override def build(documents: Seq[TDocumentAttachment]): QualityControl = QualityControl(documents)
+    protected override def build(documents: Seq[TDocumentAttachment]): SupplementDocument = SupplementDocument(documents)
 
-    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[QC])
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[Supplement])
   }
 }
 
