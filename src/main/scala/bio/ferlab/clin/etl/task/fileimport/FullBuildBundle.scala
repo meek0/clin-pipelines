@@ -97,7 +97,7 @@ object FullBuildBundle {
       val clinicalImpressionReferences = b.patient.patient.familyId
         .flatMap(f => clinicalImpressionsByFamily.get(f))
         .getOrElse(Seq(b.clinicalImpression.id))
-      a.buildResource(patientResource.toReference(), bundleFamilyExtension, clinicalImpressionReferences.map(_.toReference()))
+      a.buildResource(patientResource.toReference(), bundleFamilyExtension, clinicalImpressionReferences.map(_.toReference()), b.ldm.toReference())
     }
     val task = TTask(b.taskExtensions)
     val personResource = b.person.buildResource(patientResource.toReference())
@@ -108,7 +108,8 @@ object FullBuildBundle {
 
     val familyAnalysisServiceRequest: Option[IdType] = b.patient.patient.familyId.flatMap(f => analysisServiceRequestByFamily.get(f))
     val analysisServiceRequestReference = b.analysisServiceRequest.map(_.id.toReference()).orElse(familyAnalysisServiceRequest.map(_.toReference()))
-    val sequencingServiceRequestResource = b.sequencingServiceRequest.buildResource(analysisServiceRequestReference, patientResource.toReference(), specimenResource.toReference(), sampleResource.toReference())
+    val sequencingServiceRequestResource = b.sequencingServiceRequest.buildResource(analysisServiceRequestReference,
+      patientResource.toReference(), specimenResource.toReference(), sampleResource.toReference(), b.ldm.toReference())
 
     val taskResource: Resource = task.buildResource(sequencingServiceRequestReference, patientResource.toReference(), b.ldm.toReference(), sampleResource.toReference(), documentReferencesResources)
     val clinicalImpressionResource = b.clinicalImpression.createResource(patientResource.toReference(), b.diseaseStatus.id.toReference())
