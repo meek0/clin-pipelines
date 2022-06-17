@@ -9,5 +9,5 @@ case class ManifestRow(
                         ldmSampleId: String,
                         patientId: String,
                         serviceRequestId: String,
-                        cqgcLink: String
+                        size: Long
                       )

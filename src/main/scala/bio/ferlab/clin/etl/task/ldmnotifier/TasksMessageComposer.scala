@@ -19,7 +19,7 @@ object TasksMessageComposer {
       "ldm_sample_id",
       "patient_id",
       "service_request_id",
-      "cqgc_link"
+      "size"
     )
     pW.write(s"${header.mkString("\t")}\n")
     rows.foreach(row => {
@@ -32,7 +32,7 @@ object TasksMessageComposer {
         row.ldmSampleId,
         row.patientId,
         row.serviceRequestId,
-        row.cqgcLink
+        row.size
       )
       pW.write(s"${values.mkString("\t")}\n")
     })

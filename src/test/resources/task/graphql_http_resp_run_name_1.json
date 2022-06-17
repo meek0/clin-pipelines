@@ -16,14 +16,16 @@
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/9d7f1860-dc3a-4568-a5fa-007c3e3655ec",
                   "hash64": "YzFkY2U1ZjVmNmE0ZDBhNTlkMzlhY2I5MTlkOGViOGM=",
-                  "title": "16900.cram"
+                  "title": "16900.cram",
+                  "size": 1024
                 },
                 "fileFormat": "CRAM"
               },
               {
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/9d7f1860-dc3a-4568-a5fa-007c3e3655ec.crai",
-                  "title": "16900.cram.crai"
+                  "title": "16900.cram.crai",
+                  "size": 1024
                 },
                 "fileFormat": "CRAI"
               }
@@ -40,14 +42,16 @@
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/fbc89c72-a6ca-4b23-9078-f6f566c0ba92",
                   "hash64": "ZDMwODRkOWY2NGZmYjQxZTRjZWE0ZjJiY2M5ZmQxYjA=",
-                  "title": "16900.hard-filtered.gvcf.gz"
+                  "title": "16900.hard-filtered.gvcf.gz",
+                  "size": 1024
                 },
                 "fileFormat": "VCF"
               },
               {
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/fbc89c72-a6ca-4b23-9078-f6f566c0ba92.tbi",
-                  "title": "16900.hard-filtered.gvcf.gz.tbi"
+                  "title": "16900.hard-filtered.gvcf.gz.tbi",
+                  "size": 1024
                 },
                 "fileFormat": "TBI"
               }
@@ -64,14 +68,16 @@
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/5944c2e6-9614-4712-a762-6825037ab841",
                   "hash64": "NDIyNTE3YTdiZjIxNTliYmNhMTA5ZDIzMWI1ZWMyYzk=",
-                  "title": "16900.cnv.vcf.gz"
+                  "title": "16900.cnv.vcf.gz",
+                  "size": 1024
                 },
                 "fileFormat": "VCF"
               },
               {
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/5944c2e6-9614-4712-a762-6825037ab841.tbi",
-                  "title": "16900.cnv.vcf.gz.tbi"
+                  "title": "16900.cnv.vcf.gz.tbi",
+                  "size": 1024
                 },
                 "fileFormat": "TBI"
               }
@@ -87,7 +93,8 @@
               {
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/0400a676-b38e-402a-9cdb-b603d201c433",
-                  "title": "16900.QC.tgz"
+                  "title": "16900.QC.tgz",
+                  "size": 1024
                 },
                 "fileFormat": "TGZ"
               }
@@ -115,14 +122,16 @@
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/10b5c747-219c-4f7b-a0cf-e8dee3a22b61",
                   "hash64": "ZGQ5MjQ3ZWEyZTVjMjkzMTFiMWMyZTU2MTI4ZjFlMzU=",
-                  "title": "16902.cram"
+                  "title": "16902.cram",
+                  "size": 1024
                 },
                 "fileFormat": "CRAM"
               },
               {
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/10b5c747-219c-4f7b-a0cf-e8dee3a22b61.crai",
-                  "title": "16902.cram.crai"
+                  "title": "16902.cram.crai",
+                  "size": 1024
                 },
                 "fileFormat": "CRAI"
               }
@@ -139,14 +148,16 @@
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/b43f727c-5ee9-4403-a83f-862da5b05b54",
                   "hash64": "Mzc4OGM0ZjkwOGNhN2ZmM2NiM2FmNWJjOGI2Mzc3Zjg=",
-                  "title": "16902.hard-filtered.gvcf.gz"
+                  "title": "16902.hard-filtered.gvcf.gz",
+                  "size": 1024
                 },
                 "fileFormat": "VCF"
               },
               {
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/b43f727c-5ee9-4403-a83f-862da5b05b54.tbi",
-                  "title": "16902.hard-filtered.gvcf.gz.tbi"
+                  "title": "16902.hard-filtered.gvcf.gz.tbi",
+                  "size": 1024
                 },
                 "fileFormat": "TBI"
               }
@@ -163,14 +174,16 @@
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/b314e495-e368-4fa5-af05-060a390219e7",
                   "hash64": "NDIyNTE3YTdiZjIxNTliYmNhMTA5ZDIzMWI1ZWMyYzk=",
-                  "title": "16902.cnv.vcf.gz"
+                  "title": "16902.cnv.vcf.gz",
+                  "size": 1024
                 },
                 "fileFormat": "VCF"
               },
               {
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/b314e495-e368-4fa5-af05-060a390219e7.tbi",
-                  "title": "16902.cnv.vcf.gz.tbi"
+                  "title": "16902.cnv.vcf.gz.tbi",
+                  "size": 1024
                 },
                 "fileFormat": "TBI"
               }
@@ -186,7 +199,8 @@
               {
                 "attachment": {
                   "url": "https://ferload.qa.clin.ferlab.bio/blue/513079a1-1642-407c-98d6-b6dc2451cf67",
-                  "title": "16902.QC.tgz"
+                  "title": "16902.QC.tgz",
+                  "size": 1024
                 },
                 "fileFormat": "TGZ"
               }

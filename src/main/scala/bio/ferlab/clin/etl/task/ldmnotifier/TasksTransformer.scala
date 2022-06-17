@@ -46,7 +46,7 @@ object TasksTransformer {
           ldmSampleId = sampleId,
           patientId = patientId,
           serviceRequestId = removePrefix(serviceRequestReferencePrefix, serviceRequestReference),
-          cqgcLink = makeCqgcLink(clinUrl, patientId)
+          size = content.attachment.size
         )
       )
     })

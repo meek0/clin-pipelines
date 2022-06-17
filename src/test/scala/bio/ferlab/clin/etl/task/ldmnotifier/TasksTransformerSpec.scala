@@ -18,7 +18,8 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
               attachment = Attachment(
                 url = "https://ferload.env.clin.ferlab.bio/ldm1file1",
                 hash64 = Some("OWY3Y2Y5YzFjN2E2MWU2NDVkM2MzYzAyYmFhYzI0MGM="),
-                title = "16900.cram.cram"
+                title = "16900.cram.cram",
+                size = 1024
               ),
               fileFormat = "CRAM"
             ),
@@ -26,7 +27,8 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
               attachment = Attachment(
                 url = "https://ferload.env.clin.ferlab.bio/ldm1file1.crai",
                 hash64 = None,
-                title = "16900.cram.crai"
+                title = "16900.cram.crai",
+                size = 2048
               ),
               fileFormat = "CRAI"
             )
@@ -48,7 +50,8 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
               attachment = Attachment(
                 url = "https://ferload.env.clin.ferlab.bio/ldm1file2",
                 hash64 = Some("YWMzN2RhMWViOTgwMzQ3NzQ2NWU5ZjgwZDM0NzE2ZmQ"),
-                title = "16870.hard-filtered.gvcf.gz"
+                title = "16870.hard-filtered.gvcf.gz",
+                size = 1024
               ),
               fileFormat = "VCF"
             ),
@@ -56,7 +59,8 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
               attachment = Attachment(
                 url = "https://ferload.env.clin.ferlab.bio/ldm1file2.tbi",
                 hash64 = None,
-                title = "16870.hard-filtered.gvcf.gz.tbi"
+                title = "16870.hard-filtered.gvcf.gz.tbi",
+                size = 2048
               ),
               fileFormat = "TBI"
             )
@@ -78,7 +82,8 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
               attachment = Attachment(
                 url = "https://ferload.env.clin.ferlab.bio/ldm2file1.tbi",
                 hash64 = None,
-                title = "16870.QC.tgz"
+                title = "16870.QC.tgz",
+                size = 1024
               ),
               fileFormat = "TGZ"
             )
@@ -115,7 +120,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
         ldmSampleId = "sampleId",
         patientId = "1",
         serviceRequestId = "1",
-        cqgcLink = "https://clin.bio/patient/1"
+        size = 1024
       ),
       ManifestRow(
         url = "/ldm1file1.crai",
@@ -126,7 +131,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
         ldmSampleId = "sampleId",
         patientId = "1",
         serviceRequestId = "1",
-        cqgcLink = "https://clin.bio/patient/1"
+        size = 2048
       ),
       ManifestRow(
         url = "/ldm1file2",
@@ -137,7 +142,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
         ldmSampleId = "sampleId",
         patientId = "2",
         serviceRequestId = "2",
-        cqgcLink = "https://clin.bio/patient/2"
+        size = 1024
       ),
       ManifestRow(
         url = "/ldm1file2.tbi",
@@ -148,7 +153,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
         ldmSampleId = "sampleId",
         patientId = "2",
         serviceRequestId = "2",
-        cqgcLink = "https://clin.bio/patient/2"
+        size = 2048
       )
     )
     group(("LDM2", "LDM2@mail.com")) shouldBe Seq(
@@ -161,7 +166,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
         ldmSampleId = "sampleId",
         patientId = "3",
         serviceRequestId = "3",
-        cqgcLink = "https://clin.bio/patient/3"
+        size = 1024
       )
     )
   }
