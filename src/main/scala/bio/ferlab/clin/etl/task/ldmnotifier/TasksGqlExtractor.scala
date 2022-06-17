@@ -40,6 +40,9 @@ object TasksGqlExtractor {
          |						  url
          |              hash64: hash
          |              title
+         |              size: extension(url: "http://fhir.cqgc.ferlab.bio/StructureDefinition/full-size") @flatten @first { 
+         |                size: value
+         |              } 
          |		  		   }
          |             format @flatten {
          |              fileFormat: code

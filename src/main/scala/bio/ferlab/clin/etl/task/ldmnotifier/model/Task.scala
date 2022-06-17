@@ -2,7 +2,7 @@ package bio.ferlab.clin.etl.task.ldmnotifier.model
 
 import play.api.libs.json.{Json, Reads}
 
-case class Attachment(url: String, hash64: Option[String], title: String)
+case class Attachment(url: String, hash64: Option[String], title: String, size: Long)
 object Attachment {
   implicit val reads: Reads[Attachment] = Json.reads[Attachment]
 }
