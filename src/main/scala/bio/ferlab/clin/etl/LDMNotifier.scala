@@ -17,7 +17,7 @@ object LDMNotifier extends App {
 
   def sendEmails(runName: String,
                  mailerConf: MailerConf,
-                 group: Map[(String, String), Seq[ManifestRow]]
+                 group: Map[(String, Seq[String]), Seq[ManifestRow]]
                 ): ValidationResult[List[Unit]] = {
 
     val mailer = new MailerService(makeSmtpMailer(mailerConf))

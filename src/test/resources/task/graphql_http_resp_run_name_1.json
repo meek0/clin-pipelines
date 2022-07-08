@@ -7,7 +7,7 @@
         "requester": {
           "id": "Organization/LDM-CHUSJ/_history/1",
           "alias": "LDM-CHUSJ",
-          "email": "clin_test+LDM-CHUSJ@ferlab.bio"
+          "email": ["clin_test+LDM-CHUSJ@ferlab.bio"]
         },
         "documents": [
           {
@@ -113,7 +113,7 @@
         "requester": {
           "id": "Organization/LDM-CHUSJ/_history/1",
           "alias": "LDM-CHUSJ",
-          "email": "clin_test+LDM-CHUSJ@ferlab.bio"
+          "email": ["clin_test+LDM-CHUSJ@ferlab.bio"]
         },
         "documents": [
           {
