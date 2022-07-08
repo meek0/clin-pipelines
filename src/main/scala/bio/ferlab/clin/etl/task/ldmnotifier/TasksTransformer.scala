@@ -52,7 +52,7 @@ object TasksTransformer {
     })
   }
 
-  def groupManifestRowsByLdm(clinUrl: String, tasks: Seq[Task]): Map[(String, String), Seq[ManifestRow]] = {
+  def groupManifestRowsByLdm(clinUrl: String, tasks: Seq[Task]): Map[(String, Seq[String]), Seq[ManifestRow]] = {
     tasks.map(task =>
       (
         (task.requester.alias, task.requester.email),

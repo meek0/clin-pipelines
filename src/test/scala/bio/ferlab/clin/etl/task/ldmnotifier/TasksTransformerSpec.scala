@@ -10,7 +10,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
     val Task1Ldm1 = Task(
       id = "task1",
       serviceRequestReference = "ServiceRequest/1",
-      requester = Requester(id = "LDM1", alias = "LDM1", email = "LDM1@mail.com"),
+      requester = Requester(id = "LDM1", alias = "LDM1", email = Seq("LDM1@mail.com")),
       documents = Seq(
         Document(
           contentList = Seq(
@@ -41,7 +41,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
     )
     val Task2Ldm1 = Task(
       id = "task2",
-      requester = Requester(id = "LDM1", alias = "LDM1", email = "LDM1@mail.com"),
+      requester = Requester(id = "LDM1", alias = "LDM1", email = Seq("LDM1@mail.com")),
       serviceRequestReference = "ServiceRequest/2",
       documents = Seq(
         Document(
@@ -73,7 +73,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
     )
     val Task3Ldm2 = Task(
       id = "task3",
-      requester = Requester(id = "LDM2", alias = "LDM2", email = "LDM2@mail.com"),
+      requester = Requester(id = "LDM2", alias = "LDM2", email = Seq("LDM2@mail.com")),
       serviceRequestReference = "ServiceRequest/3",
       documents = Seq(
         Document(
@@ -106,11 +106,11 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
     group.size shouldBe 2
 
     And("have correct keys (alias, email)")
-    group.contains(("LDM1", "LDM1@mail.com")) shouldBe true
-    group.contains(("LDM2", "LDM2@mail.com")) shouldBe true
+    group.contains(("LDM1", Seq("LDM1@mail.com"))) shouldBe true
+    group.contains(("LDM2", Seq("LDM2@mail.com"))) shouldBe true
 
     And("each alias should have the corresponding data")
-    group(("LDM1", "LDM1@mail.com")) shouldBe Seq(
+    group(("LDM1", Seq("LDM1@mail.com"))) shouldBe Seq(
       ManifestRow(
         url = "/ldm1file1",
         fileName = "16900.cram.cram",
@@ -156,7 +156,7 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
         size = 2048
       )
     )
-    group(("LDM2", "LDM2@mail.com")) shouldBe Seq(
+    group(("LDM2", Seq("LDM2@mail.com"))) shouldBe Seq(
       ManifestRow(
         url = "/ldm2file1.tbi",
         fileName = "16870.QC.tgz",

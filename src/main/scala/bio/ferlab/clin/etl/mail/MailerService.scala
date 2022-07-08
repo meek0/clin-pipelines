@@ -4,7 +4,7 @@ import bio.ferlab.clin.etl.conf.MailerConf
 import play.api.libs.mailer._
 
 case class EmailParams(
-                        to: String,
+                        to: Seq[String],
                         from: String,
                         bccs: Seq[String],
                         subject: String,
@@ -19,7 +19,7 @@ class MailerService (mailerClient: MailerClient) {
     mailerClient.send(Email(
       subject = params.subject,
       from = params.from,
-      to = Seq(params.to),
+      to = params.to,
       attachments = params.attachments,
       bodyText = Some(params.bodyText),
       bcc = params.bccs

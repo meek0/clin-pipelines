@@ -22,7 +22,7 @@ object Document {
   implicit val reads: Reads[Document] = Json.reads[Document]
 }
 
-case class Requester(id: String, alias: String, email: String)
+case class Requester(id: String, alias: String, email: Seq[String])
 object Requester{
   implicit val reads: Reads[Requester] = Json.reads[Requester]
 }
