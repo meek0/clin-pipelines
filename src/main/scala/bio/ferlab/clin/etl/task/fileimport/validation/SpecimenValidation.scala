@@ -124,7 +124,7 @@ object SpecimenValidation {
 
   def validateFullPatient(specimen: TSpecimen, patient: TPatient, specimenId: String, label: SpecimenSampleType): ValidationResult[TSpecimen] = {
     specimen match {
-      case TExistingSpecimen(sp) if new IdType(sp.getSubject.getReference) != patient.id =>
+      case TExistingSpecimen(sp) if new IdType(sp.getSubject.getReference).getIdPart != patient.id.getIdPart =>
         s"$label $specimenId for patient ${patient.patient.firstName} ${patient.patient.lastName} : does not belong to the same patient (${patient.id.getIdPart} <-> ${sp.getSubject.getReference})".invalidNel
       case _ => specimen.validNel
 
