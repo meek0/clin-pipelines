@@ -11,6 +11,7 @@ import cats.implicits._
 import org.hl7.fhir.r4.model._
 
 import scala.collection.JavaConverters._
+import scala.util.{Success, Try}
 
 object TaskExtensionValidation {
 
@@ -50,10 +51,20 @@ object TaskExtensionValidation {
 
   private def validateRunDate(m: Metadata, experimentExt: Extension) = {
     val runDate: Option[ValidatedNel[String, DateTimeType]] = m.experiment.runDate.map { d =>
-      try {
-        new DateTimeType(d).validNel[String]
-      } catch {
-        case e: DataFormatException => s"Error on experiment.rundate = ${e.getMessage}".invalidNel[DateTimeType]
+
+      import java.text.SimpleDateFormat
+      val patterns = Seq("dd/MM/yyyy", "yyyy-MM-dd")
+      val t: Option[DateTimeType] = patterns.toStream.map { p =>
+        Try {
+          val simpleDateFormat = new SimpleDateFormat(p)
+          val parsed = simpleDateFormat.parse(d)
+          new DateTimeType(parsed)
+        }
+      }.collectFirst { case Success(x) => x }
+
+      t match {
+        case Some(date) => date.validNel[String]
+        case _ => s"Error on experiment.rundate = $d".invalidNel[DateTimeType]
       }
     }
 

@@ -27,7 +27,14 @@ class TaskExtensionValidationSpec extends FlatSpec with Matchers with GivenWhenT
     val metadata = defaultMetadata.copy(experiment = defaultExperiment.copy(runDate = Some("unparseable date")))
     inside(TaskExtensionValidation.validateTaskExtension(metadata)) {
       case Invalid(NonEmptyList(error, Nil)) =>
-        error shouldBe """Error on experiment.rundate = Invalid date/time format: "unparseable date""""
+        error shouldBe "Error on experiment.rundate = unparseable date"
+    }
+  }
+
+  it should "return errors if run date is valid with format dd/mm/yyyy" in {
+    val metadata = defaultMetadata.copy(experiment = defaultExperiment.copy(runDate = Some("01/12/2006")))
+    TaskExtensionValidation.validateTaskExtension(metadata) should matchPattern {
+      case Valid(TaskExtensions(_, _)) =>
     }
   }
 
