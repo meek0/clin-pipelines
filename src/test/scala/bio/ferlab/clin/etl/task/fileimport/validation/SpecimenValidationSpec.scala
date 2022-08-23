@@ -54,7 +54,7 @@ class SpecimenValidationSpec extends FlatSpec with Matchers with FhirServerSuite
     val ldmSpecimenId = nextId()
     val ptId = FhirTestUtils.loadPatients().getIdPart
     val analysis = defaultAnalysis.copy(ldmSpecimenId = ldmSpecimenId, ldm = "CHUSJ", patient = defaultPatient(ptId))
-    validateSpecimen(analysis) shouldBe Valid(TNewSpecimen("CHUSJ", ldmSpecimenId, "NBL", "2053", SpecimenType))
+    validateSpecimen(analysis) shouldBe Valid(TNewSpecimen("CHUSJ", ldmSpecimenId, "NBL", SpecimenType))
   }
 
   it should "return a valid existing specimen if it exist" in {
@@ -107,7 +107,7 @@ class SpecimenValidationSpec extends FlatSpec with Matchers with FhirServerSuite
     val ldmSampleId = nextId()
     val ldmSpecimenId = nextId()
     val analysis = defaultAnalysis.copy(ldmSpecimenId = ldmSpecimenId, ldmSampleId = ldmSampleId, ldm = "CHUSJ", patient = defaultPatient(ptId))
-    validateSample(analysis) shouldBe Valid(TNewSpecimen("CHUSJ", ldmSampleId, "DNA", "2053", SampleType))
+    validateSample(analysis) shouldBe Valid(TNewSpecimen("CHUSJ", ldmSampleId, "DNA", SampleType))
   }
 
   it should "return a valid new sample if sample does not exist but specimen does" in {
@@ -116,7 +116,7 @@ class SpecimenValidationSpec extends FlatSpec with Matchers with FhirServerSuite
     val ldmSampleId = nextId()
     val sp1 = FhirTestUtils.loadSpecimen(ptId, "CHUSJ", ldmSpecimenId)
     val analysis = defaultAnalysis.copy(ldmSpecimenId = ldmSpecimenId, ldmSampleId = ldmSampleId, ldm = "CHUSJ", patient = defaultPatient(ptId))
-    validateSample(analysis) shouldBe Valid(TNewSpecimen("CHUSJ", ldmSampleId, "DNA", "2053", SampleType))
+    validateSample(analysis) shouldBe Valid(TNewSpecimen("CHUSJ", ldmSampleId, "DNA", SampleType))
   }
 
   it should "return an error if samples does not have the same parent " in {

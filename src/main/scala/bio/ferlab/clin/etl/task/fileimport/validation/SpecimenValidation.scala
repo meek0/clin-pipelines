@@ -91,7 +91,7 @@ object SpecimenValidation {
     }
     specimen match {
       case None =>
-        val s = TNewSpecimen(ldm, id, stype, a.bodySite, specimenType)
+        val s = TNewSpecimen(ldm, id, stype, specimenType)
         val outcome = s.validateBaseResource
         validateOutcomes(outcome, s) { o =>
           val diag = o.getDiagnostics

@@ -88,7 +88,6 @@ sealed trait Analysis {
   val ldmSpecimenId: String
   val specimenType: String
   val sampleType: Option[String]
-  val bodySite: String
   val labAliquotId: String
   val patient: InputPatient
   val files: FilesAnalysis
@@ -101,7 +100,6 @@ case class SimpleAnalysis(
                            ldmSpecimenId: String,
                            specimenType: String,
                            sampleType: Option[String],
-                           bodySite: String,
                            clinServiceRequestId: String,
                            labAliquotId: String,
                            patient: SimplePatient,
@@ -119,7 +117,6 @@ case class FullAnalysis(
                          ldmSpecimenId: String,
                          specimenType: String,
                          sampleType: Option[String],
-                         bodySite: String,
                          ldmServiceRequestId: String,
                          labAliquotId: String,
                          patient: FullPatient,
