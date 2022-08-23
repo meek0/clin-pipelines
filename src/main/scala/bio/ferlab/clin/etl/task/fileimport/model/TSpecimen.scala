@@ -19,7 +19,7 @@ case class TExistingSpecimen(sp: Specimen) extends TSpecimen with ExistingResour
   def buildResource(patientId: Reference, serviceRequest: Reference, organization: Reference, parent: Option[Reference] = None): Either[IdType, Specimen] = Left(id)
 }
 
-case class TNewSpecimen(lab: String, submitterId: String, specimenType: String, bodySite: String, specimenSampleType: SpecimenSampleType) extends TSpecimen {
+case class TNewSpecimen(lab: String, submitterId: String, specimenType: String, specimenSampleType: SpecimenSampleType) extends TSpecimen {
 
   def buildResource(patientId: Reference, serviceRequest: Reference, organization: Reference, parent: Option[Reference] = None): Either[IdType, Specimen] = {
     val specimen: Specimen = buildBase()

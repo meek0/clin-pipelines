@@ -33,7 +33,6 @@ object MetadataTestUtils {
     ldmSpecimenId = "submitted_specimen_id",
     specimenType = "NBL",
     sampleType = Some("DNA"),
-    bodySite = "2053",
     ldmServiceRequestId = "clin_prescription_id",
     labAliquotId = "nanuq_sample_id",
     panelCode = "MMG",
@@ -56,7 +55,6 @@ object MetadataTestUtils {
     ldmSpecimenId = "submitted_specimen_id",
     specimenType = "NBL",
     sampleType = Some("DNA"),
-    bodySite = "2053",
     clinServiceRequestId = "clin_prescription_id",
     labAliquotId = "nanuq_sample_id",
     files = defaultFilesAnalysis
