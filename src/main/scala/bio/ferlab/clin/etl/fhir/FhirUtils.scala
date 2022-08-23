@@ -95,7 +95,7 @@ object FhirUtils {
   }
 
   def validateAdministrativeGender(gender: String): ValidatedNel[String, AdministrativeGender] = {
-    Try(AdministrativeGender.fromCode(gender)) match {
+    Try(AdministrativeGender.fromCode(gender.toLowerCase)) match {
       case Success(gender) => gender.validNel
       case Failure(_) => s"Invalid gender $gender".invalidNel
     }
