@@ -19,11 +19,12 @@ object MetadataTestUtils {
                          designFamily: String = "SOLO",
                          position: String = "PROB",
                          familyId: Option[String] = None,
-                         status: String = "AFF"
+                         status: String = "AFF",
+                         fetus:Option[String] = None
                         ): FullPatient = {
     FullPatient(firstName = firstName, lastName = lastName, sex = sex, birthDate=ddn,
       ramq = ramq, mrn = ndm, ep = ep, designFamily = designFamily,
-      familyMember = position, familyId = familyId, status = status)
+      familyMember = position, familyId = familyId, status = status, fetus = fetus)
   }
 
   val defaultFullAnalysis: FullAnalysis = FullAnalysis(

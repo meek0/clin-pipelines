@@ -159,8 +159,9 @@ case class FullPatient(
                         designFamily: String,
                         familyMember: String,
                         familyId: Option[String],
-                        status: String
-                      ) extends InputPatient{
+                        status: String,
+                        fetus: Option[String]
+                      ) extends InputPatient {
 }
 
 object FullPatient {
