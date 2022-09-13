@@ -20,7 +20,7 @@ object MetadataTestUtils {
                          position: String = "PROB",
                          familyId: Option[String] = None,
                          status: String = "AFF",
-                         fetus:Option[String] = None
+                         fetus:Option[Boolean] = None
                         ): FullPatient = {
     FullPatient(firstName = firstName, lastName = lastName, sex = sex, birthDate=ddn,
       ramq = ramq, mrn = ndm, ep = ep, designFamily = designFamily,
