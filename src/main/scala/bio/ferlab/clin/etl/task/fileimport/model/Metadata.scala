@@ -160,7 +160,7 @@ case class FullPatient(
                         familyMember: String,
                         familyId: Option[String],
                         status: String,
-                        fetus: Option[String]
+                        fetus: Option[Boolean]
                       ) extends InputPatient {
 }
 
