@@ -49,7 +49,7 @@ trait TDocumentReference extends DocumentReferenceType {
     val components = document.map { d =>
       val a = new Attachment()
       a.setContentType(d.contentType)
-      a.setUrl(s"${ferloadConf.url}/${d.objectStoreId}")
+      a.setUrl(s"${ferloadConf.cleanedUrl}/${d.objectStoreId}")
       d.md5.map(md5sum => a.setHash(md5sum.getBytes()))
       a.setTitle(d.title)
 
@@ -67,6 +67,8 @@ trait TDocumentReference extends DocumentReferenceType {
 
 object TDocumentReference {
   def validate[T <: TDocumentReference](files: Map[String, FileEntry], a: Analysis)(implicit v: ToReference[T], fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = v.validate(files, a)
+
+
 }
 
 trait DocumentReferenceType {

@@ -4,6 +4,7 @@ import bio.ferlab.clin.etl.isValid
 import bio.ferlab.clin.etl.s3.S3Utils.getContent
 import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, Metadata, RawFileEntry}
 import cats.data.ValidatedNel
+import org.apache.commons.lang3.StringUtils
 import org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM
 import org.slf4j.{Logger, LoggerFactory}
 import software.amazon.awssdk.services.s3.S3Client
@@ -55,14 +56,18 @@ object CheckS3Data {
     fileEntries
   }
 
+  def idForPrefix(outputPrefix:String, id: => String): String = {
+    if(StringUtils.isEmpty(outputPrefix)) id else s"$outputPrefix/$id"
+  }
+
   def loadFileEntries(m: Metadata, fileEntries: Seq[RawFileEntry], outputPrefix: String, generateId: () => String = () => UUID.randomUUID().toString)(implicit s3Client: S3Client): Seq[FileEntry] = {
     val (checksums, files) = fileEntries.partition(_.isChecksum)
     val mapOfIds = m.analyses.flatMap { a =>
-      val cramId: String = s"$outputPrefix/${generateId()}"
+      val cramId: String = idForPrefix(outputPrefix,generateId())
       val craiId: String = s"$cramId.crai"
-      val snvVcfId: String = s"$outputPrefix/${generateId()}"
+      val snvVcfId: String = idForPrefix(outputPrefix,generateId())
       val snvTbiId: String = s"$snvVcfId.tbi"
-      val cnvVcfId: String = s"$outputPrefix/${generateId()}"
+      val cnvVcfId: String = idForPrefix(outputPrefix,generateId())
       val cnvTbiId: String = s"$cnvVcfId.tbi"
       val qcId: String = s"$outputPrefix/${generateId()}"
 
