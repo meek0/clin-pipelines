@@ -12,7 +12,9 @@ case class KeycloakConf(realm: String, url: String, clientKey: String, clientSec
 
 case class FhirConf(url: String)
 
-case class FerloadConf(url: String)
+case class FerloadConf(url: String) {
+  val cleanedUrl: String = if (url.last == '/') url.substring(0, url.length - 1) else url
+}
 
 case class MailerConf(
                        host: String,

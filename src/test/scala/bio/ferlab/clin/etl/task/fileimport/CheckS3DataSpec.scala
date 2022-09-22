@@ -46,7 +46,7 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
 
   private def rawFileEntry(key: String) = RawFileEntry(inputBucket, key, 1)
 
-  val files = Seq(
+  val files: Seq[FileEntry] = Seq(
     fileEntry(s"file1.cram", "abc", "file1.cram"),
     fileEntry(s"file1.crai", "def", "file1.cram.crai"),
     fileEntry(s"file2.vcf", "ghi", "file2.vcf.gz"),
@@ -80,7 +80,7 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
     }
   }
 
-  val rawFiles = Seq(
+  val rawFiles: Seq[RawFileEntry] = Seq(
     rawFileEntry(s"file1.cram"),
     rawFileEntry(s"file1.cram.md5sum"),
     rawFileEntry(s"file1.crai"),
@@ -138,6 +138,15 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
         fileEntry(s"$inputPrefix/file3.tgz", s"$outputPrefix/id_4", "file3.tgz")
       )
     }
+  }
+
+  "idForPrefix" should "return output/id" in {
+    CheckS3Data.idForPrefix("output", "hello") shouldBe "output/hello"
+  }
+
+  it should "return id" in {
+    CheckS3Data.idForPrefix("", "hello") shouldBe "hello"
+    CheckS3Data.idForPrefix(null, "hello") shouldBe "hello"
   }
 
 }
