@@ -69,7 +69,7 @@ object CheckS3Data {
       val snvTbiId: String = s"$snvVcfId.tbi"
       val cnvVcfId: String = idForPrefix(outputPrefix,generateId())
       val cnvTbiId: String = s"$cnvVcfId.tbi"
-      val qcId: String = s"$outputPrefix/${generateId()}"
+      val qcId: String = idForPrefix(outputPrefix,generateId())
 
       Seq(
         a.files.cram -> (cramId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cram)),
