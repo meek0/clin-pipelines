@@ -9,6 +9,9 @@ import software.amazon.awssdk.services.s3.model.{GetObjectRequest, HeadObjectReq
 import software.amazon.awssdk.services.s3.{S3Client, S3Configuration}
 
 import java.net.URI
+import java.time.Duration
+import java.time.Duration.ofMinutes
+import java.time.temporal.TemporalUnit
 
 object S3Utils {
 
@@ -26,7 +29,10 @@ object S3Utils {
       .endpointOverride(endpoint)
       .region(Region.US_EAST_1)
       .serviceConfiguration(confBuilder)
-      .httpClient(ApacheHttpClient.create())
+      .httpClientBuilder(ApacheHttpClient.builder()
+        .connectionTimeout(ofMinutes(5))
+        .socketTimeout(ofMinutes(5))
+      )
       .build()
     s3
   }
