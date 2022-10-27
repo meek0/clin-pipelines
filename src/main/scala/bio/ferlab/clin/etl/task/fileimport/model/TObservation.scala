@@ -25,8 +25,7 @@ case class TObservation(analysis: FullAnalysis) {
 
     status().andThen { s =>
       val outcomes = FhirUtils.validateResource(obs)
-      val interpretation = if (analysis.patient.status == "AFF") "POS" else "NEG"
-      obs.addInterpretation(new CodeableConcept(new Coding().setSystem(OBSERVATION_INTERPRETATION).setCode(interpretation)))
+      obs.addInterpretation(new CodeableConcept(new Coding().setSystem(OBSERVATION_INTERPRETATION).setCode(s)))
       obs.setValue(new CodeableConcept(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.panelCode)))
       FhirUtils.validateOutcomes(outcomes, this) { o =>
         val diag = o.getDiagnostics
