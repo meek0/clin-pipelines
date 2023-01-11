@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient
 import ca.uhn.fhir.rest.server.exceptions.{PreconditionFailedException, UnprocessableEntityException}
 import cats.data.ValidatedNel
 import cats.implicits.catsSyntaxValidatedId
+import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.Bundle.{BundleEntryComponent, SearchEntryMode}
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender
 import org.hl7.fhir.r4.model.{Bundle, IdType, Identifier, OperationOutcome, Patient, Person, Reference, Resource, Specimen}
@@ -140,12 +141,20 @@ object FhirUtils {
   def bundleEntryUpdate: Resource => BundleEntryComponent = {
     fhirResource =>
       val be = new BundleEntryComponent()
-      be.setFullUrl(fhirResource.getIdElement.getIdPart)
+      be.setFullUrl(fullUrl(fhirResource))
         .setResource(fhirResource)
         .getRequest
-        .setUrl(fhirResource.getIdElement.getValue)
+        .setUrl(fullUrl(fhirResource))
         .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
       be
+  }
+
+  def fullUrl(res: Resource) = {
+    s"${res.getIdElement.getResourceType}/${res.getIdElement.getIdPart}"
+  }
+
+  def toJson(res: IBaseResource)(implicit client: IGenericClient) = {
+    client.getFhirContext.newJsonParser.setPrettyPrint(true).encodeResourceToString(res)
   }
 
   def bundleDelete(resources: Seq[Resource]): Seq[BundleEntryComponent] = resources.map { fhirResource =>
