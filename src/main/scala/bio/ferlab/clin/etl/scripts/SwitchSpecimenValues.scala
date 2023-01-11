@@ -15,7 +15,9 @@ object SwitchSpecimenValues {
 
   val LOGGER: Logger = LoggerFactory.getLogger(SwitchSpecimenValues.getClass)
 
-  def apply(fhirClient: IGenericClient): ValidationResult[Boolean] = {
+  def apply(fhirClient: IGenericClient, params: Array[String]): ValidationResult[Boolean] = {
+
+    val dryRun = params.contains("--dryRun")
 
     // search for all sequencings
     val sequencingsBundle = fhirClient.search().forResource(classOf[ServiceRequest])
@@ -59,12 +61,17 @@ object SwitchSpecimenValues {
 
       }
     })
-
     val bundle = TBundle(res.toList)
     LOGGER.info("Request:\n" + bundle.print()(fhirClient))
-    val result = bundle.save()(fhirClient)
-    LOGGER.info("Response :\n" + FhirUtils.toJson(result.toList.head)(fhirClient))
-    Valid(result.isValid)
+
+    if (dryRun) {
+      Valid(true)
+    } else {
+      val result = bundle.save()(fhirClient)
+      LOGGER.info("Response :\n" + FhirUtils.toJson(result.toList.head)(fhirClient))
+      Valid(result.isValid)
+    }
+
   }
 
   private def switchDisplay(ref: Reference, oldValue: String, newValue: String) = {
