@@ -3,6 +3,7 @@ package bio.ferlab.clin.etl.scripts
 import bio.ferlab.clin.etl.ValidationResult
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.task.fileimport.model.TBundle
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.Validated.Valid
 import org.hl7.fhir.r4.model.Bundle.{BundleEntryComponent, SearchEntryMode}
@@ -22,6 +23,7 @@ object SwitchSpecimenValues {
     // search for all sequencings
     val sequencingsBundle = fhirClient.search().forResource(classOf[ServiceRequest])
       .withProfile("http://fhir.cqgc.ferlab.bio/StructureDefinition/cqgc-sequencing-request")
+      .count(Int.MaxValue)  // 20 by default
       .returnBundle(classOf[Bundle]).encodedJson().execute()
 
     // extract from bundle response
