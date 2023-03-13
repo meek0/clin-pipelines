@@ -17,7 +17,9 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
       "file1.crai" -> fileEntry(key = "file1.crai"),
       "file2.vcf" -> fileEntry(key = "file2.vcf"),
       "file4.vcf" -> fileEntry(key = "file4.vcf"),
-      "file4.tbi" -> fileEntry(key = "file4.tbi")
+      "file4.tbi" -> fileEntry(key = "file4.tbi"),
+      "file5.vcf" -> fileEntry(key = "file5.vcf"),
+      "file5.tbi" -> fileEntry(key = "file5.tbi")
     )
     DocumentReferencesValidation.validateFiles(files, defaultAnalysis) shouldBe Invalid(
       NonEmptyList.of(
@@ -37,6 +39,8 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
       "file2.tbi" -> fileEntry(key = "file2.tbi"),
       "file4.vcf" -> fileEntry(key = "file4.vcf"),
       "file4.tbi" -> fileEntry(key = "file4.tbi"),
+      "file5.vcf" -> fileEntry(key = "file5.vcf"),
+      "file5.tbi" -> fileEntry(key = "file5.tbi"),
       "file3.tgz" -> fileEntry(key = "file3.tgz")
     )
     DocumentReferencesValidation.validateFiles(files, defaultAnalysis) shouldBe Valid(
@@ -44,6 +48,7 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
         SequencingAlignment(List(CRAM("id", "file1.cram", Some("md5"), 10, "application/octet-stream"), CRAI("id", "file1.crai", Some("md5"), 10, "application/octet-stream"))),
         VariantCalling(List(SNV_VCF("id", "file2.vcf", Some("md5"), 10, "application/octet-stream"), SNV_TBI("id", "file2.tbi", Some("md5"), 10, "application/octet-stream"))),
         CopyNumberVariant(List(CNV_VCF("id", "file4.vcf", Some("md5"), 10, "application/octet-stream"), CNV_TBI("id", "file4.tbi", Some("md5"), 10, "application/octet-stream"))),
+        StructuralVariant(List(SV_VCF("id", "file5.vcf", Some("md5"), 10, "application/octet-stream"), SV_TBI("id", "file5.tbi", Some("md5"), 10, "application/octet-stream"))),
         SupplementDocument(List(Supplement("id", "file3.tgz", Some("md5"), 10, "application/octet-stream")))
       )
     )

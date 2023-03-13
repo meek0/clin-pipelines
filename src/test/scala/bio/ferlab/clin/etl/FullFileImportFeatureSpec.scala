@@ -44,7 +44,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
 
       result.isValid shouldBe true
       val resultFiles = list(outputBucket, outputPrefix)
-      resultFiles.size shouldBe 7
+      resultFiles.size shouldBe 9
 
       val searchPatients = searchFhir("Patient")
       searchPatients.getTotal shouldBe 1
@@ -127,7 +127,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
 
       //Validate DocumentReference
       val searchDr = searchFhir("DocumentReference")
-      searchDr.getTotal shouldBe 4
+      searchDr.getTotal shouldBe 5
       val documentReferences = read(searchDr, classOf[DocumentReference])
       documentReferences.foreach { d =>
         d.getMasterIdentifier.getValue should startWith(outputPrefix)
@@ -142,11 +142,11 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
         }
       }
       //Expected title
-      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file3.json")
+      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file5.vcf", "file5.tbi", "file3.json")
 
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE
-      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "SSUP")
+      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "GSV", "SSUP")
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only CodingSystems.DR_CATEGORY
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only "GENO"
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getFormat.getSystem)) should contain only CodingSystems.DR_FORMAT

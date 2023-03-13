@@ -132,6 +132,24 @@ object CopyNumberVariant {
   }
 }
 
+case class StructuralVariant(document: Seq[TDocumentAttachment]) extends TDocumentReference {
+  override val documentType: String = StructuralVariant.documentType
+  override val id: String = idFromList[SV_VCF](document)
+}
+
+object StructuralVariant {
+  val documentType: String = "GSV"
+  val label = "Structural Variant (VCF and TBI)"
+  implicit case object builder extends ToReference[StructuralVariant] {
+    override val label: String = StructuralVariant.label
+
+    protected override def build(documents: Seq[TDocumentAttachment]): StructuralVariant = StructuralVariant(documents)
+
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[SV_VCF], valid[SV_TBI])
+
+  }
+}
+
 case class SupplementDocument(document: Seq[TDocumentAttachment]) extends TDocumentReference {
   override val documentType: String = SupplementDocument.documentType
   override val id: String = idFromList[Supplement](document)

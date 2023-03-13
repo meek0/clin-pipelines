@@ -18,7 +18,7 @@ object SwitchSpecimenValues {
 
   def apply(fhirClient: IGenericClient, params: Array[String]): ValidationResult[Boolean] = {
 
-    val dryRun = params.contains("--dryRun")
+    val dryRun = params.contains("--dryrun")
 
     // search for all sequencings
     val sequencingsBundle = fhirClient.search().forResource(classOf[ServiceRequest])

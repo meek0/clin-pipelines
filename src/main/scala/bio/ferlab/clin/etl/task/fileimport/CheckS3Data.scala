@@ -69,6 +69,8 @@ object CheckS3Data {
       val snvTbiId: String = s"$snvVcfId.tbi"
       val cnvVcfId: String = idForPrefix(outputPrefix,generateId())
       val cnvTbiId: String = s"$cnvVcfId.tbi"
+      val svVcfId: String = idForPrefix(outputPrefix,generateId())
+      val svTbiId: String = s"$svVcfId.tbi"
       val qcId: String = idForPrefix(outputPrefix,generateId())
 
       Seq(
@@ -78,6 +80,8 @@ object CheckS3Data {
         a.files.snv_tbi -> (snvTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.snv_tbi)),
         a.files.cnv_vcf -> (cnvVcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_vcf)),
         a.files.cnv_tbi -> (cnvTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_tbi)),
+        a.files.sv_vcf -> (svVcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.sv_vcf)),
+        a.files.sv_tbi -> (svTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.sv_tbi)),
         a.files.supplement -> (qcId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.supplement))
       )
 

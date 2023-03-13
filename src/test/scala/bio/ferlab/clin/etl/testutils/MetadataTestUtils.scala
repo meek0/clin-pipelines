@@ -47,6 +47,8 @@ object MetadataTestUtils {
     snv_tbi = "file2.tbi",
     cnv_vcf = "file4.vcf",
     cnv_tbi = "file4.tbi",
+    sv_vcf = "file5.vcf",
+    sv_tbi = "file5.tbi",
     supplement = "file3.tgz"
   )
   val defaultAnalysis: SimpleAnalysis = SimpleAnalysis(
