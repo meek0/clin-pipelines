@@ -189,7 +189,7 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
 
       //Validate DocumentReference
       val searchDr = searchFhir("DocumentReference")
-      searchDr.getTotal shouldBe 10
+      searchDr.getTotal shouldBe 20
       val documentReferences = read(searchDr, classOf[DocumentReference])
       documentReferences.foreach { d =>
         d.getMasterIdentifier.getValue should startWith(outputPrefix)
@@ -202,23 +202,23 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
       }
 
       //Expected title
-      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file5.vcf", "file5.tbi", "file3.json")
-
+      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file5.vcf", "file5.tbi", "file3.json",
+        "file6.html","file6.json","file6.variants.tsv","file7.seg.bw","file7.baf.bw","file7.roh.bed","file7.exome.bed","file8.png","file9.csv","file10.json")
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE
-      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "GSV", "SSUP")
+      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "GSV", "SSUP", "EXOMISER", "IGV", "CNVVIS", "COVGENE", "QCRUN")
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only CodingSystems.DR_CATEGORY
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only "GENO"
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getFormat.getSystem)) should contain only CodingSystems.DR_FORMAT
 
       val probandDocumentReferences = documentReferences.filter(_.getSubject.getReference == probandPatientId)
-      probandDocumentReferences.size shouldBe 5
+      probandDocumentReferences.size shouldBe 10
       probandDocumentReferences.foreach{ d=>
         d.getContext.getRelatedFirstRep.getReference shouldBe id(probandSample)
         d.getContext.getRelatedFirstRep.getDisplay shouldBe s"Submitter Sample ID: $ldmProbSampleId"
       }
       val motherDocumentReferences = documentReferences.filter(_.getSubject.getReference == motherPatientId)
-      motherDocumentReferences.size shouldBe 5
+      motherDocumentReferences.size shouldBe 10
       motherDocumentReferences.foreach{ d=>
         d.getContext.getRelatedFirstRep.getReference shouldBe id(motherSample)
         d.getContext.getRelatedFirstRep.getDisplay shouldBe s"Submitter Sample ID: $ldmMthSampleId"

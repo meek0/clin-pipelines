@@ -25,5 +25,5 @@ case class TDocumentReferences(sequencingAlignment: SequencingAlignment, variant
 
 case class DocumentReferencesResources(sequencingAlignment: Resource, variantCalling: Resource, copyNumberVariant:Resource, structuralVariant:Resource, supplement: Resource,
                                        exomiser: Resource, igvTrack: Resource, cnvVisualization: Resource, coverageByGene: Resource, qcMetrics: Resource) {
-  def resources() = Seq(sequencingAlignment, variantCalling, copyNumberVariant, structuralVariant, supplement)
+  def resources() = Seq(sequencingAlignment, variantCalling, copyNumberVariant, structuralVariant, supplement, exomiser, igvTrack, cnvVisualization, coverageByGene, qcMetrics)
 }

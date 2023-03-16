@@ -88,7 +88,7 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
 
       //Validate DocumentReference
       val searchDr = searchFhir("DocumentReference")
-      searchDr.getTotal shouldBe 5
+      searchDr.getTotal shouldBe 10
       val documentReferences = read(searchDr, classOf[DocumentReference])
       documentReferences.foreach { d =>
         d.getMasterIdentifier.getValue should startWith(outputPrefix)
@@ -103,11 +103,12 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
         }
       }
       //Expected title
-      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file5.vcf", "file5.tbi", "file3.json")
+      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file5.vcf", "file5.tbi", "file3.json",
+      "file6.html","file6.json","file6.variants.tsv","file7.seg.bw","file7.baf.bw","file7.roh.bed","file7.exome.bed","file8.png","file9.csv","file10.json")
 
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE
-      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "GSV", "SSUP")
+      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "GSV", "SSUP", "EXOMISER", "IGV", "CNVVIS", "COVGENE", "QCRUN")
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only CodingSystems.DR_CATEGORY
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only "GENO"
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getFormat.getSystem)) should contain only CodingSystems.DR_FORMAT
