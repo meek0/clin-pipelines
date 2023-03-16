@@ -158,3 +158,143 @@ object Supplement {
     override def buildFile: FileEntry => Supplement = f => Supplement(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
   }
 }
+
+case class EXOMISER_HTML(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+  override val format: String = "HTML"
+}
+
+object EXOMISER_HTML {
+  implicit case object builder extends ToAttachment[EXOMISER_HTML] {
+    override def label: String = "html"
+
+    override def analysisFileName: Analysis => String = a => a.files.exomiser_html
+
+    override def buildFile: FileEntry => EXOMISER_HTML = f => EXOMISER_HTML(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+  }
+}
+
+case class EXOMISER_JSON(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+  override val format: String = "JSON"
+}
+
+object EXOMISER_JSON {
+  implicit case object builder extends ToAttachment[EXOMISER_JSON] {
+    override def label: String = "json"
+
+    override def analysisFileName: Analysis => String = a => a.files.exomiser_json
+
+    override def buildFile: FileEntry => EXOMISER_JSON = f => EXOMISER_JSON(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+  }
+}
+
+case class EXOMISER_VARIANTS_TSV(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+  override val format: String = "TSV"
+}
+
+object EXOMISER_VARIANTS_TSV {
+  implicit case object builder extends ToAttachment[EXOMISER_VARIANTS_TSV] {
+    override def label: String = "tsv"
+
+    override def analysisFileName: Analysis => String = a => a.files.exomiser_variants_tsv
+
+    override def buildFile: FileEntry => EXOMISER_VARIANTS_TSV = f => EXOMISER_VARIANTS_TSV(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+  }
+}
+
+case class SEG_BW(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+  override val format: String = "BW"
+}
+
+object SEG_BW {
+  implicit case object builder extends ToAttachment[SEG_BW] {
+    override def label: String = "bw"
+
+    override def analysisFileName: Analysis => String = a => a.files.seg_bw
+
+    override def buildFile: FileEntry => SEG_BW = f => SEG_BW(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+  }
+}
+
+case class HARD_FILTERED_BAF_BW(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+  override val format: String = "BW"
+}
+
+object HARD_FILTERED_BAF_BW {
+  implicit case object builder extends ToAttachment[HARD_FILTERED_BAF_BW] {
+    override def label: String = "bw"
+
+    override def analysisFileName: Analysis => String = a => a.files.hard_filtered_baf_bw
+
+    override def buildFile: FileEntry => HARD_FILTERED_BAF_BW = f => HARD_FILTERED_BAF_BW(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+  }
+}
+
+case class ROH_BED(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+  override val format: String = "BED"
+}
+
+object ROH_BED {
+  implicit case object builder extends ToAttachment[ROH_BED] {
+    override def label: String = "bed"
+
+    override def analysisFileName: Analysis => String = a => a.files.roh_bed
+
+    override def buildFile: FileEntry => ROH_BED = f => ROH_BED(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+  }
+}
+
+case class HYPER_EXOME_HG38_BED(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+  override val format: String = "BED"
+}
+
+object HYPER_EXOME_HG38_BED {
+  implicit case object builder extends ToAttachment[HYPER_EXOME_HG38_BED] {
+    override def label: String = "bed"
+
+    override def analysisFileName: Analysis => String = a => a.files.hyper_exome_hg38_bed
+
+    override def buildFile: FileEntry => HYPER_EXOME_HG38_BED = f => HYPER_EXOME_HG38_BED(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+  }
+}
+
+case class CNV_CALLS_PNG(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+  override val format: String = "PNG"
+}
+
+object CNV_CALLS_PNG {
+  implicit case object builder extends ToAttachment[CNV_CALLS_PNG] {
+    override def label: String = "png"
+
+    override def analysisFileName: Analysis => String = a => a.files.cnv_calls_png
+
+    override def buildFile: FileEntry => CNV_CALLS_PNG = f => CNV_CALLS_PNG(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+  }
+}
+
+case class COVERAGE_BY_GENE_CSV(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+  override val format: String = "CSV"
+}
+
+object COVERAGE_BY_GENE_CSV {
+  implicit case object builder extends ToAttachment[COVERAGE_BY_GENE_CSV] {
+    override def label: String = "csv"
+
+    override def analysisFileName: Analysis => String = a => a.files.coverage_by_gene_csv
+
+    override def buildFile: FileEntry => COVERAGE_BY_GENE_CSV = f => COVERAGE_BY_GENE_CSV(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+  }
+}
+
+case class QC_METRICS(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+  override val format: String = "JSON"
+}
+
+object QC_METRICS {
+  implicit case object builder extends ToAttachment[QC_METRICS] {
+    override def label: String = "json"
+
+    override def analysisFileName: Analysis => String = a => a.files.qc_metrics
+
+    override def buildFile: FileEntry => QC_METRICS = f => QC_METRICS(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+  }
+}

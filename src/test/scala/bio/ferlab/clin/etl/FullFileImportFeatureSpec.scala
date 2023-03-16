@@ -44,7 +44,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
 
       result.isValid shouldBe true
       val resultFiles = list(outputBucket, outputPrefix)
-      resultFiles.size shouldBe 9
+      resultFiles.size shouldBe 19
 
       val searchPatients = searchFhir("Patient")
       searchPatients.getTotal shouldBe 1

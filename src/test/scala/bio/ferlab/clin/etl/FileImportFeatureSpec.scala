@@ -45,7 +45,7 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
 
       result.isValid shouldBe true
       val resultFiles = list(outputBucket, outputPrefix)
-      resultFiles.size shouldBe 9
+      resultFiles.size shouldBe 19
       val searchSpecimens = searchFhir("Specimen")
       searchSpecimens.getTotal shouldBe 2
       searchSpecimens.getEntry.asScala.foreach { be =>

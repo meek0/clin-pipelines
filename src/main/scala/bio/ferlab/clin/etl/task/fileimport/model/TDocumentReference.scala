@@ -167,6 +167,96 @@ object SupplementDocument {
   }
 }
 
+case class Exomiser(document: Seq[TDocumentAttachment]) extends TDocumentReference {
+  override val documentType: String = Exomiser.documentType
+  override val id: String = idFromList[EXOMISER_HTML](document)
+}
+
+object Exomiser {
+  val documentType: String = "EXOMISER"
+  val label = "Exomiser (HTML, JSON and TSV)"
+  implicit case object builder extends ToReference[Exomiser] {
+    override val label: String = Exomiser.label
+
+    protected override def build(documents: Seq[TDocumentAttachment]): Exomiser = Exomiser(documents)
+
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[EXOMISER_HTML], valid[EXOMISER_JSON], valid[EXOMISER_VARIANTS_TSV])
+
+  }
+}
+
+case class IgvTrack(document: Seq[TDocumentAttachment]) extends TDocumentReference {
+  override val documentType: String = IgvTrack.documentType
+  override val id: String = idFromList[SEG_BW](document)
+}
+
+object IgvTrack {
+  val documentType: String = "IGV"
+  val label = "Igv track (BW and BED)"
+  implicit case object builder extends ToReference[IgvTrack] {
+    override val label: String = IgvTrack.label
+
+    protected override def build(documents: Seq[TDocumentAttachment]): IgvTrack = IgvTrack(documents)
+
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[SEG_BW], valid[HARD_FILTERED_BAF_BW], valid[ROH_BED], valid[HYPER_EXOME_HG38_BED])
+
+  }
+}
+
+case class CnvVisualization(document: Seq[TDocumentAttachment]) extends TDocumentReference {
+  override val documentType: String = CnvVisualization.documentType
+  override val id: String = idFromList[CNV_CALLS_PNG](document)
+}
+
+object CnvVisualization {
+  val documentType: String = "CNVVIS"
+  val label = "CNV Visualization"
+  implicit case object builder extends ToReference[CnvVisualization] {
+    override val label: String = CnvVisualization.label
+
+    protected override def build(documents: Seq[TDocumentAttachment]): CnvVisualization = CnvVisualization(documents)
+
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[CNV_CALLS_PNG])
+
+  }
+}
+
+case class CoverageByGene(document: Seq[TDocumentAttachment]) extends TDocumentReference {
+  override val documentType: String = CoverageByGene.documentType
+  override val id: String = idFromList[COVERAGE_BY_GENE_CSV](document)
+}
+
+object CoverageByGene {
+  val documentType: String = "COVGENE"
+  val label = "Coverage by Gene Report"
+  implicit case object builder extends ToReference[CoverageByGene] {
+    override val label: String = CoverageByGene.label
+
+    protected override def build(documents: Seq[TDocumentAttachment]): CoverageByGene = CoverageByGene(documents)
+
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[COVERAGE_BY_GENE_CSV])
+
+  }
+}
+
+case class QcMetrics(document: Seq[TDocumentAttachment]) extends TDocumentReference {
+  override val documentType: String = QcMetrics.documentType
+  override val id: String = idFromList[QC_METRICS](document)
+}
+
+object QcMetrics {
+  val documentType: String = "QCRUN"
+  val label = "Sequencing Run QC Report"
+  implicit case object builder extends ToReference[QcMetrics] {
+    override val label: String = QcMetrics.label
+
+    protected override def build(documents: Seq[TDocumentAttachment]): QcMetrics = QcMetrics(documents)
+
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[QC_METRICS])
+
+  }
+}
+
 trait ToReference[T <: TDocumentReference] {
   def label: String
 

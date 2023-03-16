@@ -49,7 +49,17 @@ object MetadataTestUtils {
     cnv_tbi = "file4.tbi",
     sv_vcf = "file5.vcf",
     sv_tbi = "file5.tbi",
-    supplement = "file3.tgz"
+    supplement = "file3.tgz",
+    exomiser_html = "file6.html",
+    exomiser_json = "file6.json",
+    exomiser_variants_tsv = "file6.variants.tsv",
+    seg_bw = "file7.seg.bw",
+    hard_filtered_baf_bw = "file7.baf.bw",
+    roh_bed = "file7.roh.bed",
+    hyper_exome_hg38_bed = "file7.exome.bed",
+    cnv_calls_png = "file8.png",
+    coverage_by_gene_csv = "file9.csv",
+    qc_metrics = "file10.json",
   )
   val defaultAnalysis: SimpleAnalysis = SimpleAnalysis(
     patient = defaultPatient("clin_id"),

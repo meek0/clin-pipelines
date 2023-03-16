@@ -72,6 +72,21 @@ object CheckS3Data {
       val svVcfId: String = idForPrefix(outputPrefix,generateId())
       val svTbiId: String = s"$svVcfId.tbi"
       val qcId: String = idForPrefix(outputPrefix,generateId())
+      ///exomiser
+      val exomiserId: String = idForPrefix(outputPrefix,generateId())
+      val exomiserHtmlId: String =s"$exomiserId.html"
+      val exomiserJsonId: String = s"$exomiserId.json"
+      val exomiserVariantsTsvId: String = s"$exomiserId.variants.tsv"
+      // igv
+      val igvTrackId: String = idForPrefix(outputPrefix,generateId())
+      val segBw: String = s"$igvTrackId.seg.bw"
+      val hardFilteredBaf: String = s"$igvTrackId.baf.bw"
+      val rohBed: String = s"$igvTrackId.roh.bed"
+      val hyperExomeHg38Bed: String = s"$igvTrackId.exome.bed"
+
+      val cnvCallsPng: String = idForPrefix(outputPrefix,generateId())
+      val coverageByGeneCsv: String = idForPrefix(outputPrefix,generateId())
+      val qcMetrics: String = idForPrefix(outputPrefix,generateId())
 
       Seq(
         a.files.cram -> (cramId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cram)),
@@ -82,7 +97,17 @@ object CheckS3Data {
         a.files.cnv_tbi -> (cnvTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_tbi)),
         a.files.sv_vcf -> (svVcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.sv_vcf)),
         a.files.sv_tbi -> (svTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.sv_tbi)),
-        a.files.supplement -> (qcId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.supplement))
+        a.files.supplement -> (qcId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.supplement)),
+        a.files.exomiser_html -> (exomiserHtmlId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.exomiser_html)),
+        a.files.exomiser_json -> (exomiserJsonId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.exomiser_json)),
+        a.files.exomiser_variants_tsv -> (exomiserVariantsTsvId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.exomiser_variants_tsv)),
+        a.files.seg_bw -> (segBw, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.seg_bw)),
+        a.files.hard_filtered_baf_bw -> (hardFilteredBaf, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.hard_filtered_baf_bw)),
+        a.files.roh_bed -> (rohBed, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.roh_bed)),
+        a.files.hyper_exome_hg38_bed -> (hyperExomeHg38Bed, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.hyper_exome_hg38_bed)),
+        a.files.cnv_calls_png -> (cnvCallsPng, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_calls_png)),
+        a.files.coverage_by_gene_csv -> (coverageByGeneCsv, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.coverage_by_gene_csv)),
+        a.files.qc_metrics -> (qcMetrics, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.qc_metrics)),
       )
 
     }.toMap

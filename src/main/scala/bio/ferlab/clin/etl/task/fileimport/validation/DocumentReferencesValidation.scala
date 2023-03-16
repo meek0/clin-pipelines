@@ -16,7 +16,12 @@ object DocumentReferencesValidation {
       validate[VariantCalling](files, a),
       validate[CopyNumberVariant](files, a),
       validate[StructuralVariant](files, a),
-      validate[SupplementDocument](files, a)
+      validate[SupplementDocument](files, a),
+      validate[Exomiser](files, a),
+      validate[IgvTrack](files, a),
+      validate[CnvVisualization](files, a),
+      validate[CoverageByGene](files, a),
+      validate[QcMetrics](files, a),
       ).mapN(TDocumentReferences)
 
   }
