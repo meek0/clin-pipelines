@@ -25,7 +25,21 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
         RawFileEntry(inputBucket, s"$prefix/file4.tbi", 9),
         RawFileEntry(inputBucket, s"$prefix/file4.vcf", 9),
         RawFileEntry(inputBucket, s"$prefix/file4.vcf.md5sum", 12),
-        RawFileEntry(inputBucket, s"$prefix/file3.json", 8)
+        RawFileEntry(inputBucket, s"$prefix/file5.tbi", 9),
+        RawFileEntry(inputBucket, s"$prefix/file5.vcf", 9),
+        RawFileEntry(inputBucket, s"$prefix/file5.vcf.md5sum", 12),
+        RawFileEntry(inputBucket, s"$prefix/file3.json", 8),
+        RawFileEntry(inputBucket, s"$prefix/file6.html", 19),
+        RawFileEntry(inputBucket, s"$prefix/file6.json", 19),
+        RawFileEntry(inputBucket, s"$prefix/file6.variants.tsv", 18),
+        RawFileEntry(inputBucket, s"$prefix/file7.seg.bw", 22),
+        RawFileEntry(inputBucket, s"$prefix/file7.baf.bw", 22),
+        RawFileEntry(inputBucket, s"$prefix/file7.roh.bed", 23),
+        RawFileEntry(inputBucket, s"$prefix/file7.exome.bed", 26),
+        RawFileEntry(inputBucket, s"$prefix/file8.png", 22),
+        RawFileEntry(inputBucket, s"$prefix/file9.csv", 26),
+        RawFileEntry(inputBucket, s"$prefix/file10.json", 20),
+
       )
       fileEntries should contain theSameElementsAs expected
     }
@@ -125,6 +139,9 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
         rawFileEntry(s"$inputPrefix/file4.vcf"),
         rawFileEntry(s"$inputPrefix/file4.vcf.md5sum"),
         rawFileEntry(s"$inputPrefix/file4.tbi"),
+        rawFileEntry(s"$inputPrefix/file5.vcf"),
+        rawFileEntry(s"$inputPrefix/file5.vcf.md5sum"),
+        rawFileEntry(s"$inputPrefix/file5.tbi"),
         rawFileEntry(s"$inputPrefix/file3.tgz")
       )
 
@@ -135,7 +152,9 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
         fileEntry(s"$inputPrefix/file2.tbi", s"$outputPrefix/id_2.tbi", "file2.tbi"),
         fileEntry(s"$inputPrefix/file4.vcf", s"$outputPrefix/id_3", "file4.vcf", Some("md5 vcf file")),
         fileEntry(s"$inputPrefix/file4.tbi", s"$outputPrefix/id_3.tbi", "file4.tbi"),
-        fileEntry(s"$inputPrefix/file3.tgz", s"$outputPrefix/id_4", "file3.tgz")
+        fileEntry(s"$inputPrefix/file5.vcf", s"$outputPrefix/id_4", "file5.vcf", Some("md5 vcf file")),
+        fileEntry(s"$inputPrefix/file5.tbi", s"$outputPrefix/id_4.tbi", "file5.tbi"),
+        fileEntry(s"$inputPrefix/file3.tgz", s"$outputPrefix/id_5", "file3.tgz")
       )
     }
   }

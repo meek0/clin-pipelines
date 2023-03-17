@@ -49,7 +49,7 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
       val putMetadata = PutObjectRequest.builder().bucket(inputBucket).key(s"$inputPrefix/metadata.json").build()
       s3.putObject(putMetadata, RequestBody.fromString(metadata))
       val reportPath = s"$inputPrefix/logs"
-      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false, full = true)
+      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false, full = true, legacy = true)
 
       result.isValid shouldBe true
       val resultFiles = list(outputBucket, outputPrefix)
@@ -203,7 +203,6 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
 
       //Expected title
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file3.json")
-
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "SSUP")

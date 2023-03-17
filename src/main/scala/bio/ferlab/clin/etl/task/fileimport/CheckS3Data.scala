@@ -69,7 +69,24 @@ object CheckS3Data {
       val snvTbiId: String = s"$snvVcfId.tbi"
       val cnvVcfId: String = idForPrefix(outputPrefix,generateId())
       val cnvTbiId: String = s"$cnvVcfId.tbi"
+      val svVcfId: String = idForPrefix(outputPrefix,generateId())
+      val svTbiId: String = s"$svVcfId.tbi"
       val qcId: String = idForPrefix(outputPrefix,generateId())
+      ///exomiser
+      val exomiserId: String = idForPrefix(outputPrefix,generateId())
+      val exomiserHtmlId: String =s"$exomiserId.html"
+      val exomiserJsonId: String = s"$exomiserId.json"
+      val exomiserVariantsTsvId: String = s"$exomiserId.variants.tsv"
+      // igv
+      val igvTrackId: String = idForPrefix(outputPrefix,generateId())
+      val segBw: String = s"$igvTrackId.seg.bw"
+      val hardFilteredBaf: String = s"$igvTrackId.baf.bw"
+      val rohBed: String = s"$igvTrackId.roh.bed"
+      val hyperExomeHg38Bed: String = s"$igvTrackId.exome.bed"
+
+      val cnvCallsPng: String = idForPrefix(outputPrefix,generateId())
+      val coverageByGeneCsv: String = idForPrefix(outputPrefix,generateId())
+      val qcMetrics: String = idForPrefix(outputPrefix,generateId())
 
       Seq(
         a.files.cram -> (cramId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cram)),
@@ -78,7 +95,19 @@ object CheckS3Data {
         a.files.snv_tbi -> (snvTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.snv_tbi)),
         a.files.cnv_vcf -> (cnvVcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_vcf)),
         a.files.cnv_tbi -> (cnvTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_tbi)),
-        a.files.supplement -> (qcId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.supplement))
+        a.files.sv_vcf.orNull -> (svVcfId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.sv_vcf.orNull)),
+        a.files.sv_tbi.orNull -> (svTbiId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.sv_tbi.orNull)),
+        a.files.supplement -> (qcId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.supplement)),
+        a.files.exomiser_html.orNull -> (exomiserHtmlId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.exomiser_html.orNull)),
+        a.files.exomiser_json.orNull -> (exomiserJsonId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.exomiser_json.orNull)),
+        a.files.exomiser_variants_tsv.orNull -> (exomiserVariantsTsvId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.exomiser_variants_tsv.orNull)),
+        a.files.seg_bw.orNull -> (segBw, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.seg_bw.orNull)),
+        a.files.hard_filtered_baf_bw.orNull -> (hardFilteredBaf, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.hard_filtered_baf_bw.orNull)),
+        a.files.roh_bed.orNull -> (rohBed, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.roh_bed.orNull)),
+        a.files.hyper_exome_hg38_bed.orNull -> (hyperExomeHg38Bed, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.hyper_exome_hg38_bed.orNull)),
+        a.files.cnv_calls_png.orNull -> (cnvCallsPng, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_calls_png.orNull)),
+        a.files.coverage_by_gene_csv.orNull -> (coverageByGeneCsv, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.coverage_by_gene_csv.orNull)),
+        a.files.qc_metrics.orNull -> (qcMetrics, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.qc_metrics.orNull)),
       )
 
     }.toMap
@@ -93,7 +122,6 @@ object CheckS3Data {
       }
 
   }
-
 
   private def attach(f: String) = {
     s"""attachment; filename="$f""""
