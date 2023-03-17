@@ -49,11 +49,11 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
       val putMetadata = PutObjectRequest.builder().bucket(inputBucket).key(s"$inputPrefix/metadata.json").build()
       s3.putObject(putMetadata, RequestBody.fromString(metadata))
       val reportPath = s"$inputPrefix/logs"
-      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false, full = true)
+      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false, full = true, legacy = true)
 
       result.isValid shouldBe true
       val resultFiles = list(outputBucket, outputPrefix)
-      resultFiles.size shouldBe 19
+      resultFiles.size shouldBe 7
 
       val searchPatients = searchFhir("Patient")
       searchPatients.getTotal shouldBe 2
@@ -189,7 +189,7 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
 
       //Validate DocumentReference
       val searchDr = searchFhir("DocumentReference")
-      searchDr.getTotal shouldBe 20
+      searchDr.getTotal shouldBe 8
       val documentReferences = read(searchDr, classOf[DocumentReference])
       documentReferences.foreach { d =>
         d.getMasterIdentifier.getValue should startWith(outputPrefix)
@@ -202,23 +202,22 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
       }
 
       //Expected title
-      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file5.vcf", "file5.tbi", "file3.json",
-        "file6.html","file6.json","file6.variants.tsv","file7.seg.bw","file7.baf.bw","file7.roh.bed","file7.exome.bed","file8.png","file9.csv","file10.json")
+      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file3.json")
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE
-      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "GSV", "SSUP", "EXOMISER", "IGV", "CNVVIS", "COVGENE", "QCRUN")
+      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "SSUP")
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only CodingSystems.DR_CATEGORY
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only "GENO"
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getFormat.getSystem)) should contain only CodingSystems.DR_FORMAT
 
       val probandDocumentReferences = documentReferences.filter(_.getSubject.getReference == probandPatientId)
-      probandDocumentReferences.size shouldBe 10
+      probandDocumentReferences.size shouldBe 4
       probandDocumentReferences.foreach{ d=>
         d.getContext.getRelatedFirstRep.getReference shouldBe id(probandSample)
         d.getContext.getRelatedFirstRep.getDisplay shouldBe s"Submitter Sample ID: $ldmProbSampleId"
       }
       val motherDocumentReferences = documentReferences.filter(_.getSubject.getReference == motherPatientId)
-      motherDocumentReferences.size shouldBe 10
+      motherDocumentReferences.size shouldBe 4
       motherDocumentReferences.foreach{ d=>
         d.getContext.getRelatedFirstRep.getReference shouldBe id(motherSample)
         d.getContext.getRelatedFirstRep.getDisplay shouldBe s"Submitter Sample ID: $ldmMthSampleId"

@@ -168,9 +168,9 @@ object FullPatient {
   implicit val reads: Reads[FullPatient] = Json.reads[FullPatient]
 }
 
-case class FilesAnalysis(cram: String, crai: String, snv_vcf: String, snv_tbi: String, cnv_vcf: String, cnv_tbi: String, sv_vcf: String, sv_tbi: String, supplement: String,
-                         exomiser_html: String, exomiser_json: String, exomiser_variants_tsv: String, seg_bw: String, hard_filtered_baf_bw: String, roh_bed: String,
-                         hyper_exome_hg38_bed: String, cnv_calls_png: String, coverage_by_gene_csv: String, qc_metrics: String)
+case class FilesAnalysis(cram: String, crai: String, snv_vcf: String, snv_tbi: String, cnv_vcf: String, cnv_tbi: String, sv_vcf: Option[String], sv_tbi: Option[String], supplement: String,
+                         exomiser_html: Option[String], exomiser_json: Option[String], exomiser_variants_tsv: Option[String], seg_bw: Option[String], hard_filtered_baf_bw: Option[String],
+                         roh_bed: Option[String], hyper_exome_hg38_bed: Option[String], cnv_calls_png: Option[String], coverage_by_gene_csv: Option[String], qc_metrics: Option[String])
 
 object FilesAnalysis {
   implicit val reads: Reads[FilesAnalysis] = Json.reads[FilesAnalysis]
