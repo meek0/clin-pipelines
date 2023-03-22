@@ -40,7 +40,7 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
       val putMetadata = PutObjectRequest.builder().bucket(inputBucket).key(s"$inputPrefix/metadata.json").build()
       s3.putObject(putMetadata, RequestBody.fromString(metadata))
       val reportPath = s"$inputPrefix/logs"
-      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false, full = false, legacy = false)
+      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false, full = false)
       //Validate documents that has been copied
 
       result.isValid shouldBe true
@@ -137,7 +137,7 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
     withS3Objects { (inputPrefix, outputPrefix) =>
       transferFromResources(inputPrefix, "bad")
       val reportPath = s"$inputPrefix/logs"
-      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false, full = false, legacy = false)
+      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false, full = false)
 
       //Validate documents that has been copied
       result.isValid shouldBe false

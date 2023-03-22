@@ -49,7 +49,7 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
       val putMetadata = PutObjectRequest.builder().bucket(inputBucket).key(s"$inputPrefix/metadata.json").build()
       s3.putObject(putMetadata, RequestBody.fromString(metadata))
       val reportPath = s"$inputPrefix/logs"
-      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false, full = true, legacy = true)
+      val result = FileImport.run(inputBucket, inputPrefix, outputBucket, outputPrefix, reportPath, dryRun = false, full = true)
 
       result.isValid shouldBe true
       val resultFiles = list(outputBucket, outputPrefix)

@@ -11,10 +11,10 @@ object BuildBundle {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
-  def validate(metadata: Metadata, files: Seq[FileEntry], legacy: Boolean)(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
+  def validate(metadata: Metadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
     metadata match {
-      case s: SimpleMetadata => SimpleBuildBundle.validate(legacy, s, files)
-      case f: FullMetadata => FullBuildBundle.validate(legacy, f, files)
+      case s: SimpleMetadata => SimpleBuildBundle.validate(s, files)
+      case f: FullMetadata => FullBuildBundle.validate(f, files)
     }
   }
 

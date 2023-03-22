@@ -31,7 +31,7 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
       "file9.csv" -> fileEntry(key = "file9.csv"),
       "file10.json" -> fileEntry(key = "file10.json"),
     )
-    DocumentReferencesValidation.validateFiles(false, files, defaultAnalysis) shouldBe Invalid(
+    DocumentReferencesValidation.validateFiles(files, defaultAnalysis) shouldBe Invalid(
       NonEmptyList.of(
         s"File file2.tbi does not exist : type=tbi, specimen=submitted_specimen_id, sample=submitted_sample_id",
         "File file3.tgz does not exist : type=supplement, specimen=submitted_specimen_id, sample=submitted_sample_id"
@@ -63,7 +63,7 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
       "file9.csv" -> fileEntry(key = "file9.csv"),
       "file10.json" -> fileEntry(key = "file10.json"),
     )
-    DocumentReferencesValidation.validateFiles(false, files, defaultAnalysis) shouldBe Valid(
+    DocumentReferencesValidation.validateFiles(files, defaultAnalysis) shouldBe Valid(
       TDocumentReferences(
         SequencingAlignment(List(CRAM("id", "file1.cram", Some("md5"), 10, "application/octet-stream"), CRAI("id", "file1.crai", Some("md5"), 10, "application/octet-stream"))),
         VariantCalling(List(SNV_VCF("id", "file2.vcf", Some("md5"), 10, "application/octet-stream"), SNV_TBI("id", "file2.tbi", Some("md5"), 10, "application/octet-stream"))),
