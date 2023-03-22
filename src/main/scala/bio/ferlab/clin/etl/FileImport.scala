@@ -23,12 +23,11 @@ object FileImport extends App {
         val params = if (args.length > 1) args.tail.map(_.toString) else Array.empty[String]
         val dryRun = if (params.length > 0) params(0).toBoolean else false
         val full = if (params.length > 1) params(1).toBoolean else false
-        val legacy = if (params.length > 2) params(2).toBoolean else false
         implicit val s3Client: S3Client = buildS3Client(conf.aws)
         val (clinClient, client) = buildFhirClients(conf.fhir, conf.keycloak)
         val bucket = conf.aws.bucketName
         withReport(bucket, prefix) { reportPath =>
-          run(bucket, prefix, conf.aws.outputBucketName, conf.aws.outputPrefix, reportPath, dryRun, full, legacy)(s3Client, client, clinClient, conf.ferload)
+          run(bucket, prefix, conf.aws.outputBucketName, conf.aws.outputPrefix, reportPath, dryRun, full)(s3Client, client, clinClient, conf.ferload)
         }
       }
     }
@@ -40,12 +39,12 @@ object FileImport extends App {
     S3Utils.writeContent(inputBucket, s"$reportPath/files.csv", filesToCSV)
   }
 
-  def run(inputBucket: String, inputPrefix: String, outputBucket: String, outputPrefix: String, reportPath: String, dryRun: Boolean, full: Boolean, legacy: Boolean)(implicit s3: S3Client, client: IGenericClient, clinFhirClient: IClinFhirClient, ferloadConf: FerloadConf): ValidationResult[Bundle] = {
+  def run(inputBucket: String, inputPrefix: String, outputBucket: String, outputPrefix: String, reportPath: String, dryRun: Boolean, full: Boolean)(implicit s3: S3Client, client: IGenericClient, clinFhirClient: IClinFhirClient, ferloadConf: FerloadConf): ValidationResult[Bundle] = {
     val metadata: ValidatedNel[String, Metadata] = Metadata.validateMetadataFile(inputBucket, inputPrefix, full)
     metadata.andThen { m: Metadata =>
       val rawFileEntries = CheckS3Data.loadRawFileEntries(inputBucket, inputPrefix)
       val fileEntries = CheckS3Data.loadFileEntries(m, rawFileEntries, outputPrefix)
-      val results = (BuildBundle.validate(m, fileEntries, legacy), CheckS3Data.validateFileEntries(rawFileEntries, fileEntries))
+      val results = (BuildBundle.validate(m, fileEntries), CheckS3Data.validateFileEntries(rawFileEntries, fileEntries))
       if (!dryRun) {
         results
           .mapN { (bundle, files) => (bundle, files) }

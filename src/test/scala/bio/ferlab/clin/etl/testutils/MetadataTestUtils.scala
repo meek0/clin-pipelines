@@ -61,6 +61,27 @@ object MetadataTestUtils {
     coverage_by_gene_csv = Some("file9.csv"),
     qc_metrics = Some("file10.json"),
   )
+  val defaultFilesAnalysisWithOptionals: FilesAnalysis = FilesAnalysis(
+    cram = "file1.cram",
+    crai = "file1.crai",
+    snv_vcf = "file2.vcf",
+    snv_tbi = "file2.tbi",
+    cnv_vcf = "file4.vcf",
+    cnv_tbi = "file4.tbi",
+    sv_vcf = Some("file5.vcf"),
+    sv_tbi = Some("file5.tbi"),
+    supplement = "file3.tgz",
+    exomiser_html = None,
+    exomiser_json = None,
+    exomiser_variants_tsv = None,
+    seg_bw =  None,
+    hard_filtered_baf_bw =  None,
+    roh_bed =  None,
+    hyper_exome_hg38_bed = None,
+    cnv_calls_png = None,
+    coverage_by_gene_csv = None,
+    qc_metrics = None,
+  )
   val defaultAnalysis: SimpleAnalysis = SimpleAnalysis(
     patient = defaultPatient("clin_id"),
     ldm = "CHUSJ",
@@ -71,6 +92,17 @@ object MetadataTestUtils {
     clinServiceRequestId = "clin_prescription_id",
     labAliquotId = "nanuq_sample_id",
     files = defaultFilesAnalysis
+  )
+  val defaultAnalysisWithOptionals: SimpleAnalysis = SimpleAnalysis(
+    patient = defaultPatient("clin_id"),
+    ldm = "CHUSJ",
+    ldmSampleId = "submitted_sample_id",
+    ldmSpecimenId = "submitted_specimen_id",
+    specimenType = "NBL",
+    sampleType = Some("DNA"),
+    clinServiceRequestId = "clin_prescription_id",
+    labAliquotId = "nanuq_sample_id",
+    files = defaultFilesAnalysisWithOptionals
   )
   val defaultExperiment: Experiment = Experiment(
     platform = Some("Illumina"),
@@ -96,7 +128,14 @@ object MetadataTestUtils {
     analyses = Seq(
       defaultAnalysis
     )
+  )
 
+  val defaultMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
+    defaultExperiment,
+    defaultWorkflow,
+    analyses = Seq(
+      defaultAnalysisWithOptionals
+    )
   )
 
 }

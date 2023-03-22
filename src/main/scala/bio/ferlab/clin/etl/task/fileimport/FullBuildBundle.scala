@@ -29,7 +29,7 @@ object FullBuildBundle {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
-  def validate(legacy: Boolean, metadata: FullMetadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
+  def validate(metadata: FullMetadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
     LOGGER.info("################# Validate Resources ##################")
     val taskExtensions = validateTaskExtension(metadata)
     val mapFiles = files.map(f => (f.filename, f)).toMap
@@ -53,7 +53,7 @@ object FullBuildBundle {
         validateSequencingServiceRequest(a),
         specimen,
         sample,
-        validateFiles(legacy, mapFiles, a),
+        validateFiles(mapFiles, a),
         taskExtensions.map(_.forAliquot(a.labAliquotId)),
         validateObservation(a)
         ).mapN(TemporaryBundle.apply)

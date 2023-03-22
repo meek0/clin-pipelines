@@ -11,27 +11,32 @@ import cats.implicits._
 
 object DocumentReferencesValidation {
 
-  def validateFiles(legacy: Boolean, files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TDocumentReferences] = {
+  def validateFiles(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TDocumentReferences] = {
     (
       validate[SequencingAlignment](files, a),
       validate[VariantCalling](files, a),
       validate[CopyNumberVariant](files, a),
-      checkOptionalValidation(legacy, validate[StructuralVariant](files, a)),
+      checkOptionalValidation(validate[StructuralVariant](files, a)),
       validate[SupplementDocument](files, a),
-      checkOptionalValidation(legacy, validate[Exomiser](files, a)),
-      checkOptionalValidation(legacy, validate[IgvTrack](files, a)),
-      checkOptionalValidation(legacy, validate[CnvVisualization](files, a)),
-      checkOptionalValidation(legacy, validate[CoverageByGene](files, a)),
-      checkOptionalValidation(legacy, validate[QcMetrics](files, a)),
+      checkOptionalValidation(validate[Exomiser](files, a)),
+      checkOptionalValidation(validate[IgvTrack](files, a)),
+      checkOptionalValidation(validate[CnvVisualization](files, a)),
+      checkOptionalValidation(validate[CoverageByGene](files, a)),
+      checkOptionalValidation(validate[QcMetrics](files, a)),
     ).mapN(TDocumentReferences)
   }
 
-  // convert to optional or return the invalid message if not legacy mode
-  def checkOptionalValidation[T <: TDocumentReference](legacy: Boolean, validated: ValidationResult[T]): ValidatedNel[String, Option[T]] = {
+  def checkOptionalValidation[T <: TDocumentReference](validated: ValidationResult[T]): ValidatedNel[String, Option[T]] = {
     val result = validated.toOption
-    if (!legacy && validated.isInvalid){
+    if (validated.isInvalid){
       validated match {
-        case Invalid(NonEmptyList(h, t)) => h.invalidNel
+        case Invalid(NonEmptyList(h, t)) => {
+          if (h.contains("OPTIONAL")) {
+            result.valid  // file not included in the metadata
+          } else {
+            h.invalidNel  // file in metadata but missing in store
+          }
+        }
       }
     } else {
       result.valid
