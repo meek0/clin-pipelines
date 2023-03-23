@@ -78,7 +78,75 @@ case class TTask(taskExtensions: TaskExtensions) {
       sup
     }
 
-    Seq(sequencingExperimentOutput, variantCallOutput, cnvOutput, supplementOutput).foreach { r =>
+    val structuralVariantOutput = if (drr.structuralVariant != null ) {
+      val code = new CodeableConcept()
+      code.addCoding()
+        .setSystem(CodingSystems.DR_TYPE)
+        .setCode(StructuralVariant.documentType)
+      val sup = new TaskOutputComponent()
+        .setType(code)
+        .setValue(drr.structuralVariant.toReference())
+      sup
+    } else null
+
+    val exomiserOutput = if (drr.exomiser != null) {
+      val code = new CodeableConcept()
+      code.addCoding()
+        .setSystem(CodingSystems.DR_TYPE)
+        .setCode(Exomiser.documentType)
+      val sup = new TaskOutputComponent()
+        .setType(code)
+        .setValue(drr.exomiser.toReference())
+      sup
+    } else null
+
+    val igvTrackOutput = if (drr.igvTrack != null) {
+      val code = new CodeableConcept()
+      code.addCoding()
+        .setSystem(CodingSystems.DR_TYPE)
+        .setCode(IgvTrack.documentType)
+      val sup = new TaskOutputComponent()
+        .setType(code)
+        .setValue(drr.igvTrack.toReference())
+      sup
+    } else null
+
+    val cnvVisualizationOutput = if (drr.cnvVisualization != null) {
+      val code = new CodeableConcept()
+      code.addCoding()
+        .setSystem(CodingSystems.DR_TYPE)
+        .setCode(CnvVisualization.documentType)
+      val sup = new TaskOutputComponent()
+        .setType(code)
+        .setValue(drr.cnvVisualization.toReference())
+      sup
+    } else null
+
+    val coverageByGeneOutput = if (drr.coverageByGene != null) {
+      val code = new CodeableConcept()
+      code.addCoding()
+        .setSystem(CodingSystems.DR_TYPE)
+        .setCode(CoverageByGene.documentType)
+      val sup = new TaskOutputComponent()
+        .setType(code)
+        .setValue(drr.coverageByGene.toReference())
+      sup
+    } else null
+
+    val qcMetricsOutput = if (drr.qcMetrics != null) {
+      val code = new CodeableConcept()
+      code.addCoding()
+        .setSystem(CodingSystems.DR_TYPE)
+        .setCode(QcMetrics.documentType)
+      val sup = new TaskOutputComponent()
+        .setType(code)
+        .setValue(drr.qcMetrics.toReference())
+      sup
+    } else null
+
+    Seq(sequencingExperimentOutput, variantCallOutput, cnvOutput, structuralVariantOutput, supplementOutput, exomiserOutput, igvTrackOutput, cnvVisualizationOutput, coverageByGeneOutput, qcMetricsOutput)
+      .filter(_ != null)
+      .foreach { r =>
       t.addOutput(r)
     }
 
