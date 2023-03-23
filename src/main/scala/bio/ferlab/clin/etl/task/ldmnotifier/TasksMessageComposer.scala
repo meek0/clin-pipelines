@@ -44,10 +44,14 @@ object TasksMessageComposer {
   }
 
   def createMsgBody(): String = {
-   """Bonjour,
-     |
-     |Nous avons complété le séquençage de plusieurs échantillons soumis par votre laboratoire. Les fichiers inclus dans le manifeste ci-joint sont prêts pour téléchargement. Pour télécharger les fichiers, voir les instructions à https://github.com/Ferlab-Ste-Justine/ferload-client-cli
-     |
-     |L'équipe du CQGC""".stripMargin
+    """
+      |Bonjour,
+      |
+      |Les échantillons soumis récemment par votre laboratoire au CQGC ont été séquencés. Les variants associés sont disponibles pour l'interprétation dans le portail web CLIN (https://portail.cqgc.hsj.rtss.qc.ca/).
+      |
+      |L’ensemble des fichiers binaires et annexes relatifs au séquençage sont accessibles via la page « Archives » du portail web CLIN. Nous mettons également à votre disposition l’outil ferload-client de CLIN ainsi qu’un manifeste, disponible en pièce jointe, permettant un téléchargement en lot. Voir les instructions à GitHub - https://github.com/Ferlab-Ste-Justine/ferload-client-cli
+      |
+      |L'équipe du CQGC
+      |""".stripMargin
   }
 }
