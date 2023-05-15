@@ -33,7 +33,9 @@ object FhirBulkExporter {
       "PractitionerRole",
       "ServiceRequest",
       "Specimen",
-      "Task")
+      "Task",
+      "DocumentReference"
+    )
       .mkString(",")
 
   case class ExportOutputFile(`type`: String, url: String)
