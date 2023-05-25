@@ -44,7 +44,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
 
       result.isValid shouldBe true
       val resultFiles = list(outputBucket, outputPrefix)
-      resultFiles.size shouldBe 19
+      resultFiles.size shouldBe 20
 
       val searchPatients = searchFhir("Patient")
       searchPatients.getTotal shouldBe 1
@@ -143,7 +143,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
       }
       //Expected title
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file5.vcf", "file5.tbi", "file3.json",
-        "file6.html","file6.json","file6.variants.tsv","file7.seg.bw","file7.baf.bw","file7.roh.bed","file7.exome.bed","file8.png","file9.csv","file10.json")
+        "file6.html","file6.json","file6.variants.tsv","file7.seg.bw","file7.baf.bw","file7.roh.bed","file7.exome.bed","file8.png","file9.csv","file10.json", "file11.tsv")
 
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE

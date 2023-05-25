@@ -30,6 +30,7 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
       "file8.png" -> fileEntry(key = "file8.png"),
       "file9.csv" -> fileEntry(key = "file9.csv"),
       "file10.json" -> fileEntry(key = "file10.json"),
+      "file11.tsv" -> fileEntry(key = "file11.tsv"),
     )
     DocumentReferencesValidation.validateFiles(files, defaultAnalysis) shouldBe Invalid(
       NonEmptyList.of(
@@ -62,6 +63,7 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
       "file8.png" -> fileEntry(key = "file8.png"),
       "file9.csv" -> fileEntry(key = "file9.csv"),
       "file10.json" -> fileEntry(key = "file10.json"),
+      "file11.tsv" -> fileEntry(key = "file11.tsv"),
     )
     DocumentReferencesValidation.validateFiles(files, defaultAnalysis) shouldBe Valid(
       TDocumentReferences(
@@ -74,7 +76,7 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
         Some(IgvTrack(List(SEG_BW("id", "file7.seg.bw", Some("md5"), 10, "application/octet-stream"), HARD_FILTERED_BAF_BW("id", "file7.baf.bw", Some("md5"), 10, "application/octet-stream"), ROH_BED("id", "file7.roh.bed", Some("md5"), 10, "application/octet-stream"), HYPER_EXOME_HG38_BED("id", "file7.exome.bed", Some("md5"), 10, "application/octet-stream")))),
         Some(CnvVisualization(List(CNV_CALLS_PNG("id", "file8.png", Some("md5"),10, "application/octet-stream")))),
         Some(CoverageByGene(List(COVERAGE_BY_GENE_CSV("id", "file9.csv", Some("md5"),10, "application/octet-stream")))),
-        Some(QcMetrics(List(QC_METRICS("id", "file10.json", Some("md5"),10, "application/octet-stream")))),
+        Some(QcMetrics(List(QC_METRICS("id", "file10.json", Some("md5"),10, "application/octet-stream"), QC_METRICS_TSV("id", "file11.tsv", Some("md5"),10, "application/octet-stream")))),
       )
     )
 

@@ -23,6 +23,7 @@ object DocumentReferencesValidation {
       checkOptionalValidation(validate[CnvVisualization](files, a)),
       checkOptionalValidation(validate[CoverageByGene](files, a)),
       checkOptionalValidation(validate[QcMetrics](files, a)),
+//      checkOptionalValidation(validate[QcMetricsTsv](files, a)),
     ).mapN(TDocumentReferences)
   }
 

@@ -60,6 +60,7 @@ object MetadataTestUtils {
     cnv_calls_png = Some("file8.png"),
     coverage_by_gene_csv = Some("file9.csv"),
     qc_metrics = Some("file10.json"),
+    qc_metrics_tsv = Some("file11.tsv"),
   )
   val defaultFilesAnalysisWithOptionals: FilesAnalysis = FilesAnalysis(
     cram = "file1.cram",
@@ -81,6 +82,7 @@ object MetadataTestUtils {
     cnv_calls_png = None,
     coverage_by_gene_csv = None,
     qc_metrics = None,
+    qc_metrics_tsv = None,
   )
   val defaultAnalysis: SimpleAnalysis = SimpleAnalysis(
     patient = defaultPatient("clin_id"),

@@ -38,6 +38,7 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       FileEntry("bucket","file8.png", Some("md5"), 10, "4", "application/octet-stream", ""),
       FileEntry("bucket","file9.csv", Some("md5"), 10, "4", "application/octet-stream", ""),
       FileEntry("bucket","file10.json", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket","file11.tsv", Some("md5"), 10, "4", "application/octet-stream", ""),
     )
     val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files)
     println(result)
