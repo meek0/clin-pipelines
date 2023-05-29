@@ -1,6 +1,7 @@
 package bio.ferlab.clin.etl.testutils
 
 import MetadataTestUtils.defaultMetadata.analyses
+import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.EXTUM_SCHEMA
 import bio.ferlab.clin.etl.task.fileimport.model._
 
 object MetadataTestUtils {
@@ -135,6 +136,15 @@ object MetadataTestUtils {
 
   val defaultMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
     None,
+    defaultExperiment,
+    defaultWorkflow,
+    analyses = Seq(
+      defaultAnalysisWithOptionals
+    )
+  )
+
+  val extumMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
+    Some(EXTUM_SCHEMA),
     defaultExperiment,
     defaultWorkflow,
     analyses = Seq(

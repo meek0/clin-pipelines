@@ -5,6 +5,7 @@ import bio.ferlab.clin.etl.conf.FerloadConf
 import bio.ferlab.clin.etl.fhir.FhirUtils._
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.task.fileimport.model.FamilyExtension.buildFamilies
+import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.EXTUM_SCHEMA
 import bio.ferlab.clin.etl.task.fileimport.model._
 import bio.ferlab.clin.etl.task.fileimport.validation.DocumentReferencesValidation.validateFiles
 import bio.ferlab.clin.etl.task.fileimport.validation.OrganizationValidation.{validateEpOrganization, validateLdmOrganization}
@@ -29,8 +30,18 @@ object FullBuildBundle {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
+  def validateSchema(submissionSchema: Option[String], metadata: Metadata): ValidatedNel[String, Option[String]] = {
+    if (EXTUM_SCHEMA.equals(submissionSchema.orNull)) {
+      if (metadata.analyses.flatMap(a => a.files.qc_metrics_tsv).isEmpty) {
+        return "Submission schema of type EXTUM but no QC Metrics TSV files found".invalidNel
+      }
+    }
+    submissionSchema.validNel
+  }
+
   def validate(metadata: FullMetadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
     LOGGER.info("################# Validate Resources ##################")
+
     val taskExtensions = validateTaskExtension(metadata)
     val mapFiles = files.map(f => (f.filename, f)).toMap
     val allResources: ValidatedNel[String, List[TemporaryBundle]] = metadata.analyses.toList.map { a =>
@@ -44,6 +55,7 @@ object FullBuildBundle {
       val specimen: ValidationResult[TSpecimen] = (patient, validateSpecimen(a)).mapN((_, _)).andThen { case (p, sp) => SpecimenValidation.validateFullPatient(sp, p, a.ldmSpecimenId, SpecimenType) }
       val sample: ValidationResult[TSpecimen] = (patient, validateSample(a)).mapN((_, _)).andThen { case (p, sa) => SpecimenValidation.validateFullPatient(sa, p, a.ldmSampleId, SampleType) }
       (
+        validateSchema(metadata.submissionSchema, metadata),
         validateLdmOrganization(a),
         validateEpOrganization(a),
         patient,
@@ -63,7 +75,7 @@ object FullBuildBundle {
     val bundleAndFamilies = groupResourcesByFamily(allResources)
 
     val entriesComponent: ValidatedNel[String, List[BundleEntryComponent]] = bundleAndFamilies.map { case (bundles, familyMap, analysisServiceRequestByFamily, clinicalImpressionsByFamily) =>
-      bundles.flatMap(b => createResources(metadata.submissionSchema, familyMap, b, analysisServiceRequestByFamily, clinicalImpressionsByFamily))
+      bundles.flatMap(b => createResources(familyMap, b, analysisServiceRequestByFamily, clinicalImpressionsByFamily))
     }
 
     entriesComponent.map(TBundle)
@@ -84,13 +96,13 @@ object FullBuildBundle {
       }
   }
 
-  case class TemporaryBundle(ldm: IdType, ep: IdType, patient: TPatient, person: TPerson,
+  case class TemporaryBundle(submissionSchema: Option[String], ldm: IdType, ep: IdType, patient: TPatient, person: TPerson,
                              clinicalImpression: TClinicalImpression,
                              analysisServiceRequest: Option[TAnalysisServiceRequest], sequencingServiceRequest: TSequencingServiceRequest,
                              specimen: TSpecimen, sample: TSpecimen,
                              files: TDocumentReferences, taskExtensions: TaskExtensions, diseaseStatus: TObservation)
 
-  def createResources(submissionSchema: Option[String], familyMap: Map[String, Seq[FamilyExtension]], b: TemporaryBundle, analysisServiceRequestByFamily: Map[String, IdType], clinicalImpressionsByFamily: Map[String, Seq[IdType]])(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
+  def createResources(familyMap: Map[String, Seq[FamilyExtension]], b: TemporaryBundle, analysisServiceRequestByFamily: Map[String, IdType], clinicalImpressionsByFamily: Map[String, Seq[IdType]])(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
     val patientResource = b.patient.buildResource(b.ep.toReference())
     val bundleFamilyExtension = b.patient.patient.familyId.flatMap(f => familyMap.get(f))
     val analyseServiceRequestResource = b.analysisServiceRequest.map { a =>
@@ -99,7 +111,7 @@ object FullBuildBundle {
         .getOrElse(Seq(b.clinicalImpression.id))
       a.buildResource(patientResource.toReference(), bundleFamilyExtension, clinicalImpressionReferences.map(_.toReference()), b.ldm.toReference())
     }
-    val task = TTask(submissionSchema, b.taskExtensions)
+    val task = TTask(b.submissionSchema, b.taskExtensions)
     val personResource = b.person.buildResource(patientResource.toReference())
     val sequencingServiceRequestReference = b.sequencingServiceRequest.id.toReference()
     val specimenResource = b.specimen.buildResource(patientResource.toReference(), sequencingServiceRequestReference, b.ldm.toReference())
