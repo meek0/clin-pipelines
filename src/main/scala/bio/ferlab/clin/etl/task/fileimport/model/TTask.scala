@@ -5,6 +5,7 @@ import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskOutputComponent}
 import org.hl7.fhir.r4.model.{CodeableConcept, Extension, IdType, Reference, Resource, StringType}
 import TTask._
 import bio.ferlab.clin.etl.fhir.FhirUtils.ResourceExtension
+import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.EXTUM_SCHEMA
 import bio.ferlab.clin.etl.task.fileimport.validation.SpecimenValidation.CQGC_LAB
 
 case class TaskExtensions(workflowExtension: Extension, experimentExtension: Extension) {
@@ -15,16 +16,25 @@ case class TaskExtensions(workflowExtension: Extension, experimentExtension: Ext
   }
 }
 
-case class TTask(taskExtensions: TaskExtensions) {
+case class TTask(submissionSchema: Option[String], taskExtensions: TaskExtensions) {
 
-  def buildResource(serviceRequest: Reference, patient: Reference, requester: Reference, sample: Reference, drr: DocumentReferencesResources): Resource = {
+  def buildResource(analysisRef: Option[Reference], sequencingRef: Reference, patient: Reference, requester: Reference, sample: Reference, drr: DocumentReferencesResources): Resource = {
     val t = AnalysisTask()
 
-    t.getCode.addCoding()
-      .setSystem(CodingSystems.ANALYSIS_TYPE)
-      .setCode(EXOME_GERMLINE_ANALYSIS)
+    if (EXTUM_SCHEMA.equals(submissionSchema.orNull)) {
+      t.getCode.addCoding()
+        .setSystem(CodingSystems.ANALYSIS_TYPE)
+        .setCode(EXTUM_ANALYSIS)
+    } else {
+      t.getCode.addCoding()
+        .setSystem(CodingSystems.ANALYSIS_TYPE)
+        .setCode(EXOME_GERMLINE_ANALYSIS)
+    }
 
-    t.setFocus(serviceRequest)
+    t.setFocus(sequencingRef)
+    if (analysisRef.isDefined) {
+      t.getBasedOn.add(analysisRef.get)
+    }
     t.setFor(patient)
 
     t.setRequester(requester)
@@ -159,6 +169,7 @@ case class TTask(taskExtensions: TaskExtensions) {
 
 object TTask {
   val EXOME_GERMLINE_ANALYSIS = "GEBA"
+  val EXTUM_ANALYSIS = "TEBA"
 
   val ANALYSED_SAMPLE = "Analysed sample"
 }

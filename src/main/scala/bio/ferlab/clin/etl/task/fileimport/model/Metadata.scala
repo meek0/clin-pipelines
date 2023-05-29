@@ -39,14 +39,14 @@ sealed trait Metadata {
   def analyses: Seq[Analysis]
 }
 
-case class SimpleMetadata(experiment: Experiment, workflow: Workflow, analyses: Seq[SimpleAnalysis]) extends Metadata
+case class SimpleMetadata(submissionSchema: Option[String], experiment: Experiment, workflow: Workflow, analyses: Seq[SimpleAnalysis]) extends Metadata
 
 object SimpleMetadata {
   implicit val reads: Reads[SimpleMetadata] = Json.reads[SimpleMetadata]
 }
 
 
-case class FullMetadata(experiment: Experiment, workflow: Workflow, analyses: Seq[FullAnalysis]) extends Metadata
+case class FullMetadata(submissionSchema: Option[String], experiment: Experiment, workflow: Workflow, analyses: Seq[FullAnalysis]) extends Metadata
 
 object FullMetadata {
   implicit val reads: Reads[FullMetadata] = Json.reads[FullMetadata]

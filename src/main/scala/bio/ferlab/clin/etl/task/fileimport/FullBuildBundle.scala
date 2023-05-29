@@ -36,7 +36,7 @@ object FullBuildBundle {
     val allResources: ValidatedNel[String, List[TemporaryBundle]] = metadata.analyses.toList.map { a =>
 
       val analysisServiceRequests: Option[ValidationResult[TAnalysisServiceRequest]] = if (a.patient.familyId.isEmpty || a.patient.familyMember == "PROBAND") {
-        Some(validateAnalysisServiceRequest(a))
+        Some(validateAnalysisServiceRequest(metadata.submissionSchema, a))
       } else None
 
       val patient = validatePatient(a.patient)
@@ -50,7 +50,7 @@ object FullBuildBundle {
         validatePerson(a.patient),
         validateClinicalImpression(a),
         analysisServiceRequests.sequence,
-        validateSequencingServiceRequest(a),
+        validateSequencingServiceRequest(metadata.submissionSchema, a),
         specimen,
         sample,
         validateFiles(mapFiles, a),
@@ -63,7 +63,7 @@ object FullBuildBundle {
     val bundleAndFamilies = groupResourcesByFamily(allResources)
 
     val entriesComponent: ValidatedNel[String, List[BundleEntryComponent]] = bundleAndFamilies.map { case (bundles, familyMap, analysisServiceRequestByFamily, clinicalImpressionsByFamily) =>
-      bundles.flatMap(b => createResources(familyMap, b, analysisServiceRequestByFamily, clinicalImpressionsByFamily))
+      bundles.flatMap(b => createResources(metadata.submissionSchema, familyMap, b, analysisServiceRequestByFamily, clinicalImpressionsByFamily))
     }
 
     entriesComponent.map(TBundle)
@@ -90,7 +90,7 @@ object FullBuildBundle {
                              specimen: TSpecimen, sample: TSpecimen,
                              files: TDocumentReferences, taskExtensions: TaskExtensions, diseaseStatus: TObservation)
 
-  def createResources(familyMap: Map[String, Seq[FamilyExtension]], b: TemporaryBundle, analysisServiceRequestByFamily: Map[String, IdType], clinicalImpressionsByFamily: Map[String, Seq[IdType]])(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
+  def createResources(submissionSchema: Option[String], familyMap: Map[String, Seq[FamilyExtension]], b: TemporaryBundle, analysisServiceRequestByFamily: Map[String, IdType], clinicalImpressionsByFamily: Map[String, Seq[IdType]])(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
     val patientResource = b.patient.buildResource(b.ep.toReference())
     val bundleFamilyExtension = b.patient.patient.familyId.flatMap(f => familyMap.get(f))
     val analyseServiceRequestResource = b.analysisServiceRequest.map { a =>
@@ -99,7 +99,7 @@ object FullBuildBundle {
         .getOrElse(Seq(b.clinicalImpression.id))
       a.buildResource(patientResource.toReference(), bundleFamilyExtension, clinicalImpressionReferences.map(_.toReference()), b.ldm.toReference())
     }
-    val task = TTask(b.taskExtensions)
+    val task = TTask(submissionSchema, b.taskExtensions)
     val personResource = b.person.buildResource(patientResource.toReference())
     val sequencingServiceRequestReference = b.sequencingServiceRequest.id.toReference()
     val specimenResource = b.specimen.buildResource(patientResource.toReference(), sequencingServiceRequestReference, b.ldm.toReference())
@@ -111,7 +111,7 @@ object FullBuildBundle {
     val sequencingServiceRequestResource = b.sequencingServiceRequest.buildResource(analysisServiceRequestReference,
       patientResource.toReference(), specimenResource.toReference(), sampleResource.toReference(), b.ldm.toReference())
 
-    val taskResource: Resource = task.buildResource(sequencingServiceRequestReference, patientResource.toReference(), b.ldm.toReference(), sampleResource.toReference(), documentReferencesResources)
+    val taskResource: Resource = task.buildResource(analysisServiceRequestReference, sequencingServiceRequestReference, patientResource.toReference(), b.ldm.toReference(), sampleResource.toReference(), documentReferencesResources)
     val clinicalImpressionResource = b.clinicalImpression.createResource(patientResource.toReference(), b.diseaseStatus.id.toReference())
     val observationResource = b.diseaseStatus.createResource(patientResource.toReference())
 

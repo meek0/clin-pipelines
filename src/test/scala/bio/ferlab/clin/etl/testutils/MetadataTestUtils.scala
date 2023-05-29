@@ -125,6 +125,7 @@ object MetadataTestUtils {
     genomeBuild = Some("GRCh38")
   )
   val defaultMetadata: SimpleMetadata = SimpleMetadata(
+    None,
     defaultExperiment,
     defaultWorkflow,
     analyses = Seq(
@@ -133,6 +134,7 @@ object MetadataTestUtils {
   )
 
   val defaultMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
+    None,
     defaultExperiment,
     defaultWorkflow,
     analyses = Seq(

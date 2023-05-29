@@ -45,12 +45,12 @@ object SimpleBuildBundle {
   }
 
   def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
-    val task = TTask(taskExtensions)
+    val task = TTask(None, taskExtensions)
     val specimenResource = specimen.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference())
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference(), Some(specimenResource.toReference()))
     val documentReferencesResources: DocumentReferencesResources = files.buildResources(patient.toReference(), organization.toReference(), sampleResource.toReference())
     val serviceRequestResource = serviceRequest.buildResource(specimenResource.toReference(), sampleResource.toReference())
-    val taskResource: Resource = task.buildResource(serviceRequest.sr.toReference(), patient.toReference(), organization.toReference(), sampleResource.toReference(), documentReferencesResources)
+    val taskResource: Resource = task.buildResource(None, serviceRequest.sr.toReference(), patient.toReference(), organization.toReference(), sampleResource.toReference(), documentReferencesResources)
 
     val resourcesToCreate = (documentReferencesResources.resources() :+ taskResource).toList
 
