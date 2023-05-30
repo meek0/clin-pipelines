@@ -9,8 +9,8 @@ import org.hl7.fhir.r4.model.{Bundle, ServiceRequest}
 
 object SequencingServiceRequestValidation {
 
-  def validateSequencingServiceRequest(a: FullAnalysis)(implicit client: IGenericClient): ValidationResult[TSequencingServiceRequest] = {
-    (validateExistingServiceRequest(a), TSequencingServiceRequest(a).validateBaseResource()).mapN { case (_, r) => r }
+  def validateSequencingServiceRequest(submissionSchema: Option[String], a: FullAnalysis)(implicit client: IGenericClient): ValidationResult[TSequencingServiceRequest] = {
+    (validateExistingServiceRequest(a), TSequencingServiceRequest(submissionSchema, a).validateBaseResource()).mapN { case (_, r) => r }
   }
 
   private def validateExistingServiceRequest(a: FullAnalysis)(implicit client: IGenericClient) = {

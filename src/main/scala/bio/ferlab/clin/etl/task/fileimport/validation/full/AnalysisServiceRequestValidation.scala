@@ -6,8 +6,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient
 
 object AnalysisServiceRequestValidation {
 
-  def validateAnalysisServiceRequest(a: FullAnalysis)(implicit client: IGenericClient): ValidationResult[TAnalysisServiceRequest] = {
-    TAnalysisServiceRequest(a).validateBaseResource()
+  def validateAnalysisServiceRequest(submissionSchema: Option[String], a: FullAnalysis)(implicit client: IGenericClient): ValidationResult[TAnalysisServiceRequest] = {
+    TAnalysisServiceRequest(submissionSchema, a).validateBaseResource()
   }
 }
 

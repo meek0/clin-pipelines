@@ -1,9 +1,9 @@
 package bio.ferlab.clin.etl.task.fileimport.model
 
 import bio.ferlab.clin.etl.fhir.FhirUtils
-import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.{ANALYSIS_REQUEST_CODE, FAMILY_IDENTIFIER, SR_IDENTIFIER}
+import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.{ANALYSIS_REQUEST_CODE, FAMILY_IDENTIFIER, SEQUENCING_REQUEST_CODE, SR_IDENTIFIER}
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.Profiles.{ANALYSIS_SERVICE_REQUEST, SEQUENCING_SERVICE_REQUEST}
-import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.validateWithFakeSubject
+import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.{EXTUM_SCHEMA, validateWithFakeSubject}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
 import org.hl7.fhir.r4.model.ServiceRequest.{ServiceRequestIntent, ServiceRequestStatus}
@@ -14,6 +14,9 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 
 
 object TFullServiceRequest {
+
+  val EXTUM_SCHEMA = "CQGC_Exome_Tumeur_Seul"
+  val GERMLINE_SCHEMA = "CQGC_Germline"
 
   def validateWithFakeSubject(sr:ServiceRequest)(implicit client: IGenericClient): OperationOutcome ={
     sr.setSubject(new Reference("fake"))
@@ -26,7 +29,7 @@ object TFullServiceRequest {
 
 }
 
-case class TAnalysisServiceRequest(analysis: FullAnalysis) {
+case class TAnalysisServiceRequest(submissionSchema: Option[String], analysis: FullAnalysis) {
   def buildResource(patient: Reference, familyExtensions: Option[Seq[FamilyExtension]], clinicalImpressions:Seq[Reference], ldm:Reference): Resource = {
     sr.setId(id)
     sr.setSubject(patient)
@@ -53,7 +56,11 @@ case class TAnalysisServiceRequest(analysis: FullAnalysis) {
   sr.getMeta.addProfile(ANALYSIS_SERVICE_REQUEST)
   sr.setIntent(ServiceRequestIntent.ORDER)
   sr.setStatus(ServiceRequestStatus.ACTIVE)
-  sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.panelCode)))
+  if (EXTUM_SCHEMA.equals(submissionSchema.orNull)) {
+    sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode("EXTUM")))
+  } else {
+    sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.panelCode)))
+  }
 
   analysis.patient.familyId.foreach(f => sr.addIdentifier(new Identifier().setSystem(FAMILY_IDENTIFIER).setValue(f)))
   sr.setAuthoredOn(new Date())
@@ -73,7 +80,7 @@ case class TAnalysisServiceRequest(analysis: FullAnalysis) {
 
 }
 
-case class TSequencingServiceRequest(analysis: FullAnalysis) {
+case class TSequencingServiceRequest(submissionSchema: Option[String], analysis: FullAnalysis) {
   def buildResource(analysisServiceRequest: Option[Reference], patient:Reference, specimen: Reference, sample: Reference, ldm:Reference): Resource = {
     sr.setId(id)
     analysisServiceRequest.foreach(sr.addBasedOn)
@@ -92,6 +99,10 @@ case class TSequencingServiceRequest(analysis: FullAnalysis) {
   sr.setStatus(ServiceRequestStatus.COMPLETED)
   sr.getCode.addCoding().setSystem(SR_IDENTIFIER).setCode(analysis.ldmServiceRequestId)
   sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.panelCode)))
+  if (EXTUM_SCHEMA.equals(submissionSchema.orNull)) {
+    sr.getCode().addCoding(new Coding().setSystem(SEQUENCING_REQUEST_CODE).setCode("65241"))
+  }
+
   sr.setAuthoredOn(new Date())
 
   def validateBaseResource()(implicit client: IGenericClient): ValidatedNel[String, TSequencingServiceRequest] = {

@@ -298,3 +298,17 @@ object QC_METRICS {
     override def buildFile: FileEntry => QC_METRICS = f => QC_METRICS(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
   }
 }
+
+case class QC_METRICS_TSV(objectStoreId: String, title: String, md5: Option[String], size: Long, contentType: String) extends TDocumentAttachment {
+  override val format: String = "TSV"
+}
+
+object QC_METRICS_TSV {
+  implicit case object builder extends ToAttachment[QC_METRICS_TSV] {
+    override def label: String = "tsv"
+
+    override def analysisFileName: Analysis => String = a => a.files.qc_metrics_tsv.getOrElse("OPTIONAL")
+
+    override def buildFile: FileEntry => QC_METRICS_TSV = f => QC_METRICS_TSV(objectStoreId = f.id, title = f.filename, md5 = f.md5, size = f.size, contentType = f.contentType)
+  }
+}

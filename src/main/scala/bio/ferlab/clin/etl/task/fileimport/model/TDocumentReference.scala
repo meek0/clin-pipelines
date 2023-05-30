@@ -252,7 +252,7 @@ object QcMetrics {
 
     protected override def build(documents: Seq[TDocumentAttachment]): QcMetrics = QcMetrics(documents)
 
-    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[QC_METRICS])
+    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[QC_METRICS], valid[QC_METRICS_TSV])
 
   }
 }

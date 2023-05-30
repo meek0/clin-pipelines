@@ -1,6 +1,7 @@
 package bio.ferlab.clin.etl.testutils
 
 import MetadataTestUtils.defaultMetadata.analyses
+import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.{EXTUM_SCHEMA, GERMLINE_SCHEMA}
 import bio.ferlab.clin.etl.task.fileimport.model._
 
 object MetadataTestUtils {
@@ -60,6 +61,7 @@ object MetadataTestUtils {
     cnv_calls_png = Some("file8.png"),
     coverage_by_gene_csv = Some("file9.csv"),
     qc_metrics = Some("file10.json"),
+    qc_metrics_tsv = Some("file11.tsv"),
   )
   val defaultFilesAnalysisWithOptionals: FilesAnalysis = FilesAnalysis(
     cram = "file1.cram",
@@ -81,6 +83,7 @@ object MetadataTestUtils {
     cnv_calls_png = None,
     coverage_by_gene_csv = None,
     qc_metrics = None,
+    qc_metrics_tsv = None,
   )
   val defaultAnalysis: SimpleAnalysis = SimpleAnalysis(
     patient = defaultPatient("clin_id"),
@@ -123,6 +126,7 @@ object MetadataTestUtils {
     genomeBuild = Some("GRCh38")
   )
   val defaultMetadata: SimpleMetadata = SimpleMetadata(
+    Some(GERMLINE_SCHEMA),
     defaultExperiment,
     defaultWorkflow,
     analyses = Seq(
@@ -131,6 +135,7 @@ object MetadataTestUtils {
   )
 
   val defaultMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
+    Some(GERMLINE_SCHEMA),
     defaultExperiment,
     defaultWorkflow,
     analyses = Seq(
@@ -138,4 +143,21 @@ object MetadataTestUtils {
     )
   )
 
+  val extumMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
+    Some(EXTUM_SCHEMA),
+    defaultExperiment,
+    defaultWorkflow,
+    analyses = Seq(
+      defaultAnalysisWithOptionals
+    )
+  )
+
+  val unsupportedMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
+    None,
+    defaultExperiment,
+    defaultWorkflow,
+    analyses = Seq(
+      defaultAnalysisWithOptionals
+    )
+  )
 }

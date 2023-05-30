@@ -4,6 +4,8 @@ import bio.ferlab.clin.etl.ValidationResult
 import bio.ferlab.clin.etl.conf.FerloadConf
 import bio.ferlab.clin.etl.fhir.FhirUtils._
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
+import bio.ferlab.clin.etl.task.fileimport.FullBuildBundle.validateSchema
+import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.EXTUM_SCHEMA
 import bio.ferlab.clin.etl.task.fileimport.model._
 import bio.ferlab.clin.etl.task.fileimport.validation.DocumentReferencesValidation.validateFiles
 import bio.ferlab.clin.etl.task.fileimport.validation.OrganizationValidation.{validateOrganization, validateOrganizationByAlias}
@@ -30,6 +32,7 @@ object SimpleBuildBundle {
     val allResources: ValidatedNel[String, List[BundleEntryComponent]] = metadata.analyses.toList.map { a =>
 
       (
+        validateSchema(metadata.submissionSchema, metadata),
         validateOrganization(a),
         validatePatient(a.patient),
         validateServiceRequest(a),
@@ -44,13 +47,13 @@ object SimpleBuildBundle {
     allResources.map(TBundle)
   }
 
-  def createResources(organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
-    val task = TTask(taskExtensions)
+  def createResources(submissionSchema: Option[String], organization: IdType, patient: IdType, serviceRequest: TServiceRequest, specimen: TSpecimen, sample: TSpecimen, files: TDocumentReferences, taskExtensions: TaskExtensions)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
+    val task = TTask(submissionSchema, taskExtensions)
     val specimenResource = specimen.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference())
     val sampleResource = sample.buildResource(patient.toReference(), serviceRequest.sr.toReference(), organization.toReference(), Some(specimenResource.toReference()))
     val documentReferencesResources: DocumentReferencesResources = files.buildResources(patient.toReference(), organization.toReference(), sampleResource.toReference())
     val serviceRequestResource = serviceRequest.buildResource(specimenResource.toReference(), sampleResource.toReference())
-    val taskResource: Resource = task.buildResource(serviceRequest.sr.toReference(), patient.toReference(), organization.toReference(), sampleResource.toReference(), documentReferencesResources)
+    val taskResource: Resource = task.buildResource(None, serviceRequest.sr.toReference(), patient.toReference(), organization.toReference(), sampleResource.toReference(), documentReferencesResources)
 
     val resourcesToCreate = (documentReferencesResources.resources() :+ taskResource).toList
 
