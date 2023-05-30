@@ -1,7 +1,7 @@
 package bio.ferlab.clin.etl.testutils
 
 import MetadataTestUtils.defaultMetadata.analyses
-import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.EXTUM_SCHEMA
+import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.{EXTUM_SCHEMA, GERMLINE_SCHEMA}
 import bio.ferlab.clin.etl.task.fileimport.model._
 
 object MetadataTestUtils {
@@ -126,7 +126,7 @@ object MetadataTestUtils {
     genomeBuild = Some("GRCh38")
   )
   val defaultMetadata: SimpleMetadata = SimpleMetadata(
-    None,
+    Some(GERMLINE_SCHEMA),
     defaultExperiment,
     defaultWorkflow,
     analyses = Seq(
@@ -135,7 +135,7 @@ object MetadataTestUtils {
   )
 
   val defaultMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
-    None,
+    Some(GERMLINE_SCHEMA),
     defaultExperiment,
     defaultWorkflow,
     analyses = Seq(
@@ -152,4 +152,12 @@ object MetadataTestUtils {
     )
   )
 
+  val unsupportedMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
+    None,
+    defaultExperiment,
+    defaultWorkflow,
+    analyses = Seq(
+      defaultAnalysisWithOptionals
+    )
+  )
 }

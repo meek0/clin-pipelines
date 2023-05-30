@@ -16,6 +16,7 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 object TFullServiceRequest {
 
   val EXTUM_SCHEMA = "CQGC_Exome_Tumeur_Seul"
+  val GERMLINE_SCHEMA = "CQGC_Germline"
 
   def validateWithFakeSubject(sr:ServiceRequest)(implicit client: IGenericClient): OperationOutcome ={
     sr.setSubject(new Reference("fake"))

@@ -5,7 +5,7 @@ import bio.ferlab.clin.etl.conf.FerloadConf
 import bio.ferlab.clin.etl.fhir.FhirUtils._
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.task.fileimport.model.FamilyExtension.buildFamilies
-import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.EXTUM_SCHEMA
+import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.{EXTUM_SCHEMA, GERMLINE_SCHEMA}
 import bio.ferlab.clin.etl.task.fileimport.model._
 import bio.ferlab.clin.etl.task.fileimport.validation.DocumentReferencesValidation.validateFiles
 import bio.ferlab.clin.etl.task.fileimport.validation.OrganizationValidation.{validateEpOrganization, validateLdmOrganization}
@@ -35,6 +35,10 @@ object FullBuildBundle {
       if (metadata.analyses.flatMap(a => a.files.qc_metrics_tsv).isEmpty) {
         return "Submission schema of type EXTUM but no QC Metrics TSV files found".invalidNel
       }
+    } else if (GERMLINE_SCHEMA.equals(submissionSchema.orNull)) {
+      // could do some checks here
+    } else {
+      return s"Unsupported metadata schema, should be one of: [$GERMLINE_SCHEMA, $EXTUM_SCHEMA]".invalidNel
     }
     submissionSchema.validNel
   }
