@@ -4,7 +4,7 @@ import bio.ferlab.clin.etl.conf.FerloadConf
 import org.hl7.fhir.r4.model.{Reference, Resource}
 
 case class TDocumentReferences(sequencingAlignment: SequencingAlignment, variantCalling: VariantCalling, copyNumberVariant: CopyNumberVariant, structuralVariant: Option[StructuralVariant], supplement: SupplementDocument,
-                               exomiser: Option[Exomiser], igvTrack: Option[IgvTrack], cnvVisualization: Option[CnvVisualization], coverageByGene: Option[CoverageByGene], qcMetrics: Option[QcMetrics]) {
+                               exomiser: Option[Exomiser], igvTrack: Option[IgvTrack], cnvVisualization: Option[CnvVisualization], coverageByGene: Option[CoverageByGene], qcMetrics: Option[QcMetrics], qcMetricsTsv: Option[QcMetricsTsv]) {
 
   def buildResources(subject: Reference, custodian: Reference, sample: Reference)(implicit ferloadConf: FerloadConf): DocumentReferencesResources = {
     val sequencingAlignmentR = sequencingAlignment.buildResource(subject, custodian, Seq(sample))
@@ -17,14 +17,15 @@ case class TDocumentReferences(sequencingAlignment: SequencingAlignment, variant
     val cnvVisualizationR = cnvVisualization.map(_.buildResource(subject, custodian, Seq(sample))).orNull
     val coverageByGeneR = coverageByGene.map(_.buildResource(subject, custodian, Seq(sample))).orNull
     val qcMetricsR = qcMetrics.map(_.buildResource(subject, custodian, Seq(sample))).orNull
+    val qcMetricsTsvR = qcMetricsTsv.map(_.buildResource(subject, custodian, Seq(sample))).orNull
     DocumentReferencesResources(sequencingAlignmentR, variantCallingR, copyNumberVariantR, structuralVariantR, supplementR,
-      exomiserR, igvTrackR, cnvVisualizationR, coverageByGeneR, qcMetricsR)
+      exomiserR, igvTrackR, cnvVisualizationR, coverageByGeneR, qcMetricsR, qcMetricsTsvR)
   }
 
 }
 
 case class DocumentReferencesResources(sequencingAlignment: Resource, variantCalling: Resource, copyNumberVariant:Resource, structuralVariant:Resource, supplement: Resource,
-                                       exomiser: Resource, igvTrack: Resource, cnvVisualization: Resource, coverageByGene: Resource, qcMetrics: Resource) {
-  def resources() = Seq(sequencingAlignment, variantCalling, copyNumberVariant, structuralVariant, supplement, exomiser, igvTrack, cnvVisualization, coverageByGene, qcMetrics)
+                                       exomiser: Resource, igvTrack: Resource, cnvVisualization: Resource, coverageByGene: Resource, qcMetrics: Resource, qcMetricsTsv: Resource) {
+  def resources() = Seq(sequencingAlignment, variantCalling, copyNumberVariant, structuralVariant, supplement, exomiser, igvTrack, cnvVisualization, coverageByGene, qcMetrics, qcMetricsTsv)
     .filter(_!=null)
 }

@@ -1,7 +1,7 @@
 package bio.ferlab.clin.etl
 
+import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.Profiles.{ANALYSIS_SERVICE_REQUEST, SEQUENCING_SERVICE_REQUEST}
-import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.{CodingSystems, Profiles}
 import bio.ferlab.clin.etl.s3.S3Utils
 import bio.ferlab.clin.etl.task.fileimport.model.TTask
 import bio.ferlab.clin.etl.testutils.{FhirTestUtils, WholeStackSuite}
@@ -13,11 +13,11 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import scala.collection.JavaConverters._
 import scala.io.Source
 
-class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
+class ExtumFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers {
 
   "run" should "return no errors" in {
     withS3Objects { (inputPrefix, outputPrefix) =>
-      transferFromResources(inputPrefix, "full")
+      transferFromResources(inputPrefix, "extum")
 
       val ramq = nextId()
       val mrn = nextId()
@@ -28,7 +28,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
       FhirTestUtils.loadCQGCOrganization()
       val ldmSpecimenId = nextId()
       val ldmSampleId = nextId()
-      val templateMetadata = Source.fromResource("full/metadata.json").mkString
+      val templateMetadata = Source.fromResource("extum/metadata.json").mkString
       val metadata = templateMetadata
         .replace("_RAMQ_", ramq)
         .replace("_MRN_", mrn)
@@ -44,7 +44,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
 
       result.isValid shouldBe true
       val resultFiles = list(outputBucket, outputPrefix)
-      resultFiles.size shouldBe 20
+      resultFiles.size shouldBe 14
 
       val searchPatients = searchFhir("Patient")
       searchPatients.getTotal shouldBe 1
@@ -103,7 +103,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
       analysisServiceRequest.getSpecimen.asScala shouldBe empty
       analysisServiceRequest.getSubject.getReference shouldBe patientId
       analysisServiceRequest.getCode.getCodingFirstRep.getSystem shouldBe CodingSystems.ANALYSIS_REQUEST_CODE
-      analysisServiceRequest.getCode.getCodingFirstRep.getCode shouldBe "MMG"
+      analysisServiceRequest.getCode.getCodingFirstRep.getCode shouldBe "EXTUM"
       analysisServiceRequest.getPerformerFirstRep.getReference shouldBe ldmFhirOrganizationId
 
       val analysisServiceRequestId = id(analysisServiceRequest)
@@ -127,7 +127,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
 
       //Validate DocumentReference
       val searchDr = searchFhir("DocumentReference")
-      searchDr.getTotal shouldBe 11
+      searchDr.getTotal shouldBe 8
       val documentReferences = read(searchDr, classOf[DocumentReference])
       documentReferences.foreach { d =>
         d.getMasterIdentifier.getValue should startWith(outputPrefix)
@@ -142,12 +142,12 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
         }
       }
       //Expected title
-      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file5.vcf", "file5.tbi", "file3.json",
-        "file6.html","file6.json","file6.variants.tsv","file7.seg.bw","file7.baf.bw","file7.roh.bed","file7.exome.bed","file8.png","file9.csv","file10.json", "file11.tsv")
+      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file3.json",
+        "file7.seg.bw","file7.baf.bw","file7.roh.bed","file7.exome.bed","file8.png","file9.csv", "file11.tsv")
 
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE
-      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "GSV", "SSUP", "EXOMISER", "IGV", "CNVVIS", "COVGENE", "QCRUN")
+      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "SSUP", "IGV", "CNVVIS", "COVGENE", "QCRUN")
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only CodingSystems.DR_CATEGORY
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only "GENO"
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getFormat.getSystem)) should contain only CodingSystems.DR_FORMAT
@@ -161,9 +161,9 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
         t.getRequester.getReference shouldBe ldmFhirOrganizationId
         t.getOwner.getReference shouldBe "Organization/CQGC"
         t.getFocus.getReference shouldBe sequencingServiceRequestId
-        t.getOutput.size() shouldBe 11
+        t.getOutput.size() shouldBe 8
       }
-      tasks.map(_.getCode.getCodingFirstRep.getCode) should contain only TTask.EXOME_GERMLINE_ANALYSIS
+      tasks.map(_.getCode.getCodingFirstRep.getCode) should contain only TTask.EXTUM_ANALYSIS
 
       //Valid ClinicalImpression
       val searchClinicalImpressions = searchFhir("ClinicalImpression")

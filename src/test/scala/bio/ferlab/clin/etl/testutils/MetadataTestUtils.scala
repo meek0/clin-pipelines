@@ -85,6 +85,7 @@ object MetadataTestUtils {
     qc_metrics = None,
     qc_metrics_tsv = None,
   )
+
   val defaultAnalysis: SimpleAnalysis = SimpleAnalysis(
     patient = defaultPatient("clin_id"),
     ldm = "CHUSJ",
@@ -149,6 +150,15 @@ object MetadataTestUtils {
     defaultWorkflow,
     analyses = Seq(
       defaultAnalysisWithOptionals
+    )
+  )
+
+  val extumMetadataInvalidQcMetrics: SimpleMetadata = SimpleMetadata(
+    Some(EXTUM_SCHEMA),
+    defaultExperiment,
+    defaultWorkflow,
+    analyses = Seq(
+      defaultAnalysis
     )
   )
 
