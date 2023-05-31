@@ -154,7 +154,18 @@ case class TTask(submissionSchema: Option[String], taskExtensions: TaskExtension
       sup
     } else null
 
-    Seq(sequencingExperimentOutput, variantCallOutput, cnvOutput, structuralVariantOutput, supplementOutput, exomiserOutput, igvTrackOutput, cnvVisualizationOutput, coverageByGeneOutput, qcMetricsOutput)
+    val qcMetricsTsvOutput = if (drr.qcMetricsTsv != null) {
+      val code = new CodeableConcept()
+      code.addCoding()
+        .setSystem(CodingSystems.DR_TYPE)
+        .setCode(QcMetricsTsv.documentType)
+      val sup = new TaskOutputComponent()
+        .setType(code)
+        .setValue(drr.qcMetricsTsv.toReference())
+      sup
+    } else null
+
+    Seq(sequencingExperimentOutput, variantCallOutput, cnvOutput, structuralVariantOutput, supplementOutput, exomiserOutput, igvTrackOutput, cnvVisualizationOutput, coverageByGeneOutput, qcMetricsOutput, qcMetricsTsvOutput)
       .filter(_ != null)
       .foreach { r =>
       t.addOutput(r)

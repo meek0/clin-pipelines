@@ -88,7 +88,7 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
 
       //Validate DocumentReference
       val searchDr = searchFhir("DocumentReference")
-      searchDr.getTotal shouldBe 10
+      searchDr.getTotal shouldBe 11
       val documentReferences = read(searchDr, classOf[DocumentReference])
       documentReferences.foreach { d =>
         d.getMasterIdentifier.getValue should startWith(outputPrefix)
@@ -122,7 +122,7 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
         t.getRequester.getReference shouldBe fhirOrganizationId
         t.getOwner.getReference shouldBe "Organization/CQGC"
         t.getFocus.getReference shouldBe fhirServiceRequestId
-        t.getOutput.size() shouldBe 10
+        t.getOutput.size() shouldBe 11
       }
       tasks.map(_.getCode.getCodingFirstRep.getCode) should contain only TTask.EXOME_GERMLINE_ANALYSIS
       val bundleJson = s"$reportPath/bundle.json"
