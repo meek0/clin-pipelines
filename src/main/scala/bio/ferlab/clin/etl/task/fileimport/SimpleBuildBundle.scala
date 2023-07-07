@@ -27,9 +27,9 @@ object SimpleBuildBundle {
 
   def validate(metadata: SimpleMetadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
     LOGGER.info("################# Validate Resources ##################")
-    val taskExtensions = validateTaskExtension(metadata)
     val mapFiles = files.map(f => (f.filename, f)).toMap
     val allResources: ValidatedNel[String, List[BundleEntryComponent]] = metadata.analyses.toList.map { a =>
+      val taskExtensions = validateTaskExtension(a)
 
       (
         validateSchema(metadata.submissionSchema, metadata),

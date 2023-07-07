@@ -10,6 +10,7 @@ class MetadataSpec extends FlatSpec with MinioServerSuite with Matchers {
       transferFromResources(prefix, "good")
 
       val meta = Metadata.validateMetadataFile(inputBucket, prefix)
+      println(meta)
       meta.isValid shouldBe true
     }
 

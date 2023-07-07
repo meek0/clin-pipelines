@@ -2,7 +2,7 @@ package bio.ferlab.clin.etl.task.fileimport.validation
 
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.{CodingSystems, Extensions}
 import bio.ferlab.clin.etl.fhir.FhirUtils
-import bio.ferlab.clin.etl.task.fileimport.model.{AnalysisTask, Experiment, Metadata, TaskExtensions, Workflow}
+import bio.ferlab.clin.etl.task.fileimport.model.{Analysis, AnalysisTask, Experiment, Metadata, TaskExtensions, Workflow}
 import bio.ferlab.clin.etl.{ValidationResult, isValid}
 import ca.uhn.fhir.parser.DataFormatException
 import ca.uhn.fhir.rest.client.api.IGenericClient
@@ -15,14 +15,15 @@ import scala.util.{Success, Try}
 
 object TaskExtensionValidation {
 
-  def validateTaskExtension(m: Metadata)(implicit client: IGenericClient): ValidationResult[TaskExtensions] = {
+  def validateTaskExtension(a: Analysis)(implicit client: IGenericClient): ValidationResult[TaskExtensions] = {
     // Experiment are built without run date because we need to validate FHIR resource without this field, otherwise we get an exception before submitting validation to server
     // Run date is validate elsewhere
-    val experimentExtWithoutRunDate = buildExperimentExtension(m.experiment)
-    val workflowExt = buildWorkflowExtension(m.workflow)
+
+    val experimentExtWithoutRunDate = buildExperimentExtension(a.experiment)
+    val workflowExt = buildWorkflowExtension(a.workflow)
     val taskExtensions = validTaskExtension(experimentExtWithoutRunDate, workflowExt)
 
-    val experimentExt = validateRunDate(m, experimentExtWithoutRunDate)
+    val experimentExt = validateRunDate(a, experimentExtWithoutRunDate)
 
     (experimentExt, taskExtensions).mapN {
       (validExp, taskExtensions) => taskExtensions.copy(experimentExtension = validExp)
@@ -49,8 +50,8 @@ object TaskExtensionValidation {
     taskExtensions
   }
 
-  private def validateRunDate(m: Metadata, experimentExt: Extension) = {
-    val runDate: Option[ValidatedNel[String, DateTimeType]] = m.experiment.runDate.map { d =>
+  private def validateRunDate(a: Analysis, experimentExt: Extension) = {
+    val runDate: Option[ValidatedNel[String, DateTimeType]] = a.experiment.runDate.map { d =>
 
       import java.text.SimpleDateFormat
       val patterns = Seq("dd/MM/yyyy", "yyyy-MM-dd")
@@ -70,7 +71,7 @@ object TaskExtensionValidation {
 
     val exp = runDate.map { d =>
       d.map { v =>
-        val newExperimentExt = buildExperimentExtension(m.experiment)
+        val newExperimentExt = buildExperimentExtension(a.experiment)
         newExperimentExt.addExtension(new Extension("runDate", v))
         newExperimentExt
       }
