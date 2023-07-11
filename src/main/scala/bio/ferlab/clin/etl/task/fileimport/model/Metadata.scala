@@ -2,7 +2,7 @@ package bio.ferlab.clin.etl.task.fileimport.model
 
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.implicits.catsSyntaxValidatedId
-import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
+import play.api.libs.json.{JsError, JsSuccess, Json, Reads, Writes}
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 
@@ -46,6 +46,7 @@ case class FullMetadata(submissionSchema: Option[String], analyses: Seq[FullAnal
 
 object FullMetadata {
   implicit val reads: Reads[FullMetadata] = Json.reads[FullMetadata]
+  implicit val writes: Writes[FullMetadata] = Json.writes[FullMetadata]
 }
 
 
@@ -65,6 +66,7 @@ case class Experiment(
 
 object Experiment {
   implicit val reads: Reads[Experiment] = Json.reads[Experiment]
+  implicit val writes: Writes[Experiment] = Json.writes[Experiment]
 }
 
 case class Workflow(
@@ -75,6 +77,7 @@ case class Workflow(
 
 object Workflow {
   implicit val reads: Reads[Workflow] = Json.reads[Workflow]
+  implicit val writes: Writes[Workflow] = Json.writes[Workflow]
 }
 
 sealed trait Analysis {
@@ -130,6 +133,7 @@ case class FullAnalysis(
 
 object FullAnalysis {
   implicit val reads: Reads[FullAnalysis] = Json.reads[FullAnalysis]
+  implicit val writes: Writes[FullAnalysis] = Json.writes[FullAnalysis]
 }
 
 sealed trait InputPatient {
@@ -170,6 +174,7 @@ case class FullPatient(
 
 object FullPatient {
   implicit val reads: Reads[FullPatient] = Json.reads[FullPatient]
+  implicit val writes: Writes[FullPatient] = Json.writes[FullPatient]
 }
 
 case class FilesAnalysis(cram: String, crai: String, snv_vcf: String, snv_tbi: String, cnv_vcf: String, cnv_tbi: String, sv_vcf: Option[String], sv_tbi: Option[String], supplement: String,
@@ -178,4 +183,5 @@ case class FilesAnalysis(cram: String, crai: String, snv_vcf: String, snv_tbi: S
 
 object FilesAnalysis {
   implicit val reads: Reads[FilesAnalysis] = Json.reads[FilesAnalysis]
+  implicit val writes: Writes[FilesAnalysis] = Json.writes[FilesAnalysis]
 }
