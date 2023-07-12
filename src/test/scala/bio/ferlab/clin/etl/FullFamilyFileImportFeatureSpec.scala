@@ -169,6 +169,8 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
         r.getBasedOnFirstRep.getReference shouldBe analysisServiceRequestId
         r.getCode.getCodingFirstRep.getSystem shouldBe CodingSystems.ANALYSIS_REQUEST_CODE
         r.getCode.getCodingFirstRep.getCode shouldBe "MMG"
+        r.getCode.getCoding.get(1).getSystem shouldBe CodingSystems.SEQUENCING_REQUEST_CODE
+        r.getCode.getCoding.get(1).getCode shouldBe "75020"
       }
       val optProbandSequencingServiceRequest = sequencingServiceRequests.find(_.getSubject.getReference == probandPatientId)
       optProbandSequencingServiceRequest.isDefined shouldBe true

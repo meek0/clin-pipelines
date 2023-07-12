@@ -118,6 +118,8 @@ class ExtumFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matc
         r.getSubject.getReference shouldBe patientId
         r.getCode.getCodingFirstRep.getSystem shouldBe CodingSystems.ANALYSIS_REQUEST_CODE
         r.getCode.getCodingFirstRep.getCode shouldBe "MMG"
+        r.getCode.getCoding.get(1).getSystem shouldBe CodingSystems.SEQUENCING_REQUEST_CODE
+        r.getCode.getCoding.get(1).getCode shouldBe "65241"
         r.getPerformerFirstRep.getReference shouldBe ldmFhirOrganizationId
       }
       val sequencingServiceRequestId = id(sequencingServiceRequests.head)

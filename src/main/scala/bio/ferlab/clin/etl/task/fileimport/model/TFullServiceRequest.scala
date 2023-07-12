@@ -3,7 +3,7 @@ package bio.ferlab.clin.etl.task.fileimport.model
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.{ANALYSIS_REQUEST_CODE, FAMILY_IDENTIFIER, SEQUENCING_REQUEST_CODE, SR_IDENTIFIER}
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.Profiles.{ANALYSIS_SERVICE_REQUEST, SEQUENCING_SERVICE_REQUEST}
-import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.{EXTUM_SCHEMA, validateWithFakeSubject}
+import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.{EXTUM_SCHEMA, GERMLINE_SCHEMA, validateWithFakeSubject}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
 import org.hl7.fhir.r4.model.ServiceRequest.{ServiceRequestIntent, ServiceRequestStatus}
@@ -99,7 +99,9 @@ case class TSequencingServiceRequest(submissionSchema: Option[String], analysis:
   sr.setStatus(ServiceRequestStatus.COMPLETED)
   sr.getCode.addCoding().setSystem(SR_IDENTIFIER).setCode(analysis.ldmServiceRequestId)
   sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.panelCode)))
-  if (EXTUM_SCHEMA.equals(submissionSchema.orNull)) {
+  if (GERMLINE_SCHEMA.equals(submissionSchema.orNull)) {
+    sr.getCode().addCoding(new Coding().setSystem(SEQUENCING_REQUEST_CODE).setCode("75020"))
+  } else if (EXTUM_SCHEMA.equals(submissionSchema.orNull)) {
     sr.getCode().addCoding(new Coding().setSystem(SEQUENCING_REQUEST_CODE).setCode("65241"))
   }
 
