@@ -8,3 +8,4 @@ data1/*
 tmp/*
 .DS_Store
 .bsp/sbt.json
+.bsp/*

@@ -1,23 +1,5 @@
 {
   "submissionSchema": "CQGC_Germline",
-  "experiment": {
-    "platform": "Illumina",
-    "sequencerId": "NB552318",
-    "runName": "runNameExample",
-    "runDate": "2014-09-21T11:50:23-05:00",
-    "runAlias": "runAliasExample",
-    "flowcellId": "0",
-    "isPairedEnd": true,
-    "fragmentSize": 100,
-    "experimentalStrategy": "WXS",
-    "captureKit": "RocheKapaHyperExome",
-    "baitDefinition": "KAPA_HyperExome_hg38_capture_targets"
-  },
-  "workflow": {
-    "name": "Dragen",
-    "version": "1.1.0",
-    "genomeBuild": "GRCh38"
-  },
   "analyses": [
     {
       "patient": {
@@ -55,6 +37,24 @@
         "coverage_by_gene_csv": "file9.csv",
         "qc_metrics": "file10.json",
         "qc_metrics_tsv": "file11.tsv"
+      },
+      "experiment": {
+        "platform": "Illumina",
+        "sequencerId": "NB552318",
+        "runName": "runNameExample",
+        "runDate": "2014-09-21T11:50:23-05:00",
+        "runAlias": "runAliasExample",
+        "flowcellId": "0",
+        "isPairedEnd": true,
+        "fragmentSize": 100,
+        "experimentalStrategy": "WXS",
+        "captureKit": "RocheKapaHyperExome",
+        "baitDefinition": "KAPA_HyperExome_hg38_capture_targets"
+      },
+      "workflow": {
+        "name": "Dragen",
+        "version": "1.1.0",
+        "genomeBuild": "GRCh38"
       }
     }
   ]

@@ -28,6 +28,24 @@ object MetadataTestUtils {
       familyMember = position, familyId = familyId, status = status, fetus = fetus)
   }
 
+  val defaultExperiment: Experiment = Experiment(
+    platform = Some("Illumina"),
+    sequencerId = Some("NB552318"),
+    runName = Some("runNameExample"),
+    runDate = Some("2014-09-21T11:50:23-05:00"),
+    runAlias = Some("runAliasExample"),
+    flowcellId = Some("0"),
+    isPairedEnd = Some(true),
+    fragmentSize = Some(100),
+    experimentalStrategy = Some("WXS"),
+    captureKit = Some("RocheKapaHyperExome"),
+    baitDefinition = Some("KAPA_HyperExome_hg38_capture_targets")
+  )
+  val defaultWorkflow: Workflow = Workflow(
+    name = Some("Dragen"),
+    version = Some("1.1.0"),
+    genomeBuild = Some("GRCh38")
+  )
   val defaultFullAnalysis: FullAnalysis = FullAnalysis(
     patient = defaultFullPatient(),
     ldm = "LDM-CHUSJ",
@@ -38,7 +56,9 @@ object MetadataTestUtils {
     ldmServiceRequestId = "clin_prescription_id",
     labAliquotId = "nanuq_sample_id",
     panelCode = "MMG",
-    files = defaultFilesAnalysis
+    files = defaultFilesAnalysis,
+    experiment = defaultExperiment,
+    workflow = defaultWorkflow
   )
 
   val defaultFilesAnalysis: FilesAnalysis = FilesAnalysis(
@@ -95,7 +115,9 @@ object MetadataTestUtils {
     sampleType = Some("DNA"),
     clinServiceRequestId = "clin_prescription_id",
     labAliquotId = "nanuq_sample_id",
-    files = defaultFilesAnalysis
+    files = defaultFilesAnalysis,
+    experiment = defaultExperiment,
+    workflow = defaultWorkflow
   )
   val defaultAnalysisWithOptionals: SimpleAnalysis = SimpleAnalysis(
     patient = defaultPatient("clin_id"),
@@ -106,30 +128,12 @@ object MetadataTestUtils {
     sampleType = Some("DNA"),
     clinServiceRequestId = "clin_prescription_id",
     labAliquotId = "nanuq_sample_id",
-    files = defaultFilesAnalysisWithOptionals
-  )
-  val defaultExperiment: Experiment = Experiment(
-    platform = Some("Illumina"),
-    sequencerId = Some("NB552318"),
-    runName = Some("runNameExample"),
-    runDate = Some("2014-09-21T11:50:23-05:00"),
-    runAlias = Some("runAliasExample"),
-    flowcellId = Some("0"),
-    isPairedEnd = Some(true),
-    fragmentSize = Some(100),
-    experimentalStrategy = Some("WXS"),
-    captureKit = Some("RocheKapaHyperExome"),
-    baitDefinition = Some("KAPA_HyperExome_hg38_capture_targets")
-  )
-  val defaultWorkflow: Workflow = Workflow(
-    name = Some("Dragen"),
-    version = Some("1.1.0"),
-    genomeBuild = Some("GRCh38")
+    files = defaultFilesAnalysisWithOptionals,
+    experiment = defaultExperiment,
+    workflow = defaultWorkflow
   )
   val defaultMetadata: SimpleMetadata = SimpleMetadata(
     Some(GERMLINE_SCHEMA),
-    defaultExperiment,
-    defaultWorkflow,
     analyses = Seq(
       defaultAnalysis
     )
@@ -137,8 +141,6 @@ object MetadataTestUtils {
 
   val defaultMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
     Some(GERMLINE_SCHEMA),
-    defaultExperiment,
-    defaultWorkflow,
     analyses = Seq(
       defaultAnalysisWithOptionals
     )
@@ -146,8 +148,6 @@ object MetadataTestUtils {
 
   val extumMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
     Some(EXTUM_SCHEMA),
-    defaultExperiment,
-    defaultWorkflow,
     analyses = Seq(
       defaultAnalysisWithOptionals
     )
@@ -155,8 +155,6 @@ object MetadataTestUtils {
 
   val extumMetadataInvalidQcMetrics: SimpleMetadata = SimpleMetadata(
     Some(EXTUM_SCHEMA),
-    defaultExperiment,
-    defaultWorkflow,
     analyses = Seq(
       defaultAnalysis
     )
@@ -164,8 +162,6 @@ object MetadataTestUtils {
 
   val unsupportedMetadataWithOptionals: SimpleMetadata = SimpleMetadata(
     None,
-    defaultExperiment,
-    defaultWorkflow,
     analyses = Seq(
       defaultAnalysisWithOptionals
     )

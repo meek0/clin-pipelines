@@ -1,25 +1,26 @@
 {
   "submissionSchema": "CQGC_Exome_Tumeur_Seul",
-  "experiment": {
-    "platform": "Illumina",
-    "sequencerId": "NB552318",
-    "runName": "runNameExample",
-    "runDate": "2014-09-21T11:50:23-05:00",
-    "runAlias": "runAliasExample",
-    "flowcellId": "0",
-    "isPairedEnd": true,
-    "fragmentSize": 100,
-    "experimentalStrategy": "WXS",
-    "captureKit": "RocheKapaHyperExome",
-    "baitDefinition": "KAPA_HyperExome_hg38_capture_targets"
-  },
-  "workflow": {
-    "name": "Dragen",
-    "version": "1.1.0",
-    "genomeBuild": "GRCh38"
-  },
+
   "analyses": [
     {
+      "experiment": {
+        "platform": "Illumina",
+        "sequencerId": "NB552318",
+        "runName": "runNameExample",
+        "runDate": "2014-09-21T11:50:23-05:00",
+        "runAlias": "runAliasExample",
+        "flowcellId": "0",
+        "isPairedEnd": true,
+        "fragmentSize": 100,
+        "experimentalStrategy": "WXS",
+        "captureKit": "RocheKapaHyperExome",
+        "baitDefinition": "KAPA_HyperExome_hg38_capture_targets"
+      },
+      "workflow": {
+        "name": "Dragen",
+        "version": "1.1.0",
+        "genomeBuild": "GRCh38"
+      },
       "patient": {
         "firstName": "John",
         "lastName": "Doe",

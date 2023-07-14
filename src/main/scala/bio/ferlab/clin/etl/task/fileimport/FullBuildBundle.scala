@@ -50,10 +50,9 @@ object FullBuildBundle {
   def validate(metadata: FullMetadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
     LOGGER.info("################# Validate Resources ##################")
 
-    val taskExtensions = validateTaskExtension(metadata)
     val mapFiles = files.map(f => (f.filename, f)).toMap
     val allResources: ValidatedNel[String, List[TemporaryBundle]] = metadata.analyses.toList.map { a =>
-
+      val taskExtensions = validateTaskExtension(a)
       val analysisServiceRequests: Option[ValidationResult[TAnalysisServiceRequest]] = if (a.patient.familyId.isEmpty || a.patient.familyMember == "PROBAND") {
         Some(validateAnalysisServiceRequest(metadata.submissionSchema, a))
       } else None

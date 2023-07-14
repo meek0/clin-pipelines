@@ -2,12 +2,11 @@ package bio.ferlab.clin.etl.task.fileimport.model
 
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.implicits.catsSyntaxValidatedId
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json, Reads}
+import play.api.libs.json.{JsError, JsSuccess, Json, Reads, Writes}
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 
 import java.io.ByteArrayInputStream
-import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 object Metadata {
@@ -32,24 +31,22 @@ object Metadata {
 }
 
 sealed trait Metadata {
-  def experiment: Experiment
-
-  def workflow: Workflow
 
   def analyses: Seq[Analysis]
 }
 
-case class SimpleMetadata(submissionSchema: Option[String], experiment: Experiment, workflow: Workflow, analyses: Seq[SimpleAnalysis]) extends Metadata
+case class SimpleMetadata(submissionSchema: Option[String], analyses: Seq[SimpleAnalysis]) extends Metadata
 
 object SimpleMetadata {
   implicit val reads: Reads[SimpleMetadata] = Json.reads[SimpleMetadata]
 }
 
 
-case class FullMetadata(submissionSchema: Option[String], experiment: Experiment, workflow: Workflow, analyses: Seq[FullAnalysis]) extends Metadata
+case class FullMetadata(submissionSchema: Option[String], analyses: Seq[FullAnalysis]) extends Metadata
 
 object FullMetadata {
   implicit val reads: Reads[FullMetadata] = Json.reads[FullMetadata]
+  implicit val writes: Writes[FullMetadata] = Json.writes[FullMetadata]
 }
 
 
@@ -69,6 +66,7 @@ case class Experiment(
 
 object Experiment {
   implicit val reads: Reads[Experiment] = Json.reads[Experiment]
+  implicit val writes: Writes[Experiment] = Json.writes[Experiment]
 }
 
 case class Workflow(
@@ -79,6 +77,7 @@ case class Workflow(
 
 object Workflow {
   implicit val reads: Reads[Workflow] = Json.reads[Workflow]
+  implicit val writes: Writes[Workflow] = Json.writes[Workflow]
 }
 
 sealed trait Analysis {
@@ -91,6 +90,10 @@ sealed trait Analysis {
   val labAliquotId: String
   val patient: InputPatient
   val files: FilesAnalysis
+
+  def experiment: Experiment
+
+  def workflow: Workflow
 }
 
 
@@ -103,7 +106,9 @@ case class SimpleAnalysis(
                            clinServiceRequestId: String,
                            labAliquotId: String,
                            patient: SimplePatient,
-                           files: FilesAnalysis
+                           files: FilesAnalysis,
+                           experiment: Experiment,
+                           workflow: Workflow
                          ) extends Analysis
 
 object SimpleAnalysis {
@@ -121,11 +126,14 @@ case class FullAnalysis(
                          labAliquotId: String,
                          patient: FullPatient,
                          files: FilesAnalysis,
-                         panelCode: String
+                         panelCode: String,
+                         experiment: Experiment,
+                         workflow: Workflow
                        ) extends Analysis
 
 object FullAnalysis {
   implicit val reads: Reads[FullAnalysis] = Json.reads[FullAnalysis]
+  implicit val writes: Writes[FullAnalysis] = Json.writes[FullAnalysis]
 }
 
 sealed trait InputPatient {
@@ -166,6 +174,7 @@ case class FullPatient(
 
 object FullPatient {
   implicit val reads: Reads[FullPatient] = Json.reads[FullPatient]
+  implicit val writes: Writes[FullPatient] = Json.writes[FullPatient]
 }
 
 case class FilesAnalysis(cram: String, crai: String, snv_vcf: String, snv_tbi: String, cnv_vcf: String, cnv_tbi: String, sv_vcf: Option[String], sv_tbi: Option[String], supplement: String,
@@ -174,4 +183,5 @@ case class FilesAnalysis(cram: String, crai: String, snv_vcf: String, snv_tbi: S
 
 object FilesAnalysis {
   implicit val reads: Reads[FilesAnalysis] = Json.reads[FilesAnalysis]
+  implicit val writes: Writes[FilesAnalysis] = Json.writes[FilesAnalysis]
 }
