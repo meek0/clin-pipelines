@@ -2,7 +2,7 @@ package bio.ferlab.clin.etl
 
 import bio.ferlab.clin.etl.FileImport.args
 import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
-import bio.ferlab.clin.etl.scripts.{MigrateMetadata, SwitchSpecimenValues}
+import bio.ferlab.clin.etl.scripts.{MigrateMetadata, MigrateServiceRequest, SwitchSpecimenValues}
 
 object Scripts extends App {
   withSystemExit {
@@ -16,6 +16,7 @@ object Scripts extends App {
             // bellow all the scripts we can execute by name
             case "SwitchSpecimenValues" => SwitchSpecimenValues(client, params)
             case "MigrateMetadata" => MigrateMetadata(params.head, conf)
+            case "MigrateServiceRequest" => MigrateServiceRequest(client, params)
             case s: String => throw new IllegalArgumentException(s"unknown script: $s")
           }
         }
