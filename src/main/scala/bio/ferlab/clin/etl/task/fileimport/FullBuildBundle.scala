@@ -47,7 +47,7 @@ object FullBuildBundle {
     submissionSchema.validNel
   }
 
-  def validate(metadata: FullMetadata, files: Seq[FileEntry])(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
+  def validate(metadata: FullMetadata, files: Seq[FileEntry], batchId: String)(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
     LOGGER.info("################# Validate Resources ##################")
 
     val mapFiles = files.map(f => (f.filename, f)).toMap
@@ -75,14 +75,14 @@ object FullBuildBundle {
         validateFiles(mapFiles, a),
         taskExtensions.map(_.forAliquot(a.labAliquotId)),
         validateObservation(a)
-        ).mapN(TemporaryBundle.apply)
+      ).mapN(TemporaryBundle.apply)
 
     }.sequence
 
     val bundleAndFamilies = groupResourcesByFamily(allResources)
 
     val entriesComponent: ValidatedNel[String, List[BundleEntryComponent]] = bundleAndFamilies.map { case (bundles, familyMap, analysisServiceRequestByFamily, clinicalImpressionsByFamily) =>
-      bundles.flatMap(b => createResources(familyMap, b, analysisServiceRequestByFamily, clinicalImpressionsByFamily))
+      bundles.flatMap(b => createResources(familyMap, b, analysisServiceRequestByFamily, clinicalImpressionsByFamily, batchId))
     }
 
     entriesComponent.map(TBundle)
@@ -109,7 +109,7 @@ object FullBuildBundle {
                              specimen: TSpecimen, sample: TSpecimen,
                              files: TDocumentReferences, taskExtensions: TaskExtensions, diseaseStatus: TObservation)
 
-  def createResources(familyMap: Map[String, Seq[FamilyExtension]], b: TemporaryBundle, analysisServiceRequestByFamily: Map[String, IdType], clinicalImpressionsByFamily: Map[String, Seq[IdType]])(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
+  def createResources(familyMap: Map[String, Seq[FamilyExtension]], b: TemporaryBundle, analysisServiceRequestByFamily: Map[String, IdType], clinicalImpressionsByFamily: Map[String, Seq[IdType]], batchId: String)(implicit ferloadConf: FerloadConf): List[BundleEntryComponent] = {
     val patientResource = b.patient.buildResource(b.ep.toReference())
     val bundleFamilyExtension = b.patient.patient.familyId.flatMap(f => familyMap.get(f))
     val analyseServiceRequestResource = b.analysisServiceRequest.map { a =>
@@ -130,7 +130,7 @@ object FullBuildBundle {
     val sequencingServiceRequestResource = b.sequencingServiceRequest.buildResource(analysisServiceRequestReference,
       patientResource.toReference(), specimenResource.toReference(), sampleResource.toReference(), b.ldm.toReference())
 
-    val taskResource: Resource = task.buildResource(analysisServiceRequestReference, sequencingServiceRequestReference, patientResource.toReference(), b.ldm.toReference(), sampleResource.toReference(), documentReferencesResources)
+    val taskResource: Resource = task.buildResource(analysisServiceRequestReference, sequencingServiceRequestReference, patientResource.toReference(), b.ldm.toReference(), sampleResource.toReference(), documentReferencesResources, batchId)
     val clinicalImpressionResource = b.clinicalImpression.createResource(patientResource.toReference(), b.diseaseStatus.id.toReference())
     val observationResource = b.diseaseStatus.createResource(patientResource.toReference())
 

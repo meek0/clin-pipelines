@@ -164,6 +164,7 @@ class ExtumFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matc
         t.getOwner.getReference shouldBe "Organization/CQGC"
         t.getFocus.getReference shouldBe sequencingServiceRequestId
         t.getOutput.size() shouldBe 8
+        t.getGroupIdentifier.getValue shouldBe inputPrefix
       }
       tasks.map(_.getCode.getCodingFirstRep.getCode) should contain only TTask.EXTUM_ANALYSIS
 

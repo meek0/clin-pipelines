@@ -2,7 +2,7 @@ package bio.ferlab.clin.etl.task.fileimport.model
 
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
 import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskOutputComponent}
-import org.hl7.fhir.r4.model.{CodeableConcept, Extension, IdType, Reference, Resource, StringType}
+import org.hl7.fhir.r4.model.{CodeableConcept, Extension, IdType, Identifier, Reference, Resource, StringType}
 import TTask._
 import bio.ferlab.clin.etl.fhir.FhirUtils.ResourceExtension
 import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.EXTUM_SCHEMA
@@ -18,7 +18,7 @@ case class TaskExtensions(workflowExtension: Extension, experimentExtension: Ext
 
 case class TTask(submissionSchema: Option[String], taskExtensions: TaskExtensions) {
 
-  def buildResource(analysisRef: Option[Reference], sequencingRef: Reference, patient: Reference, requester: Reference, sample: Reference, drr: DocumentReferencesResources): Resource = {
+  def buildResource(analysisRef: Option[Reference], sequencingRef: Reference, patient: Reference, requester: Reference, sample: Reference, drr: DocumentReferencesResources, batchId: String): Resource = {
     val t = AnalysisTask()
 
     if (EXTUM_SCHEMA.equals(submissionSchema.orNull)) {
@@ -39,7 +39,7 @@ case class TTask(submissionSchema: Option[String], taskExtensions: TaskExtension
 
     t.setRequester(requester)
     t.setOwner(new Reference(s"Organization/$CQGC_LAB"))
-
+    t.setGroupIdentifier(new Identifier().setValue(batchId))
     val input = new ParameterComponent()
     input.setType(new CodeableConcept().setText(ANALYSED_SAMPLE))
     input.setValue(sample)
@@ -88,7 +88,7 @@ case class TTask(submissionSchema: Option[String], taskExtensions: TaskExtension
       sup
     }
 
-    val structuralVariantOutput = if (drr.structuralVariant != null ) {
+    val structuralVariantOutput = if (drr.structuralVariant != null) {
       val code = new CodeableConcept()
       code.addCoding()
         .setSystem(CodingSystems.DR_TYPE)
@@ -168,8 +168,8 @@ case class TTask(submissionSchema: Option[String], taskExtensions: TaskExtension
     Seq(sequencingExperimentOutput, variantCallOutput, cnvOutput, structuralVariantOutput, supplementOutput, exomiserOutput, igvTrackOutput, cnvVisualizationOutput, coverageByGeneOutput, qcMetricsOutput, qcMetricsTsvOutput)
       .filter(_ != null)
       .foreach { r =>
-      t.addOutput(r)
-    }
+        t.addOutput(r)
+      }
 
     t.setId(IdType.newRandomUuid())
     t.addExtension(taskExtensions.workflowExtension)
