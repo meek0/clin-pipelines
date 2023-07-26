@@ -123,6 +123,7 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
         t.getOwner.getReference shouldBe "Organization/CQGC"
         t.getFocus.getReference shouldBe fhirServiceRequestId
         t.getOutput.size() shouldBe 11
+        t.getGroupIdentifier.getValue shouldBe inputPrefix
       }
       tasks.map(_.getCode.getCodingFirstRep.getCode) should contain only TTask.EXOME_GERMLINE_ANALYSIS
       val bundleJson = s"$reportPath/bundle.json"

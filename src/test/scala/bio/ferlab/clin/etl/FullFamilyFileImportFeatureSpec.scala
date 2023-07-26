@@ -232,6 +232,7 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
         t.getRequester.getReference shouldBe ldmFhirOrganizationId
         t.getOwner.getReference shouldBe "Organization/CQGC"
         t.getOutput.size() shouldBe 4
+        t.getGroupIdentifier.getValue shouldBe inputPrefix
       }
       tasks.map(_.getCode.getCodingFirstRep.getCode) should contain only TTask.EXOME_GERMLINE_ANALYSIS
 

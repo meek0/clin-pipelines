@@ -39,7 +39,7 @@ class TaskExtensionValidationSpec extends FlatSpec with Matchers with GivenWhenT
   it should "return errors if genomeBuild is not valid" in {
     inside(TaskExtensionValidation.validateTaskExtension(defaultAnalysis.copy(workflow = defaultWorkflow.copy(genomeBuild = Some("invalid"))))) {
       case Invalid(NonEmptyList(error, Nil)) =>
-        error should include("Unknown code")
+        error should include("Unable to validate code")
         error should include("invalid")
     }
   }
@@ -48,7 +48,7 @@ class TaskExtensionValidationSpec extends FlatSpec with Matchers with GivenWhenT
     val metadata = defaultAnalysis.copy(experiment = defaultExperiment.copy(experimentalStrategy = Some("unknown")))
     inside(TaskExtensionValidation.validateTaskExtension(metadata)) {
       case Invalid(NonEmptyList(error, Nil)) =>
-        error should include("Unknown code")
+        error should include("Unable to validate code")
     }
   }
 

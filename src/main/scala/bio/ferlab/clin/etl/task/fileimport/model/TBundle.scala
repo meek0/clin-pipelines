@@ -35,7 +35,6 @@ case class TBundle(resources: List[BundleEntryComponent]) {
             s"${i.getSeverity} : ${i.getDiagnostics}, location : ${i.getLocation.asScala.mkString(",")}"
           }
         NonEmptyList.fromList(issues).map(Invalid(_)).getOrElse(e.getMessage.invalidNel[Bundle])
-      case e => throw e
     }
 
   }

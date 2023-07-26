@@ -19,28 +19,28 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       defaultAnalysis.copy(patient = defaultPatient(ptId), clinServiceRequestId = serviceRequestId, ldm = organizationAlias)
     ))
     val files = Seq(
-      FileEntry("bucket","file1.cram", Some("md5"), 10, "1", "application/octet-stream", ""),
-      FileEntry("bucket","file1.crai", Some("md5"), 10, "1.crai", "application/octet-stream", ""),
-      FileEntry("bucket","file2.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
-      FileEntry("bucket","file2.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
-      FileEntry("bucket","file4.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
-      FileEntry("bucket","file4.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
-      FileEntry("bucket","file5.vcf", Some("md5"), 10, "3", "application/octet-stream", ""),
-      FileEntry("bucket","file5.tbi", Some("md5"), 10, "3.tbi", "application/octet-stream", ""),
-      FileEntry("bucket","file3.tgz", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket","file6.html", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket","file6.json", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket","file6.variants.tsv", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket","file7.seg.bw", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket","file7.baf.bw", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket","file7.roh.bed", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket","file7.exome.bed", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket","file8.png", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket","file9.csv", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket","file10.json", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket","file11.tsv", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file1.cram", Some("md5"), 10, "1", "application/octet-stream", ""),
+      FileEntry("bucket", "file1.crai", Some("md5"), 10, "1.crai", "application/octet-stream", ""),
+      FileEntry("bucket", "file2.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
+      FileEntry("bucket", "file2.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file4.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
+      FileEntry("bucket", "file4.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file5.vcf", Some("md5"), 10, "3", "application/octet-stream", ""),
+      FileEntry("bucket", "file5.tbi", Some("md5"), 10, "3.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file6.html", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file6.json", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file6.variants.tsv", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file7.seg.bw", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file7.baf.bw", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file7.roh.bed", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file7.exome.bed", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file8.png", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file9.csv", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file10.json", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file11.tsv", Some("md5"), 10, "4", "application/octet-stream", ""),
     )
-    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files)
+    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files, "BAT1")
     println(result)
     result.isValid shouldBe true
   }
@@ -64,7 +64,7 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       FileEntry("bucket", "file5.tbi", Some("md5"), 10, "3.tbi", "application/octet-stream", ""),
       FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4", "application/octet-stream", "")
     )
-    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files)
+    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files, "BAT1")
     println(result)
     result.isValid shouldBe true
   }
@@ -88,7 +88,7 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       //FileEntry("bucket", "file5.tbi", Some("md5"), 10, "3.tbi", "application/octet-stream", ""),
       FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4", "application/octet-stream", "")
     )
-    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files)
+    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files, "BAT1")
     println(result)
     result.isValid shouldBe false
     val error = result match {
@@ -117,7 +117,7 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       FileEntry("bucket", "file5.tbi", Some("md5"), 10, "3.tbi", "application/octet-stream", ""),
       FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4", "application/octet-stream", "")
     )
-    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files)
+    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files, "BAT1")
     println(result)
     result.isValid shouldBe false
     val error = result match {
@@ -157,7 +157,7 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       FileEntry("bucket", "file10.json", Some("md5"), 10, "4", "application/octet-stream", ""),
       FileEntry("bucket", "file11.tsv", Some("md5"), 10, "4", "application/octet-stream", ""),
     )
-    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files)
+    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files, "BAT1")
     println(result)
     result.isValid shouldBe false
     val error = result match {
@@ -186,7 +186,7 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       FileEntry("bucket", "file5.tbi", Some("md5"), 10, "3.tbi", "application/octet-stream", ""),
       FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4", "application/octet-stream", "")
     )
-    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files)
+    val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files, "BAT1")
     println(result)
     result.isValid shouldBe false
     val error = result match {
