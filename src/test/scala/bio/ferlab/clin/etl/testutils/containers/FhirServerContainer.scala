@@ -35,7 +35,7 @@ case object FhirServerContainer extends OurContainer {
 
   val port = 8080
   val container: GenericContainer = GenericContainer(
-    "hapiproject/hapi:v6.6.0",
+    "hapiproject/hapi:v5.4.1",
     waitStrategy = Wait.forHttp("/").withStartupTimeout(Duration.ofSeconds(120)),
     exposedPorts = Seq(port),
     env = fhirEnv,

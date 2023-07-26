@@ -45,7 +45,7 @@ class SpecimenValidationSpec extends FlatSpec with Matchers with FhirServerSuite
     val analysis = defaultAnalysis.copy(ldmSpecimenId = ldmSpecimenId, ldm = "CHUSJ", patient = defaultPatient(ptId), specimenType = "invalid")
     validateSpecimen(analysis) shouldBe Invalid(
       NonEmptyList.of(
-        """Error Specimen : Parameters.parameter[0].resource/*Specimen/null*/.type - Unable to validate code http://fhir.cqgc.ferlab.bio/CodeSystem/specimen-type#invalid - Code is not found in CodeSystem: http://fhir.cqgc.ferlab.bio/CodeSystem/specimen-type for 'http://fhir.cqgc.ferlab.bio/CodeSystem/specimen-type#invalid'"""
+        """Error Specimen : type - Unknown code {http://fhir.cqgc.ferlab.bio/CodeSystem/specimen-type}invalid for 'http://fhir.cqgc.ferlab.bio/CodeSystem/specimen-type#invalid'"""
       )
     )
   }
@@ -97,7 +97,7 @@ class SpecimenValidationSpec extends FlatSpec with Matchers with FhirServerSuite
     val analysis = defaultAnalysis.copy(ldmSpecimenId = "1", ldm = "CHUSJ", patient = defaultPatient(ptId), specimenType = "NBL", sampleType = Some("invalid"))
     validateSample(analysis) shouldBe Invalid(
       NonEmptyList.of(
-        """Error Sample : Parameters.parameter[0].resource/*Specimen/null*/.type - Unable to validate code http://fhir.cqgc.ferlab.bio/CodeSystem/specimen-type#invalid - Code is not found in CodeSystem: http://fhir.cqgc.ferlab.bio/CodeSystem/specimen-type for 'http://fhir.cqgc.ferlab.bio/CodeSystem/specimen-type#invalid'"""
+        """Error Sample : type - Unknown code {http://fhir.cqgc.ferlab.bio/CodeSystem/specimen-type}invalid for 'http://fhir.cqgc.ferlab.bio/CodeSystem/specimen-type#invalid'"""
       )
     )
   }
