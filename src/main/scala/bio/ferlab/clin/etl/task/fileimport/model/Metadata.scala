@@ -126,10 +126,15 @@ case class FullAnalysis(
                          labAliquotId: String,
                          patient: FullPatient,
                          files: FilesAnalysis,
-                         panelCode: String,
+                         panelCode: Option[String],
+                         analysisCode: Option[String],
                          experiment: Experiment,
                          workflow: Workflow
-                       ) extends Analysis
+                       ) extends Analysis {
+  def getAnalysisCode(): String = {
+    panelCode.orElse(analysisCode).getOrElse("")
+  }
+}
 
 object FullAnalysis {
   implicit val reads: Reads[FullAnalysis] = Json.reads[FullAnalysis]

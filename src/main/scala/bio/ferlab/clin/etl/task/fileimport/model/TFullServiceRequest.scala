@@ -59,7 +59,7 @@ case class TAnalysisServiceRequest(submissionSchema: Option[String], analysis: F
   if (EXTUM_SCHEMA.equals(submissionSchema.orNull)) {
     sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode("EXTUM")))
   } else {
-    sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.panelCode)))
+    sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.getAnalysisCode())))
   }
 
   analysis.patient.familyId.foreach(f => sr.addIdentifier(new Identifier().setSystem(FAMILY_IDENTIFIER).setValue(f)))
@@ -98,7 +98,7 @@ case class TSequencingServiceRequest(submissionSchema: Option[String], analysis:
   sr.setIntent(ServiceRequestIntent.ORDER)
   sr.setStatus(ServiceRequestStatus.COMPLETED)
   sr.getCode.addCoding().setSystem(SR_IDENTIFIER).setCode(analysis.ldmServiceRequestId)
-  sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.panelCode)))
+  sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.getAnalysisCode())))
   if (GERMLINE_SCHEMA.equals(submissionSchema.orNull)) {
     sr.getCode().addCoding(new Coding().setSystem(SEQUENCING_REQUEST_CODE).setCode("75020"))
   } else if (EXTUM_SCHEMA.equals(submissionSchema.orNull)) {

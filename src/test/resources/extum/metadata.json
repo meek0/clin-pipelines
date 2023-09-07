@@ -41,7 +41,7 @@
       "bodySite": "can be null",
       "ldmServiceRequestId": "_LDM_SERVICE_REQUEST_ID_",
       "labAliquotId": "nanuq_sample_id",
-      "panelCode": "MMG",
+      "analysisCode": "MMG",
       "files": {
         "cram": "file1.cram",
         "crai": "file1.crai",

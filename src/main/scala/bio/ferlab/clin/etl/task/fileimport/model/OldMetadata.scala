@@ -45,7 +45,8 @@ case class OldMetadata(submissionSchema: Option[String], experiment: Experiment,
         a.labAliquotId,
         a.patient,
         a.files,
-        a.panelCode,
+        Some(a.panelCode),
+        None,
         experiment,
         workflow
       )

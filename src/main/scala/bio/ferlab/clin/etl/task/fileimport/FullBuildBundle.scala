@@ -21,6 +21,7 @@ import bio.ferlab.clin.etl.task.fileimport.validation.full.SequencingServiceRequ
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
 import cats.implicits._
+import org.apache.commons.lang3.StringUtils
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
 import org.hl7.fhir.r4.model.{IdType, Resource}
 import org.slf4j.{Logger, LoggerFactory}
@@ -47,6 +48,14 @@ object FullBuildBundle {
     submissionSchema.validNel
   }
 
+  def validateAnalysisCode(analysis: FullAnalysis): ValidatedNel[String, String] = {
+    val code = analysis.getAnalysisCode()
+    if (StringUtils.isBlank(code)) {
+      return "panelCode or analysisCode is required".invalidNel
+    }
+    code.validNel
+  }
+
   def validate(metadata: FullMetadata, files: Seq[FileEntry], batchId: String)(implicit clinClient: IClinFhirClient, fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TBundle] = {
     LOGGER.info("################# Validate Resources ##################")
 
@@ -63,6 +72,7 @@ object FullBuildBundle {
       val sample: ValidationResult[TSpecimen] = (patient, validateSample(a)).mapN((_, _)).andThen { case (p, sa) => SpecimenValidation.validateFullPatient(sa, p, a.ldmSampleId, SampleType) }
       (
         validateSchema(metadata.submissionSchema, metadata),
+        validateAnalysisCode(a),
         validateLdmOrganization(a),
         validateEpOrganization(a),
         patient,
@@ -103,7 +113,7 @@ object FullBuildBundle {
       }
   }
 
-  case class TemporaryBundle(submissionSchema: Option[String], ldm: IdType, ep: IdType, patient: TPatient, person: TPerson,
+  case class TemporaryBundle(submissionSchema: Option[String], analysisCode: String, ldm: IdType, ep: IdType, patient: TPatient, person: TPerson,
                              clinicalImpression: TClinicalImpression,
                              analysisServiceRequest: Option[TAnalysisServiceRequest], sequencingServiceRequest: TSequencingServiceRequest,
                              specimen: TSpecimen, sample: TSpecimen,

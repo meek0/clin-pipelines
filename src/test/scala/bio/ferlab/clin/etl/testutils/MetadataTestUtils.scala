@@ -55,7 +55,8 @@ object MetadataTestUtils {
     sampleType = Some("DNA"),
     ldmServiceRequestId = "clin_prescription_id",
     labAliquotId = "nanuq_sample_id",
-    panelCode = "MMG",
+    panelCode = None,
+    analysisCode = Some("MMG"),
     files = defaultFilesAnalysis,
     experiment = defaultExperiment,
     workflow = defaultWorkflow
