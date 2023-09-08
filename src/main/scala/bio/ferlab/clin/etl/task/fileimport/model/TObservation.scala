@@ -26,7 +26,7 @@ case class TObservation(analysis: FullAnalysis) {
     status().andThen { s =>
       val outcomes = FhirUtils.validateResource(obs)
       obs.addInterpretation(new CodeableConcept(new Coding().setSystem(OBSERVATION_INTERPRETATION).setCode(s)))
-      obs.setValue(new CodeableConcept(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.panelCode)))
+      obs.setValue(new CodeableConcept(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.getAnalysisCode())))
       FhirUtils.validateOutcomes(outcomes, this) { o =>
         val diag = o.getDiagnostics
         val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
