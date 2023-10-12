@@ -53,7 +53,8 @@ object CheckS3Data {
         && !f.filename.toLowerCase().contains("hard-filtered.formatted.norm.vep.vcf.gz")
         && !f.filename.toLowerCase().contains("dragen.WES_somatic-tumor_only.hard-filtered.vcf.gz")
         && !f.filename.toLowerCase().contains("hard-filtered.vcf.gz")
-        && !f.filename.toLowerCase().endsWith("extra_results.tgz"))
+        && !f.filename.toLowerCase().endsWith("extra_results.tgz")
+        && !f.filename.toLowerCase().endsWith(".hpo"))
     fileEntries
   }
 
