@@ -184,7 +184,7 @@ object FullPatient {
 
 case class FilesAnalysis(cram: String, crai: String, snv_vcf: String, snv_tbi: String, cnv_vcf: String, cnv_tbi: String, sv_vcf: Option[String], sv_tbi: Option[String], supplement: String,
                          exomiser_html: Option[String], exomiser_json: Option[String], exomiser_variants_tsv: Option[String], seg_bw: Option[String], hard_filtered_baf_bw: Option[String],
-                         roh_bed: Option[String], hyper_exome_hg38_bed: Option[String], cnv_calls_png: Option[String], coverage_by_gene_csv: Option[String], qc_metrics: Option[String], qc_metrics_tsv: Option[String])
+                         roh_bed: Option[String], hyper_exome_hg38_bed: Option[String], cnv_calls_png: Option[String], coverage_by_gene_csv: Option[String], qc_metrics: Option[String])
 
 object FilesAnalysis {
   implicit val reads: Reads[FilesAnalysis] = Json.reads[FilesAnalysis]

@@ -110,7 +110,6 @@ object CheckS3Data {
         a.files.cnv_calls_png.orNull -> (cnvCallsPng, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cnv_calls_png.orNull)),
         a.files.coverage_by_gene_csv.orNull -> (coverageByGeneCsv, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.coverage_by_gene_csv.orNull)),
         a.files.qc_metrics.orNull -> (qcMetrics, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.qc_metrics.orNull)),
-        a.files.qc_metrics_tsv.orNull -> (qcMetricsTsv, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.qc_metrics_tsv.orNull)),
       )
 
     }.toMap
