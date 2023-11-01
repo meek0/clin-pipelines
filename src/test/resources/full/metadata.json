@@ -42,8 +42,7 @@
         "hyper_exome_hg38_bed": "file7.exome.bed",
         "cnv_calls_png": "file8.png",
         "coverage_by_gene_csv": "file9.csv",
-        "qc_metrics": "file10.json",
-        "qc_metrics_tsv": "file11.tsv"
+        "qc_metrics": "file10.json"
       },
       "experiment": {
         "platform": "Illumina",

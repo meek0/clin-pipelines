@@ -39,7 +39,6 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
         RawFileEntry(inputBucket, s"$prefix/file8.png", 22),
         RawFileEntry(inputBucket, s"$prefix/file9.csv", 26),
         RawFileEntry(inputBucket, s"$prefix/file10.json", 20),
-        RawFileEntry(inputBucket, s"$prefix/file11.tsv", 19),
       )
       fileEntries should contain theSameElementsAs expected
     }

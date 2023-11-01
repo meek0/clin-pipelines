@@ -257,24 +257,6 @@ object QcMetrics {
   }
 }
 
-case class QcMetricsTsv(document: Seq[TDocumentAttachment]) extends TDocumentReference {
-  override val documentType: String = QcMetricsTsv.documentType
-  override val id: String = idFromList[QC_METRICS_TSV](document)
-}
-
-object QcMetricsTsv {
-  val documentType: String = "QCRUN"
-  val label = "Sequencing Run QC Report"
-  implicit case object builder extends ToReference[QcMetricsTsv] {
-    override val label: String = QcMetrics.label
-
-    protected override def build(documents: Seq[TDocumentAttachment]): QcMetricsTsv = QcMetricsTsv(documents)
-
-    override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[QC_METRICS_TSV])
-
-  }
-}
-
 trait ToReference[T <: TDocumentReference] {
   def label: String
 

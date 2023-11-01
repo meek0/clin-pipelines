@@ -33,13 +33,7 @@ object FullBuildBundle {
 
   def validateSchema(submissionSchema: Option[String], metadata: Metadata): ValidatedNel[String, Option[String]] = {
     if (EXTUM_SCHEMA.equals(submissionSchema.orNull)) {
-      val qcMetrics = metadata.analyses.flatMap(a => a.files.qc_metrics)
-      val qcMetricsTsv = metadata.analyses.flatMap(a => a.files.qc_metrics_tsv)
-      if (qcMetricsTsv.isEmpty) {
-        return "Submission schema of type EXTUM but no QC Metrics TSV files found".invalidNel
-      } else if (qcMetrics.nonEmpty) {
-        return "Submission schema of type EXTUM can't have QC Metrics not-TSV files".invalidNel
-      }
+      // could do some checks here
     } else if (GERMLINE_SCHEMA.equals(submissionSchema.orNull)) {
       // could do some checks here
     } else {
