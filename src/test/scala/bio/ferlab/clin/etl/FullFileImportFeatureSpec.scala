@@ -149,7 +149,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
 
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE
-      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "GSV", "SSUP", "EXOMISER", "IGV", "CNVVIS", "COVGENE", "QCRUN")
+      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only ("ALIR", "SNV", "GCNV", "GSV", "SSUP", "EXOMISER", "IGV", "CNVVIS", "COVGENE", "QCRUN")
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only CodingSystems.DR_CATEGORY
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only "GENO"
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getFormat.getSystem)) should contain only CodingSystems.DR_FORMAT
@@ -166,6 +166,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
         t.getGroupIdentifier.getValue shouldBe inputPrefix
         t.getOutput.size() shouldBe 10
       }
+      tasks.flatMap(t => t.getOutput.asScala.map(o=> o.getType.getCodingFirstRep.getCode)) should contain only ("ALIR", "SNV", "GCNV", "GSV", "SSUP", "EXOMISER", "IGV", "CNVVIS", "COVGENE", "QCRUN")
       tasks.map(_.getCode.getCodingFirstRep.getCode) should contain only TTask.EXOME_GERMLINE_ANALYSIS
 
       //Valid ClinicalImpression

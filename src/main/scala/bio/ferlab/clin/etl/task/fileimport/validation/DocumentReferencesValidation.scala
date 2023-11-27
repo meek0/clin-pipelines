@@ -11,18 +11,18 @@ import cats.implicits._
 
 object DocumentReferencesValidation {
 
-  def validateFiles(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TDocumentReferences] = {
+  def validateFiles(files: Map[String, FileEntry], a: Analysis, schema: Option[String])(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[TDocumentReferences] = {
     (
-      validate[SequencingAlignment](files, a),
-      validate[VariantCalling](files, a),
-      validate[CopyNumberVariant](files, a),
-      checkOptionalValidation(validate[StructuralVariant](files, a)),
-      validate[SupplementDocument](files, a),
-      checkOptionalValidation(validate[Exomiser](files, a)),
-      checkOptionalValidation(validate[IgvTrack](files, a)),
-      checkOptionalValidation(validate[CnvVisualization](files, a)),
-      checkOptionalValidation(validate[CoverageByGene](files, a)),
-      checkOptionalValidation(validate[QcMetrics](files, a)),
+      validate[SequencingAlignment](files, a, schema),
+      validate[VariantCalling](files, a, schema),
+      validate[CopyNumberVariant](files, a, schema),
+      checkOptionalValidation(validate[StructuralVariant](files, a, schema)),
+      validate[SupplementDocument](files, a, schema),
+      checkOptionalValidation(validate[Exomiser](files, a, schema)),
+      checkOptionalValidation(validate[IgvTrack](files, a, schema)),
+      checkOptionalValidation(validate[CnvVisualization](files, a, schema)),
+      checkOptionalValidation(validate[CoverageByGene](files, a, schema)),
+      checkOptionalValidation(validate[QcMetrics](files, a, schema)),
     ).mapN(TDocumentReferences)
   }
 

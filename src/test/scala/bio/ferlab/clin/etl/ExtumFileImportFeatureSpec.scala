@@ -149,7 +149,7 @@ class ExtumFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matc
 
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE
-      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "SSUP", "IGV", "CNVVIS", "COVGENE", "QCRUN")
+      documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only ("ALIR", "SSNV", "SCNV", "SSUP", "IGV", "CNVVIS", "COVGENE", "QCRUN")
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getSystem) should contain only CodingSystems.DR_CATEGORY
       documentReferences.map(d => d.getCategoryFirstRep.getCodingFirstRep.getCode) should contain only "GENO"
       documentReferences.flatMap(d => d.getContent.asScala.map(_.getFormat.getSystem)) should contain only CodingSystems.DR_FORMAT
@@ -166,6 +166,7 @@ class ExtumFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matc
         t.getOutput.size() shouldBe 8
         t.getGroupIdentifier.getValue shouldBe inputPrefix
       }
+      tasks.flatMap(t => t.getOutput.asScala.map(o=> o.getType.getCodingFirstRep.getCode)) should contain only ("ALIR", "SSNV", "SCNV", "SSUP", "IGV", "CNVVIS", "COVGENE", "QCRUN")
       tasks.map(_.getCode.getCodingFirstRep.getCode) should contain only TTask.EXTUM_ANALYSIS
 
       //Valid ClinicalImpression
