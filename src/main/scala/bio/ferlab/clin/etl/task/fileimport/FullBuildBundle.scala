@@ -76,7 +76,7 @@ object FullBuildBundle {
         validateSequencingServiceRequest(metadata.submissionSchema, a),
         specimen,
         sample,
-        validateFiles(mapFiles, a),
+        validateFiles( mapFiles,a, metadata.submissionSchema),
         taskExtensions.map(_.forAliquot(a.labAliquotId)),
         validateObservation(a)
       ).mapN(TemporaryBundle.apply)

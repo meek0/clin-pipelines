@@ -6,6 +6,8 @@ import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.{CodingSystems, Extensions}
 import bio.ferlab.clin.etl.fhir.FhirUtils.validateOutcomes
 import bio.ferlab.clin.etl.task.fileimport.model.TDocumentAttachment.{idFromList, valid}
+import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.EXTUM_SCHEMA
+import bio.ferlab.clin.etl.task.fileimport.model.VariantCalling.{documentTypeGermline, documentTypeSomatic}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.implicits._
 import org.hl7.fhir.r4.model.DocumentReference.{DocumentReferenceContentComponent, DocumentReferenceContextComponent}
@@ -66,7 +68,7 @@ trait TDocumentReference extends DocumentReferenceType {
 }
 
 object TDocumentReference {
-  def validate[T <: TDocumentReference](files: Map[String, FileEntry], a: Analysis)(implicit v: ToReference[T], fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = v.validate(files, a)
+  def validate[T <: TDocumentReference](files: Map[String, FileEntry], a: Analysis, schema: Option[String])(implicit v: ToReference[T], fhirClient: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = v.validate(files, a, schema)
 
 
 }
@@ -88,25 +90,26 @@ object SequencingAlignment {
   implicit case object builder extends ToReference[SequencingAlignment] {
     override val label: String = SequencingAlignment.label
 
-    protected override def build(documents: Seq[TDocumentAttachment]): SequencingAlignment = SequencingAlignment(documents)
+    protected override def build(documents: Seq[TDocumentAttachment], schema: Option[String]): SequencingAlignment = SequencingAlignment(documents)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[CRAM], valid[CRAI])
 
   }
 }
 
-case class VariantCalling(document: Seq[TDocumentAttachment]) extends TDocumentReference {
-  override val documentType: String = VariantCalling.documentType
+case class VariantCalling(document: Seq[TDocumentAttachment], schema: Option[String]) extends TDocumentReference {
+  override val documentType: String = if (EXTUM_SCHEMA.equals(schema.orNull)) VariantCalling.documentTypeSomatic else VariantCalling.documentTypeGermline
   override val id: String = idFromList[SNV_VCF](document)
 }
 
 object VariantCalling {
-  val documentType: String = "SNV"
+  val documentTypeGermline: String = "SNV"
+  val documentTypeSomatic: String = "SSNV"
   val label = "Variant Calling (VCF and TBI)"
   implicit case object builder extends ToReference[VariantCalling] {
     override val label: String = VariantCalling.label
 
-    protected override def build(documents: Seq[TDocumentAttachment]): VariantCalling = VariantCalling(documents)
+    protected override def build(documents: Seq[TDocumentAttachment], schema: Option[String]): VariantCalling = VariantCalling(documents, schema)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[SNV_VCF], valid[SNV_TBI])
 
@@ -114,36 +117,38 @@ object VariantCalling {
   }
 }
 
-case class CopyNumberVariant(document: Seq[TDocumentAttachment]) extends TDocumentReference {
-  override val documentType: String = CopyNumberVariant.documentType
+case class CopyNumberVariant(document: Seq[TDocumentAttachment], schema: Option[String]) extends TDocumentReference {
+  override val documentType: String = if (EXTUM_SCHEMA.equals(schema.orNull)) CopyNumberVariant.documentTypeSomatic else CopyNumberVariant.documentTypeGermline
   override val id: String = idFromList[CNV_VCF](document)
 }
 
 object CopyNumberVariant {
-  val documentType: String = "GCNV"
+  val documentTypeGermline: String = "GCNV"
+  val documentTypeSomatic: String = "SCNV"
   val label = "Copy Number Variant (VCF and TBI)"
   implicit case object builder extends ToReference[CopyNumberVariant] {
     override val label: String = CopyNumberVariant.label
 
-    protected override def build(documents: Seq[TDocumentAttachment]): CopyNumberVariant = CopyNumberVariant(documents)
+    protected override def build(documents: Seq[TDocumentAttachment], schema: Option[String]): CopyNumberVariant = CopyNumberVariant(documents, schema)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[CNV_VCF], valid[CNV_TBI])
 
   }
 }
 
-case class StructuralVariant(document: Seq[TDocumentAttachment]) extends TDocumentReference {
-  override val documentType: String = StructuralVariant.documentType
+case class StructuralVariant(document: Seq[TDocumentAttachment], schema: Option[String]) extends TDocumentReference {
+  override val documentType: String = if (EXTUM_SCHEMA.equals(schema.orNull)) StructuralVariant.documentTypeSomatic else StructuralVariant.documentTypeGermline
   override val id: String = idFromList[SV_VCF](document)
 }
 
 object StructuralVariant {
-  val documentType: String = "GSV"
+  val documentTypeGermline: String = "GSV"
+  val documentTypeSomatic: String = "SSV"
   val label = "Structural Variant (VCF and TBI)"
   implicit case object builder extends ToReference[StructuralVariant] {
     override val label: String = StructuralVariant.label
 
-    protected override def build(documents: Seq[TDocumentAttachment]): StructuralVariant = StructuralVariant(documents)
+    protected override def build(documents: Seq[TDocumentAttachment], schema: Option[String]): StructuralVariant = StructuralVariant(documents, schema)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[SV_VCF], valid[SV_TBI])
 
@@ -161,7 +166,7 @@ object SupplementDocument {
   implicit case object builder extends ToReference[SupplementDocument] {
     override val label: String = SupplementDocument.label
 
-    protected override def build(documents: Seq[TDocumentAttachment]): SupplementDocument = SupplementDocument(documents)
+    protected override def build(documents: Seq[TDocumentAttachment], schema: Option[String]): SupplementDocument = SupplementDocument(documents)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[Supplement])
   }
@@ -178,7 +183,7 @@ object Exomiser {
   implicit case object builder extends ToReference[Exomiser] {
     override val label: String = Exomiser.label
 
-    protected override def build(documents: Seq[TDocumentAttachment]): Exomiser = Exomiser(documents)
+    protected override def build(documents: Seq[TDocumentAttachment], schema: Option[String]): Exomiser = Exomiser(documents)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[EXOMISER_HTML], valid[EXOMISER_JSON], valid[EXOMISER_VARIANTS_TSV])
 
@@ -196,7 +201,7 @@ object IgvTrack {
   implicit case object builder extends ToReference[IgvTrack] {
     override val label: String = IgvTrack.label
 
-    protected override def build(documents: Seq[TDocumentAttachment]): IgvTrack = IgvTrack(documents)
+    protected override def build(documents: Seq[TDocumentAttachment], schema: Option[String]): IgvTrack = IgvTrack(documents)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[SEG_BW], valid[HARD_FILTERED_BAF_BW], valid[ROH_BED], valid[HYPER_EXOME_HG38_BED])
 
@@ -214,7 +219,7 @@ object CnvVisualization {
   implicit case object builder extends ToReference[CnvVisualization] {
     override val label: String = CnvVisualization.label
 
-    protected override def build(documents: Seq[TDocumentAttachment]): CnvVisualization = CnvVisualization(documents)
+    protected override def build(documents: Seq[TDocumentAttachment], schema: Option[String]): CnvVisualization = CnvVisualization(documents)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[CNV_CALLS_PNG])
 
@@ -232,7 +237,7 @@ object CoverageByGene {
   implicit case object builder extends ToReference[CoverageByGene] {
     override val label: String = CoverageByGene.label
 
-    protected override def build(documents: Seq[TDocumentAttachment]): CoverageByGene = CoverageByGene(documents)
+    protected override def build(documents: Seq[TDocumentAttachment], schema: Option[String]): CoverageByGene = CoverageByGene(documents)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[COVERAGE_BY_GENE_CSV])
 
@@ -250,7 +255,7 @@ object QcMetrics {
   implicit case object builder extends ToReference[QcMetrics] {
     override val label: String = QcMetrics.label
 
-    protected override def build(documents: Seq[TDocumentAttachment]): QcMetrics = QcMetrics(documents)
+    protected override def build(documents: Seq[TDocumentAttachment], schema: Option[String]): QcMetrics = QcMetrics(documents)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[QC_METRICS])
 
@@ -260,17 +265,17 @@ object QcMetrics {
 trait ToReference[T <: TDocumentReference] {
   def label: String
 
-  protected def build(documents: Seq[TDocumentAttachment]): T
+  protected def build(documents: Seq[TDocumentAttachment], schema: Option[String]): T
 
   def attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]]
 
   def attach(files: Map[String, FileEntry], a: Analysis): Seq[ValidationResult[TDocumentAttachment]] =
     attachments.map(v => v(files, a))
 
-  def validate(files: Map[String, FileEntry], a: Analysis)(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = {
+  def validate(files: Map[String, FileEntry], a: Analysis, schema: Option[String])(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = {
     attach(files, a).toList.sequence
       .andThen { attachments =>
-        val dr: T = build(attachments)
+        val dr: T = build(attachments, schema)
         val outcome = dr.validateBaseResource()
         validateOutcomes(outcome, dr) { o =>
           val diag = o.getDiagnostics

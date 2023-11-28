@@ -38,7 +38,7 @@ object SimpleBuildBundle {
         validateServiceRequest(a),
         validateSpecimen(a),
         validateSample(a),
-        validateFiles(mapFiles, a),
+        validateFiles(mapFiles, a, metadata.submissionSchema),
         taskExtensions.map(_.forAliquot(a.labAliquotId)),
         batchId.validNel[String]
       ).mapN(createResources)
