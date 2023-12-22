@@ -19,7 +19,7 @@ object FhirExport extends App {
           case entities => fhirExporter.requestBulkExportFor(entities)
         }
 
-        val files = fhirExporter.checkPollingStatus(url, 1.seconds, 100.seconds)
+        val files = fhirExporter.checkPollingStatus(url, 1.seconds, 600.seconds)
         fhirExporter.uploadFiles(conf.aws.bucketName, files).validNel[String]
       }
     }
