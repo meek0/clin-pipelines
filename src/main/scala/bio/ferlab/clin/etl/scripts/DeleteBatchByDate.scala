@@ -28,6 +28,8 @@ object DeleteBatchByDate {
     val expectedBatchId = params(0)
     val date = params(1)
 
+    LOGGER.info(s"Delete batch by date: $expectedBatchId $date (drynrun=$dryRun)")
+
     // SAFETY #1 to limit the risk we build our own max date from the param + 1 second
     // considering an import has always the same date for each resources 1 second is plenty
     val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
@@ -51,7 +53,7 @@ object DeleteBatchByDate {
     taskReferences.foreach(ref => {
       val batchId = ref.getGroupIdentifier.getValue
       if (!batchId.equals(expectedBatchId)) {
-        throw new IllegalArgumentException(s"Trying to delete something from another batch: ${batchId}")
+       throw new IllegalArgumentException(s"Trying to delete something from another batch: ${batchId}")
       }
     })
 
