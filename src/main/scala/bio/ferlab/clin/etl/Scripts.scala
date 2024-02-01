@@ -2,7 +2,7 @@ package bio.ferlab.clin.etl
 
 import bio.ferlab.clin.etl.FileImport.args
 import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
-import bio.ferlab.clin.etl.scripts.{AddGroupIdentifierTask, MigrateMetadata, MigrateServiceRequest, SwitchSpecimenValues}
+import bio.ferlab.clin.etl.scripts.{AddGroupIdentifierTask, DeleteBatchByDate, MigrateMetadata, MigrateServiceRequest, SwitchSpecimenValues}
 
 object Scripts extends App {
   withSystemExit {
@@ -18,6 +18,7 @@ object Scripts extends App {
             case "MigrateMetadata" => MigrateMetadata(params.head, conf)
             case "MigrateServiceRequest" => MigrateServiceRequest(client, params)
             case "AddGroupIdentifierTask" => AddGroupIdentifierTask(client, params)
+            case "DeleteBatchByDate" => DeleteBatchByDate(client, params)
             case s: String => throw new IllegalArgumentException(s"unknown script: $s")
           }
         }
