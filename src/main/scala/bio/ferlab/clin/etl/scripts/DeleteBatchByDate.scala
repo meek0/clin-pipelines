@@ -69,10 +69,9 @@ object DeleteBatchByDate {
     if (dryRun) {
       Valid(true)
     } else {
-     // val result = bundle.save()(fhirClient)
-     // LOGGER.info("Response :\n" + FhirUtils.toJson(result.toList.head)(fhirClient))
-     // Valid(result.isValid)
-      Valid(true)
+      val result = bundle.save()(fhirClient)
+      LOGGER.info("Response :\n" + FhirUtils.toJson(result.toList.head)(fhirClient))
+      Valid(result.isValid)
     }
   }
 
