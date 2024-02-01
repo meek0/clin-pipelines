@@ -44,7 +44,8 @@ object DeleteBatchByDate {
     // a delete needs to respect the following order of deletions cause some resources reference others
     val documentReferences = fetchBundleFor(lastUpdatedParam, classOf[DocumentReference])(fhirClient)
     val taskReferences = fetchBundleFor(lastUpdatedParam, classOf[Task])(fhirClient)
-    val specimenReferences = fetchBundleFor(lastUpdatedParam, classOf[Specimen])(fhirClient)
+    // specimens are re-used dont delete them
+    //val specimenReferences = fetchBundleFor(lastUpdatedParam, classOf[Specimen])(fhirClient)
     val observationReferences = fetchBundleFor(lastUpdatedParam, classOf[Observation])(fhirClient)
     val clinicalImpressionReferences = fetchBundleFor(lastUpdatedParam, classOf[ClinicalImpression])(fhirClient)
     val serviceRequestReferences = fetchBundleFor(lastUpdatedParam, classOf[ServiceRequest])(fhirClient)
@@ -53,7 +54,7 @@ object DeleteBatchByDate {
     taskReferences.foreach(ref => {
       val batchId = ref.getGroupIdentifier.getValue
       if (!batchId.equals(expectedBatchId)) {
-       throw new IllegalArgumentException(s"Trying to delete something from another batch: ${batchId}")
+        throw new IllegalArgumentException(s"Trying to delete something from another batch: ${batchId}")
       }
     })
 
@@ -65,7 +66,7 @@ object DeleteBatchByDate {
       })
     })
 
-    val bundle = TBundle(FhirUtils.bundleDelete(documentReferences ++ taskReferences ++ specimenReferences ++ observationReferences ++ clinicalImpressionReferences ++ serviceRequestReferences).toList)
+    val bundle = TBundle(FhirUtils.bundleDelete(documentReferences ++ taskReferences ++ /*specimenReferences ++*/ observationReferences ++ clinicalImpressionReferences ++ serviceRequestReferences).toList)
     LOGGER.info("Request:\n" + bundle.print()(fhirClient))
 
     if (dryRun) {
