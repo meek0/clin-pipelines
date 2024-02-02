@@ -48,7 +48,7 @@ object PatientValidation {
 
       firstInBundle[Patient](SearchEntryMode.INCLUDE, results) { pt =>
         pt.hasManagingOrganization &&
-          new IdType(pt.getManagingOrganization.getReference).getIdPart == patient.ep &&
+          new IdType(pt.getManagingOrganization.getReference).getIdPart.equals(patient.ep) &&
           firstInBundle[Person](SearchEntryMode.MATCH, results) { person => matchPersonAndPatient(person, pt) }
             .exists(person => matchIdentifierCode(JHN, person))
       }

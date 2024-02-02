@@ -64,7 +64,8 @@ class FhirBulkExporter(authConfig: KeycloakConf,
       basicRequest
         .headers(Map(
           "Authorization" -> s"Bearer $getAuthentication",
-          "Prefer" -> "respond-async"
+          "Prefer" -> "respond-async",
+          "Cache-Control" -> "no-cache"
         ))
         .get(uri"${exportUrl(entities)}")
         .send(backend)

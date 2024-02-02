@@ -3,6 +3,7 @@ package bio.ferlab.clin.etl.task.fileimport.model
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.{ANALYSIS_REQUEST_CODE, FAMILY_IDENTIFIER, SEQUENCING_REQUEST_CODE, SR_IDENTIFIER}
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.Profiles.{ANALYSIS_SERVICE_REQUEST, SEQUENCING_SERVICE_REQUEST}
+import bio.ferlab.clin.etl.fhir.FhirUtils.IdTypeExtension
 import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.{EXTUM_SCHEMA, GERMLINE_SCHEMA, validateWithFakeSubject}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.ValidatedNel
@@ -38,7 +39,7 @@ case class TAnalysisServiceRequest(submissionSchema: Option[String], analysis: F
       val extensions: Seq[Extension] = fel.map { familyExtension =>
         val ext = new Extension("http://fhir.cqgc.ferlab.bio/StructureDefinition/family-member")
         ext
-          .addExtension("parent", new Reference(familyExtension.patientId))
+          .addExtension("parent", familyExtension.patientId.toReference())
         val coding = new Coding()
         coding.setCode(familyExtension.code)
         coding.setSystem("http://terminology.hl7.org/CodeSystem/v3-RoleCode")

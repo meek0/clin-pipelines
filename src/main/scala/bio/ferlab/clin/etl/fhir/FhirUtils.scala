@@ -70,7 +70,7 @@ object FhirUtils {
   }
   def matchPersonAndPatient(person:Person, patient:Patient): Boolean = {
     person.getLink.asScala.exists(linkComponent => {
-      new IdType(linkComponent.getTarget.getReference).getIdPart == IdType.of(patient).getIdPart
+      new IdType(linkComponent.getTarget.getReference).getIdPart.equals(IdType.of(patient).getIdPart)
     })
   }
 
