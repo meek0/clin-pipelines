@@ -30,8 +30,8 @@ object S3Utils {
       .region(Region.US_EAST_1)
       .serviceConfiguration(confBuilder)
       .httpClientBuilder(ApacheHttpClient.builder()
-        .connectionTimeout(ofMinutes(5))
-        .socketTimeout(ofMinutes(5))
+        .connectionTimeout(ofMinutes(60))
+        .socketTimeout(ofMinutes(60))
       )
       .build()
     s3
