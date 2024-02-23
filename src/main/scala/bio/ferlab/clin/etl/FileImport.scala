@@ -1,7 +1,7 @@
 package bio.ferlab.clin.etl
 
 import bio.ferlab.clin.etl.Scripts.args
-import bio.ferlab.clin.etl.conf.FerloadConf
+import bio.ferlab.clin.etl.conf.{AWSConf, FerloadConf}
 import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
 import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.s3.S3Utils
@@ -27,7 +27,7 @@ object FileImport extends App {
         val (clinClient, client) = buildFhirClients(conf.fhir, conf.keycloak)
         val bucket = conf.aws.bucketName
         withReport(bucket, batch) { reportPath =>
-          run(bucket, batch, conf.aws.outputBucketName, conf.aws.outputPrefix, reportPath, dryRun, full)(s3Client, client, clinClient, conf.ferload)
+          run(bucket, batch, conf.aws.outputBucketName, conf.aws.outputPrefix, reportPath, dryRun, full)(s3Client, client, clinClient, conf.ferload, conf.aws)
         }
       }
     }
@@ -39,7 +39,7 @@ object FileImport extends App {
     S3Utils.writeContent(inputBucket, s"$reportPath/files.csv", filesToCSV)
   }
 
-  def run(inputBucket: String, batch: String, outputBucket: String, outputPrefix: String, reportPath: String, dryRun: Boolean, full: Boolean)(implicit s3: S3Client, client: IGenericClient, clinFhirClient: IClinFhirClient, ferloadConf: FerloadConf): ValidationResult[Bundle] = {
+  def run(inputBucket: String, batch: String, outputBucket: String, outputPrefix: String, reportPath: String, dryRun: Boolean, full: Boolean)(implicit s3: S3Client, client: IGenericClient, clinFhirClient: IClinFhirClient, ferloadConf: FerloadConf, awsConf: AWSConf): ValidationResult[Bundle] = {
     val metadata: ValidatedNel[String, Metadata] = Metadata.validateMetadataFile(inputBucket, batch, full)
     metadata.andThen { m: Metadata =>
       val rawFileEntries = CheckS3Data.loadRawFileEntries(inputBucket, batch)
@@ -52,7 +52,11 @@ object FileImport extends App {
             try {
               //In case something bad happen in the distributed transaction, we store the modification brings to the resource (FHIR and S3 objects)
               writeAheadLog(inputBucket, reportPath, bundle, files)
-              CheckS3Data.copyFiles(files, outputBucket)
+              if (awsConf.copyFileMode.equals("transfer-manager")) {
+                CheckS3Data.copyFilesTransferManager(files, outputBucket)
+              } else {
+                CheckS3Data.copyFiles(files, outputBucket)
+              }
               val result = bundle.save()
               if (result.isInvalid) {
                 CheckS3Data.revert(files, outputBucket)

@@ -6,7 +6,7 @@ import pureconfig.ConfigReader.Result
 import pureconfig._
 import pureconfig.generic.auto._
 
-case class AWSConf(accessKey: String, secretKey: String, endpoint: String, pathStyleAccess: Boolean, bucketName: String, outputBucketName: String, outputPrefix: String)
+case class AWSConf(accessKey: String, secretKey: String, endpoint: String, pathStyleAccess: Boolean, bucketName: String, outputBucketName: String, outputPrefix: String, copyFileMode: String)
 
 case class KeycloakConf(realm: String, url: String, clientKey: String, clientSecret: String, audience: String)
 
@@ -49,7 +49,7 @@ object Conf {
         val message = errors.prettyPrint()
         message.invalidNel[Conf]
       case Right(conf) => conf.validNel[String]
-
+      
     }
   }
 }

@@ -1,6 +1,8 @@
 package bio.ferlab.clin.etl.task.fileimport
 
+import bio.ferlab.clin.etl.conf.AWSConf
 import bio.ferlab.clin.etl.isValid
+import bio.ferlab.clin.etl.s3.S3Utils
 import bio.ferlab.clin.etl.s3.S3Utils.getContent
 import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, Metadata, RawFileEntry}
 import cats.data.ValidatedNel
@@ -9,10 +11,13 @@ import org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM
 import org.slf4j.{Logger, LoggerFactory}
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model._
+import software.amazon.awssdk.transfer.s3.S3TransferManager
+import software.amazon.awssdk.transfer.s3.model.CopyRequest
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.UUID
+import java.util.concurrent.Executors
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
@@ -138,20 +143,39 @@ object CheckS3Data {
     }
   }
 
+  private def buildCopyObjectRequest(f: FileEntry, bucketDest: String) = {
+    CopyObjectRequest.builder()
+      .sourceBucket(f.bucket)
+      .sourceKey(f.key)
+      .contentType(f.contentType)
+      .contentDisposition(f.contentDisposition)
+      .destinationBucket(bucketDest)
+      .destinationKey(f.id)
+      .metadataDirective(MetadataDirective.REPLACE)
+      .build()
+  }
+
   def copyFiles(files: Seq[FileEntry], bucketDest: String)(implicit s3Client: S3Client): Unit = {
     LOGGER.info("################# Copy Files ##################")
     files.foreach { f =>
-      val encodedUrl = URLEncoder.encode(f.bucket + "/" + f.key, StandardCharsets.UTF_8.toString)
-      val cp = CopyObjectRequest.builder()
-        .copySource(encodedUrl)
-        .contentType(f.contentType)
-        .contentDisposition(f.contentDisposition)
-        .destinationBucket(bucketDest)
-        .destinationKey(f.id)
-        .metadataDirective(MetadataDirective.REPLACE)
-        .build()
-
+      val cp = buildCopyObjectRequest(f, bucketDest)
       s3Client.copyObject(cp)
+    }
+  }
+
+  def copyFilesTransferManager(files: Seq[FileEntry], bucketDest: String)(implicit AWSConf: AWSConf): Unit = {
+    LOGGER.info("################# Copy Files TransferManager ##################")
+    val s3Client = S3Utils.buildAsyncS3Client(AWSConf)
+    val transferManager = S3TransferManager.builder()
+      .s3Client(s3Client)
+      .executor(Executors.newCachedThreadPool()).build();
+    files.foreach { f =>
+      val cp = buildCopyObjectRequest(f, bucketDest)
+      val copyRequest = CopyRequest.builder()
+        .copyObjectRequest(cp)
+        .build();
+      val copy = transferManager.copy(copyRequest);
+      copy.completionFuture().join().response().copyObjectResult().eTag();
     }
   }
 
