@@ -6,10 +6,12 @@ version := "0.1"
 scalaVersion := "2.12.12"
 scalacOptions += "-Ypartial-unification"
 
-val awssdkVersion = "2.16.66"
+val awssdkVersion = "2.24.7"
 libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "s3" % awssdkVersion,
   "software.amazon.awssdk" % "apache-client" % awssdkVersion,
+  "software.amazon.awssdk" % "s3-transfer-manager" % awssdkVersion,
+  "software.amazon.awssdk.crt" % "aws-crt" % "0.29.10",
   "org.slf4j" % "slf4j-api" % "1.7.30",
   "org.slf4j" % "slf4j-simple" % "1.7.30",
   "ca.uhn.hapi.fhir" % "hapi-fhir-client" % "5.4.2",

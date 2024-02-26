@@ -1,7 +1,6 @@
 package bio.ferlab.clin.etl.testutils
 
 import bio.ferlab.clin.etl.conf.AWSConf
-import FhirTestUtils.getClass
 import bio.ferlab.clin.etl.s3.S3Utils
 import bio.ferlab.clin.etl.testutils.containers.MinioContainer
 import org.scalatest.{BeforeAndAfterAll, TestSuite}
@@ -11,7 +10,6 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.{CreateBucketRequest, DeleteObjectRequest, ListObjectsRequest, PutObjectRequest}
 
 import java.io.File
-import java.nio.file.Path
 import scala.collection.JavaConverters._
 import scala.util.Random
 
@@ -19,7 +17,8 @@ trait MinioServer {
   private val (minioPort, _) = MinioContainer.startIfNotRunning()
 
   protected val minioEndpoint = s"http://localhost:$minioPort"
-  implicit val s3: S3Client = S3Utils.buildS3Client(AWSConf(MinioContainer.accessKey, MinioContainer.secretKey, minioEndpoint, pathStyleAccess = true, "", "", ""))
+  implicit val awsConf: AWSConf = AWSConf(MinioContainer.accessKey, MinioContainer.secretKey, minioEndpoint, pathStyleAccess = true, "", "", "", "async");
+  implicit val s3: S3Client = S3Utils.buildS3Client(awsConf)
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
   val inputBucket = s"clin-import"
   val outputBucket = s"clin-repository"
