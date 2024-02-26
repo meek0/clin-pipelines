@@ -52,8 +52,8 @@ object FileImport extends App {
             try {
               //In case something bad happen in the distributed transaction, we store the modification brings to the resource (FHIR and S3 objects)
               writeAheadLog(inputBucket, reportPath, bundle, files)
-              if (awsConf.copyFileMode.equals("transfer-manager")) {
-                CheckS3Data.copyFilesTransferManager(files, outputBucket)
+              if (awsConf.copyFileMode.equals("async")) {
+                CheckS3Data.copyFilesAsync(files, outputBucket)
               } else {
                 CheckS3Data.copyFiles(files, outputBucket)
               }

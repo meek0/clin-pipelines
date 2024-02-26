@@ -12,12 +12,12 @@ import org.slf4j.{Logger, LoggerFactory}
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model._
 import software.amazon.awssdk.transfer.s3.S3TransferManager
-import software.amazon.awssdk.transfer.s3.model.CopyRequest
+import software.amazon.awssdk.transfer.s3.model.{CompletedCopy, CopyRequest}
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.UUID
-import java.util.concurrent.Executors
+import java.util.concurrent.{CompletableFuture, Executors}
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
@@ -163,20 +163,20 @@ object CheckS3Data {
     }
   }
 
-  def copyFilesTransferManager(files: Seq[FileEntry], bucketDest: String)(implicit AWSConf: AWSConf): Unit = {
-    LOGGER.info("################# Copy Files TransferManager ##################")
+  def copyFilesAsync(files: Seq[FileEntry], bucketDest: String)(implicit AWSConf: AWSConf): Unit = {
+    LOGGER.info("################# Copy Files ##################")
     val s3Client = S3Utils.buildAsyncS3Client(AWSConf)
     val transferManager = S3TransferManager.builder()
       .s3Client(s3Client)
-      .executor(Executors.newCachedThreadPool()).build();
-    files.foreach { f =>
+      .executor(Executors.newCachedThreadPool()).build()
+    val copies = files.map { f =>
       val cp = buildCopyObjectRequest(f, bucketDest)
       val copyRequest = CopyRequest.builder()
         .copyObjectRequest(cp)
-        .build();
-      val copy = transferManager.copy(copyRequest);
-      copy.completionFuture().join().response().copyObjectResult().eTag();
-    }
+        .build()
+      transferManager.copy(copyRequest).completionFuture()
+    }.toList
+    CompletableFuture.allOf(copies: _*).join()
+    transferManager.close()
   }
-
 }
