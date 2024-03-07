@@ -4,7 +4,7 @@ import bio.ferlab.clin.etl.conf.{AWSConf, Conf}
 import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.{ANALYSIS_TYPE, DR_CATEGORY, DR_FORMAT, DR_TYPE}
-import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.Extensions.{FULL_SIZE, SEQUENCING_EXPERIMENT}
+import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.Extensions.{FULL_SIZE, SEQUENCING_EXPERIMENT, WORKFLOW}
 import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
 import bio.ferlab.clin.etl.scripts.SwitchSpecimenValues
 import bio.ferlab.clin.etl.task.fileimport.CheckS3Data
@@ -15,9 +15,10 @@ import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.Validated.Valid
 import org.apache.commons.io.IOUtils
 import org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM
+import org.graalvm.compiler.nodeinfo.InputType
 import org.hl7.fhir.r4.model.Bundle.{BundleEntryComponent, SearchEntryMode}
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus
-import org.hl7.fhir.r4.model.Task.ParameterComponent
+import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskStatus}
 import org.hl7.fhir.r4.model._
 import org.slf4j.{Logger, LoggerFactory}
 import software.amazon.awssdk.services.s3.S3Client
@@ -81,25 +82,20 @@ object SomaticNormalImport extends App {
     if (dryRun) {
       Valid(true)
     } else {
-      /*val result = bundle.save()(fhirClient)
-      LOGGER.info("Response :\n" + FhirUtils.toJson(result.toList.head)(fhirClient))
-      Valid(result.isValid)*/
-      Valid(true)
-    }
 
-    /*
-    TODO
-    - lister les fichiers VCF S3
-    - pour chaque VCF
-    -- extraire aliquots IDs
-    -- optionel logger un warning si les aliqots ne match pas le nom du fichier
-    -- si le vcf.gz n'est pas valide ou ne contient pas d'aliquots ou n'est pas un vcf alors planter
-    -- demander a FHIR les Tasks de ces deux aliquots
-    -- implementer l'algo de l'analyse => trouverTask
-    --- rajouter une petite subtilite => si TNEBA existe deja alors ne rien faire
-    -- creer DocumentReference + Task (ne pas envoyer vers FHIR, on va tout mettre dans un bundle pour la fin)
-    - on fait un seul POST vers FHIR
-    */
+      if (conf.aws.copyFileMode.equals("async")) {
+        CheckS3Data.copyFilesAsync(files, conf.aws.outputBucketName)(conf.aws)
+      } else {
+        CheckS3Data.copyFiles(files, conf.aws.outputBucketName)(s3Client)
+      }
+
+      val result = Valid(new Bundle()); //bundle.save()(fhirClient)
+      LOGGER.info("Response :\n" + FhirUtils.toJson(result.toList.head)(fhirClient))
+      if (result.isInvalid) {
+        CheckS3Data.revert(files, conf.aws.outputBucketName)
+      }
+      result
+    }
   }
 
   private def prepareCopy(prefix: String, vcf: RawFileEntry, tbi: RawFileEntry) = {
@@ -108,11 +104,15 @@ object SomaticNormalImport extends App {
       FileEntry(tbi, s"$prefix/$uuid.tbi", None, APPLICATION_OCTET_STREAM.getMimeType, attach(vcf.filename)))
   }
 
+  private def formatDisplaySpecimen(specimen: Reference, displayType: String = "") = {
+    s"Submitter $displayType Sample ID: ${specimen.getDisplay.split(":")(1).trim}"
+  }
+
   private def buildDocumentReference(ferloadURL: String, taskGermline: Task, taskSomatic: Task, copiedVCF: FileEntry, copiedTBI: FileEntry) = {
 
     def addContext(doc: DocumentReference, task: Task, displayType: String) = {
       val specimen = task.getInputFirstRep.getValue.asInstanceOf[Reference]
-      doc.getContext.addRelated().setReference(specimen.getReference).setDisplay(s"Submitter $displayType Sample ID: ${specimen.getDisplay.split(":")(1).trim}")
+      doc.getContext.addRelated().setReference(specimen.getReference).setDisplay(formatDisplaySpecimen(specimen, displayType))
     }
 
     def addContent(doc: DocumentReference, file: FileEntry, formatType: String) = {
@@ -130,10 +130,11 @@ object SomaticNormalImport extends App {
     }
 
     val doc = new DocumentReference
+    doc.setId(IdType.newRandomUuid())
     doc.setStatus(DocumentReferenceStatus.CURRENT)
     doc.setType(new CodeableConcept(new Coding().setSystem(DR_TYPE).setCode("SSNV")))
     doc.addCategory(new CodeableConcept(new Coding().setSystem(DR_CATEGORY).setCode("GEMO")))
-    doc.setSubject(new Reference(taskSomatic.getFor.getReference))
+    doc.setSubject(taskSomatic.getFor)
 
     addContent(doc, copiedVCF, "VCF")
     addContent(doc, copiedTBI, "TBI")
@@ -145,8 +146,34 @@ object SomaticNormalImport extends App {
   }
 
   private def buildTask(taskGermline: Task, taskSomatic: Task) = {
+
+    def addInput(task: Task, inputTask: Task, inputType: String) = {
+      val i1 = task.addInput()
+      val specimen = inputTask.getInputFirstRep.getValue.asInstanceOf[Reference]
+      i1.setType(new CodeableConcept().setText(s"Analysed ${inputType.toLowerCase} sample"))
+      i1.setValue(new Reference().setReference(specimen.getReference).setDisplay(formatDisplaySpecimen(specimen)))
+
+      val i2 = task.addInput()
+      i2.setType(new CodeableConcept().setText(s"$inputType Exome Bioinformatic Analysis"))
+      i2.setValue(new Reference().setReference(s"Task/${inputTask.getIdElement.getIdPart}"))
+    }
+
     val task = new Task()
+    task.setId(IdType.newRandomUuid())
     task.setCode(new CodeableConcept(new Coding().setSystem(ANALYSIS_TYPE).setCode("TNEBA")))
+    task.addExtension(taskSomatic.getExtensionByUrl(WORKFLOW))
+    task.addExtension(taskSomatic.getExtensionByUrl(SEQUENCING_EXPERIMENT))
+    task.addBasedOn(taskSomatic.getBasedOnFirstRep)
+    task.setStatus(TaskStatus.COMPLETED)
+    task.setIntent(taskSomatic.getIntent)
+    task.setPriority(taskSomatic.getPriority)
+    task.setFocus(taskSomatic.getFocus)
+    task.setFor(taskSomatic.getFor)
+    task.setRequester(taskSomatic.getRequester)
+    task.setOwner(taskSomatic.getOwner)
+    //task.setAuthoredOn(taskSomatic.getAuthoredOn)
+    addInput(task, taskGermline, "Normal")
+    addInput(task, taskSomatic, "Tumor")
     task
   }
 
