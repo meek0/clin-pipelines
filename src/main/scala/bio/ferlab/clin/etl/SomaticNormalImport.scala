@@ -11,6 +11,7 @@ import bio.ferlab.clin.etl.task.fileimport.CheckS3Data
 import bio.ferlab.clin.etl.task.fileimport.CheckS3Data.attach
 import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, RawFileEntry, TBundle}
 import bio.ferlab.clin.etl.task.fileimport.model.TTask.{EXOME_GERMLINE_ANALYSIS, EXTUM_ANALYSIS, SOMATIC_NORMAL}
+import bio.ferlab.clin.etl.task.fileimport.validation.DocumentReferencesValidation.checkOptionalValidation
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.Validated.Valid
 import org.apache.commons.io.IOUtils
@@ -34,9 +35,9 @@ object SomaticNormalImport extends App {
   val LOGGER: Logger = LoggerFactory.getLogger(SwitchSpecimenValues.getClass)
 
   withSystemExit {
-    withLog {
+    withExceptions {
       withConf { conf =>
-        withExceptions {
+         withLog {
           val batch_id = if (args.length > 0) args.head else throw new IllegalArgumentException(s"Missing batch_id")
           val params = if (args.length > 1) args.tail else Array.empty[String]
           importBatch(batch_id, params)(conf)
@@ -45,7 +46,7 @@ object SomaticNormalImport extends App {
     }
   }
 
-  private def importBatch(batchId: String, params : Array[String])(implicit conf: Conf) = {
+  private def importBatch(batchId: String, params : Array[String])(implicit conf: Conf): ValidationResult[Any] = {
     implicit val s3Client = buildS3Client(conf.aws)
     val (_, fhirClient) = buildFhirClients(conf.fhir, conf.keycloak)
     val bucket = conf.aws.bucketName
@@ -53,6 +54,10 @@ object SomaticNormalImport extends App {
     val dryRun = params.contains("--dryrun")
 
     val s3VCFFiles = CheckS3Data.ls(bucket, batchId)
+
+    // we cant GET tasks by aliquot IDs so let's fetch them all with pagination
+    val allFHIRTasks = fetchFHIRTasks()(fhirClient)
+    LOGGER.info(s"Fetched FHIR Tasks: ${allFHIRTasks.size}")
 
     var res: Seq[BundleEntryComponent] = Seq()
     var files : Seq[FileEntry] = Seq()
@@ -66,7 +71,7 @@ object SomaticNormalImport extends App {
         val aliquotIDs = extractAliquotIDs(bucket, s3VCF.key)
         LOGGER.info(s"${s3VCF.filename} contains aliquot IDs: ${aliquotIDs.mkString(" ")}")
 
-        val (taskGermline, taskSomatic, existingTNBEATask) = findFhirTasks(aliquotIDs)(fhirClient)
+        val (taskGermline, taskSomatic, existingTNBEATask) = findFhirTasks(allFHIRTasks, aliquotIDs)
 
         if (existingTNBEATask.isEmpty) {
 
@@ -83,22 +88,39 @@ object SomaticNormalImport extends App {
 
     val bundle = TBundle(res.toList)
     LOGGER.info("Request:\n" + bundle.print()(fhirClient))
+
     if (dryRun) {
       Valid(true)
     } else {
+      submit(files, bundle)(s3Client, fhirClient, conf)
+    }
+  }
 
-      if (conf.aws.copyFileMode.equals("async")) {
-        CheckS3Data.copyFilesAsync(files, conf.aws.outputBucketName)(conf.aws)
+  private def submit(files: Seq[FileEntry], bundle: TBundle)(implicit s3Client: S3Client, fhirClient:IGenericClient, conf: Conf) = {
+    try {
+      if (files.nonEmpty) {
+        if (conf.aws.copyFileMode.equals("async")) {
+          CheckS3Data.copyFilesAsync(files, conf.aws.outputBucketName)(conf.aws)
+        } else {
+          CheckS3Data.copyFiles(files, conf.aws.outputBucketName)(s3Client)
+        }
+
+        val result = bundle.save()(fhirClient)
+
+        if (result.isInvalid) {
+          CheckS3Data.revert(files, conf.aws.outputBucketName)
+        } else {
+          LOGGER.info("Response :\n" + FhirUtils.toJson(result.toList.head)(fhirClient))
+        }
+        result
       } else {
-        CheckS3Data.copyFiles(files, conf.aws.outputBucketName)(s3Client)
+        Valid("Nothing to submit")
       }
-
-      val result = Valid(new Bundle()); //bundle.save()(fhirClient)
-      LOGGER.info("Response :\n" + FhirUtils.toJson(result.toList.head)(fhirClient))
-      if (result.isInvalid) {
+    } catch {
+      case e: Throwable => {
         CheckS3Data.revert(files, conf.aws.outputBucketName)
+        throw e
       }
-      result
     }
   }
 
@@ -137,7 +159,7 @@ object SomaticNormalImport extends App {
     doc.setId(IdType.newRandomUuid())
     doc.setStatus(DocumentReferenceStatus.CURRENT)
     doc.setType(new CodeableConcept(new Coding().setSystem(DR_TYPE).setCode("SSNV")))
-    doc.addCategory(new CodeableConcept(new Coding().setSystem(DR_CATEGORY).setCode("GEMO")))
+    doc.addCategory(new CodeableConcept(new Coding().setSystem(DR_CATEGORY).setCode("GENO")))
     doc.setSubject(taskSomatic.getFor)
 
     addContent(doc, copiedVCF, "VCF")
@@ -204,50 +226,50 @@ object SomaticNormalImport extends App {
       .map(_.toString)
   }
 
-  private def findFhirTasks(aliquotIDs: Array[String])(fhirClient: IGenericClient) = {
-
-    def searchTask(offset: Int, count: Int = 100) = {
+  private def fetchFHIRTasks()(fhirClient: IGenericClient) = {
+    def fetchTasks(offset: Int, count: Int = 100) = {
       val res = fhirClient.search().forResource(classOf[Task]).count(count).offset(offset).returnBundle(classOf[Bundle]).execute()
       res.getEntry.asScala.collect { case be if be.getSearch.getMode == SearchEntryMode.MATCH => be.getResource.asInstanceOf[Task] }
     }
-
-    def hasAnyAliquotIds(task: Task, aliquotIDs: Array[String]) = {
-      extractAliquotID(task).filter(aliquotIDs.contains)
+    var currentOffset = 0
+    var searchCompleted = false
+    var allFHIRTasks: Seq[Task] = Seq()
+    while(!searchCompleted) {
+      val tasks = fetchTasks(currentOffset)
+      currentOffset += tasks.length
+      searchCompleted = tasks.isEmpty
+      allFHIRTasks = allFHIRTasks ++ tasks
     }
+    allFHIRTasks
+  }
+
+  private def findFhirTasks(allFHIRTasks: Seq[Task], aliquotIDs: Array[String]) = {
 
     var taskGermline: Option[Task] = None
     var taskSomatic: Option[Task] = None
     var existingTNEBATask: Option[Task] = None
 
-    var currentOffset = 0
-    var searchCompleted = false
-
-    while(!searchCompleted) {
-      val tasks = searchTask(currentOffset)
-      currentOffset += tasks.length
-      tasks.foreach(task => {
-        val matchingAliquot = hasAnyAliquotIds(task, aliquotIDs)
-        if(matchingAliquot.isDefined){
-          val aliquot = matchingAliquot.get
-          task.getCode.getCodingFirstRep.getCode match {
-            case EXOME_GERMLINE_ANALYSIS => {
-              LOGGER.info(s"Found Task Germline id: ${task.getIdElement.getIdPart} with aliquot: $aliquot")
-              taskGermline = Some(task)
-            }
-            case EXTUM_ANALYSIS => {
-              LOGGER.info(s"Found Task Somatic id: ${task.getIdElement.getIdPart} with aliquot: $aliquot")
-              taskSomatic = Some(task)
-            }
-            case SOMATIC_NORMAL => {
-              LOGGER.info(s"Found an existing TNEBA Task id: ${task.getIdElement.getIdPart} with aliquot: $aliquot")
-              existingTNEBATask = Some(task)
-            }
-            case other: Any => throw new IllegalStateException(s"Found unknown Task with type: $other for aliquot ID: $aliquot")
+    allFHIRTasks.foreach(task => {
+      val matchingAliquot =  extractAliquotID(task).filter(aliquotIDs.contains)
+      if(matchingAliquot.isDefined){
+        val aliquot = matchingAliquot.get
+        task.getCode.getCodingFirstRep.getCode match {
+          case EXOME_GERMLINE_ANALYSIS => {
+            LOGGER.info(s"Found FHIR Task Germline id: ${task.getIdElement.getIdPart} with aliquot: $aliquot")
+            taskGermline = Some(task)
           }
+          case EXTUM_ANALYSIS => {
+            LOGGER.info(s"Found FHIR Task Somatic id: ${task.getIdElement.getIdPart} with aliquot: $aliquot")
+            taskSomatic = Some(task)
+          }
+          case SOMATIC_NORMAL => {
+            LOGGER.info(s"Existing FHIR TNEBA Task id: ${task.getIdElement.getIdPart} with aliquot: $aliquot")
+            existingTNEBATask = Some(task)
+          }
+          case other: Any => throw new IllegalStateException(s"Unknown Task with type: $other for aliquot ID: $aliquot")
         }
-      })
-      searchCompleted = tasks.isEmpty || existingTNEBATask.isDefined
-    }
+      }
+    })
 
     if (existingTNEBATask.isEmpty && (taskGermline.isEmpty || taskSomatic.isEmpty)) {
       throw new IllegalStateException(s"Can't find all required FHIR Tasks for aliquot IDs ${aliquotIDs.mkString(" ")}")
