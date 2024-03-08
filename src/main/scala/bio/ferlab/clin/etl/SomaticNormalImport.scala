@@ -3,14 +3,14 @@ package bio.ferlab.clin.etl
 import bio.ferlab.clin.etl.conf.{AWSConf, Conf}
 import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
 import bio.ferlab.clin.etl.fhir.FhirUtils
-import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.{ANALYSIS_TYPE, DR_CATEGORY, DR_FORMAT, DR_TYPE}
+import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.{ANALYSIS_TYPE, DR_CATEGORY, DR_FORMAT, DR_TYPE, EXPERIMENTAL_STRATEGY}
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.Extensions.{FULL_SIZE, SEQUENCING_EXPERIMENT, WORKFLOW}
 import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
 import bio.ferlab.clin.etl.scripts.SwitchSpecimenValues
 import bio.ferlab.clin.etl.task.fileimport.CheckS3Data
 import bio.ferlab.clin.etl.task.fileimport.CheckS3Data.attach
 import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, RawFileEntry, TBundle}
-import bio.ferlab.clin.etl.task.fileimport.model.TTask.{EXOME_GERMLINE_ANALYSIS, EXTUM_ANALYSIS}
+import bio.ferlab.clin.etl.task.fileimport.model.TTask.{EXOME_GERMLINE_ANALYSIS, EXTUM_ANALYSIS, SOMATIC_NORMAL}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.Validated.Valid
 import org.apache.commons.io.IOUtils
@@ -66,15 +66,19 @@ object SomaticNormalImport extends App {
         val aliquotIDs = extractAliquotIDs(bucket, s3VCF.key)
         LOGGER.info(s"${s3VCF.filename} contains aliquot IDs: ${aliquotIDs.mkString(" ")}")
 
-        val (taskGermline, taskSomatic) = findFhirTasks(aliquotIDs)(fhirClient)
-        validateTasks(s3VCF, taskGermline, taskSomatic)
+        val (taskGermline, taskSomatic, existingTNBEATask) = findFhirTasks(aliquotIDs)(fhirClient)
 
-        val (copiedVCF, copiedTBI) = prepareCopy(bucketOutputPrefix, s3VCF, s3VCFTbi)
-        files = files ++ Seq(copiedVCF, copiedTBI)
+        if (existingTNBEATask.isEmpty) {
 
-        val documentReference = buildDocumentReference(conf.ferload.cleanedUrl, taskGermline, taskSomatic, copiedVCF, copiedTBI)
-        val task = buildTask(taskGermline, taskSomatic)
-        res = res ++ FhirUtils.bundleCreate(Seq(documentReference, task))
+          validateTasks(s3VCF, taskGermline, taskSomatic)
+
+          val (copiedVCF, copiedTBI) = prepareCopy(bucketOutputPrefix, s3VCF, s3VCFTbi)
+          files = files ++ Seq(copiedVCF, copiedTBI)
+
+          val documentReference = buildDocumentReference(conf.ferload.cleanedUrl, taskGermline, taskSomatic, copiedVCF, copiedTBI)
+          val task = buildTask(taskGermline, taskSomatic)
+          res = res ++ FhirUtils.bundleCreate(Seq(documentReference, task))
+        }
       })
 
     val bundle = TBundle(res.toList)
@@ -160,7 +164,7 @@ object SomaticNormalImport extends App {
 
     val task = new Task()
     task.setId(IdType.newRandomUuid())
-    task.setCode(new CodeableConcept(new Coding().setSystem(ANALYSIS_TYPE).setCode("TNEBA")))
+    task.setCode(new CodeableConcept(new Coding().setSystem(ANALYSIS_TYPE).setCode(SOMATIC_NORMAL)))
     task.addExtension(taskSomatic.getExtensionByUrl(WORKFLOW))
     task.addExtension(taskSomatic.getExtensionByUrl(SEQUENCING_EXPERIMENT))
     task.addBasedOn(taskSomatic.getBasedOnFirstRep)
@@ -213,6 +217,7 @@ object SomaticNormalImport extends App {
 
     var taskGermline: Option[Task] = None
     var taskSomatic: Option[Task] = None
+    var existingTNEBATask: Option[Task] = None
 
     var currentOffset = 0
     var searchCompleted = false
@@ -225,20 +230,30 @@ object SomaticNormalImport extends App {
         if(matchingAliquot.isDefined){
           val aliquot = matchingAliquot.get
           task.getCode.getCodingFirstRep.getCode match {
-            case EXOME_GERMLINE_ANALYSIS => LOGGER.info(s"Found Task Germline id: ${task.getIdElement.getIdPart} with aliquot: $aliquot"); taskGermline = Some(task)
-            case EXTUM_ANALYSIS => LOGGER.info(s"Found Task Somatic id: ${task.getIdElement.getIdPart} with aliquot: $aliquot"); taskSomatic = Some(task)
-            case s: Any => throw new IllegalStateException(s"Found unknown Task with type: $s for aliquot ID: $aliquot")
+            case EXOME_GERMLINE_ANALYSIS => {
+              LOGGER.info(s"Found Task Germline id: ${task.getIdElement.getIdPart} with aliquot: $aliquot")
+              taskGermline = Some(task)
+            }
+            case EXTUM_ANALYSIS => {
+              LOGGER.info(s"Found Task Somatic id: ${task.getIdElement.getIdPart} with aliquot: $aliquot")
+              taskSomatic = Some(task)
+            }
+            case SOMATIC_NORMAL => {
+              LOGGER.info(s"Found an existing TNEBA Task id: ${task.getIdElement.getIdPart} with aliquot: $aliquot")
+              existingTNEBATask = Some(task)
+            }
+            case other: Any => throw new IllegalStateException(s"Found unknown Task with type: $other for aliquot ID: $aliquot")
           }
         }
       })
-      searchCompleted = (taskGermline.isDefined && taskSomatic.isDefined) || tasks.isEmpty
+      searchCompleted = tasks.isEmpty || existingTNEBATask.isDefined
     }
 
-    if (taskGermline.isEmpty || taskSomatic.isEmpty) {
+    if (existingTNEBATask.isEmpty && (taskGermline.isEmpty || taskSomatic.isEmpty)) {
       throw new IllegalStateException(s"Can't find all required FHIR Tasks for aliquot IDs ${aliquotIDs.mkString(" ")}")
     }
 
-    (taskGermline.get, taskSomatic.get)
+    (taskGermline.get, taskSomatic.get, existingTNEBATask)
   }
 
   private def extractAliquotIDs(bucket: String, key: String)(implicit s3Client: S3Client) = {
