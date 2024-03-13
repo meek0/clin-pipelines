@@ -32,28 +32,33 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 
 object SomaticNormalImport extends App {
 
-  val LOGGER: Logger = LoggerFactory.getLogger(SwitchSpecimenValues.getClass)
-
   withSystemExit {
     withExceptions {
       withConf { conf =>
          withLog {
           val batch_id = if (args.length > 0) args.head else throw new IllegalArgumentException(s"Missing batch_id")
           val params = if (args.length > 1) args.tail else Array.empty[String]
-          importBatch(batch_id, params)(conf)
+          SomaticNormalImport(batch_id, params)(conf)
         }
       }
     }
   }
 
-  private def importBatch(batchId: String, params : Array[String])(implicit conf: Conf): ValidationResult[Any] = {
+  def apply(batchId: String, params : Array[String])(implicit conf: Conf): ValidationResult[Any] = {
+    val LOGGER: Logger = LoggerFactory.getLogger(SwitchSpecimenValues.getClass)
+
     implicit val s3Client = buildS3Client(conf.aws)
     val (_, fhirClient) = buildFhirClients(conf.fhir, conf.keycloak)
     val bucket = conf.aws.bucketName
     val bucketOutputPrefix = conf.aws.outputPrefix
     val dryRun = params.contains("--dryrun")
 
-    val s3VCFFiles = CheckS3Data.ls(bucket, batchId)
+    val s3Files = CheckS3Data.ls(bucket, batchId)
+    val s3VCFFiles = s3Files.filter(f => f.filename.endsWith(".vcf.gz"))  // keep only VCF files
+
+    if (s3VCFFiles.isEmpty) { // wrong batch id folder ??
+      throw new IllegalStateException(s"No VCF files found in: $batchId")
+    }
 
     // we cant GET tasks by aliquot IDs so let's fetch them all with pagination
     val allFHIRTasks = fetchFHIRTasks()(fhirClient)
@@ -62,11 +67,9 @@ object SomaticNormalImport extends App {
     var res: Seq[BundleEntryComponent] = Seq()
     var files : Seq[FileEntry] = Seq()
 
-    s3VCFFiles
-      .filter(f => f.filename.endsWith(".vcf.gz"))  // keep only VCF files
-      .foreach(s3VCF => {
+    s3VCFFiles.foreach(s3VCF => {
         // find associated TBI (is it optional? could be ... let make it mandatory for now)
-        val s3VCFTbi = s3VCFFiles.find(f => f.filename.equals(s3VCF.filename+".tbi")).getOrElse(throw new IllegalStateException(s"Cant find TBI file for: ${s3VCF.filename}"))
+        val s3VCFTbi = s3Files.find(f => f.filename.equals(s3VCF.filename+".tbi")).getOrElse(throw new IllegalStateException(s"Cant find TBI file for: ${s3VCF.key}"))
 
         val aliquotIDs = extractAliquotIDs(bucket, s3VCF.key)
         LOGGER.info(s"${s3VCF.filename} contains aliquot IDs: ${aliquotIDs.mkString(" ")}")
@@ -266,13 +269,12 @@ object SomaticNormalImport extends App {
             LOGGER.info(s"Existing FHIR TNEBA Task id: ${task.getIdElement.getIdPart} with aliquot: $aliquot")
             existingTNEBATask = Some(task)
           }
-          case other: Any => throw new IllegalStateException(s"Unknown Task with type: $other for aliquot ID: $aliquot")
         }
       }
     })
 
     if (existingTNEBATask.isEmpty && (taskGermline.isEmpty || taskSomatic.isEmpty)) {
-      throw new IllegalStateException(s"Can't find all required FHIR Tasks for aliquot IDs ${aliquotIDs.mkString(" ")}")
+      throw new IllegalStateException(s"Can't find all required FHIR Tasks for aliquot IDs: ${aliquotIDs.mkString(" ")}")
     }
 
     (taskGermline.get, taskSomatic.get, existingTNEBATask)

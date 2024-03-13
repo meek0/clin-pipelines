@@ -3,6 +3,7 @@ package bio.ferlab.clin.etl.fhir
 import bio.ferlab.clin.etl.conf.{FhirConf, KeycloakConf}
 import ca.uhn.fhir.context.{FhirContext, PerformanceOptionsEnum}
 import ca.uhn.fhir.rest.client.api.{IGenericClient, ServerValidationModeEnum}
+import org.apache.commons.lang3.StringUtils
 
 object FhirClient {
   def buildFhirClients(fhirConf:FhirConf, keycloakConf:KeycloakConf) = {
@@ -15,9 +16,11 @@ object FhirClient {
 
     val clinClient: IClinFhirClient = fhirContext.newRestfulClient(classOf[IClinFhirClient], fhirServerUrl)
     val client: IGenericClient = fhirContext.newRestfulGenericClient(fhirServerUrl)
-    val hapiFhirInterceptor: AuthTokenInterceptor = new AuthTokenInterceptor(keycloakConf)
-    clinClient.registerInterceptor(hapiFhirInterceptor)
-    client.registerInterceptor(hapiFhirInterceptor)
+    if (StringUtils.isNotBlank(keycloakConf.url)) {
+      val hapiFhirInterceptor: AuthTokenInterceptor = new AuthTokenInterceptor(keycloakConf)
+      clinClient.registerInterceptor(hapiFhirInterceptor)
+      client.registerInterceptor(hapiFhirInterceptor)
+    }
 
     (clinClient, client)
   }
