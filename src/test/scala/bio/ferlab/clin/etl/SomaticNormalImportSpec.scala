@@ -29,6 +29,7 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
     withS3Objects { (inputPrefix, _) =>
       try {
         SomaticNormalImport(inputPrefix, Array())(conf)
+        fail("Expecting IllegalStateException")
       } catch {
         case e: IllegalStateException =>
           println(e.getMessage)
@@ -43,10 +44,12 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
       transferFromResources(inputPrefix, "somatic_normal/no_attached_tbi", inputBucket)
       try {
         SomaticNormalImport(inputPrefix, Array())(conf)
+        fail("Expecting IllegalStateException")
       } catch {
         case e: IllegalStateException =>
           println(e.getMessage)
-          assert(e.getMessage.equals(s"Cant find TBI file for: $inputPrefix/empty.somatic_tumor_normal.vcf.gz"))
+          assert(e.getMessage.equals(s"Cant find TBI file for: $inputPrefix/empty_0.somatic_tumor_normal.vcf.gz\n" +
+            s"Cant find TBI file for: $inputPrefix/empty_1.somatic_tumor_normal.vcf.gz"))
       }
     }
   }
@@ -57,6 +60,7 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
       transferFromResources(inputPrefix, "somatic_normal/no_aliquot_ids", inputBucket)
       try {
         SomaticNormalImport(inputPrefix, Array())(conf)
+        fail("Expecting IllegalStateException")
       } catch {
         case e: IllegalStateException =>
           println(e.getMessage)
@@ -71,6 +75,7 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
       transferFromResources(inputPrefix, "somatic_normal/more_than_two_aliquot_ids", inputBucket)
       try {
         SomaticNormalImport(inputPrefix, Array())(conf)
+        fail("Expecting IllegalStateException")
       } catch {
         case e: IllegalStateException =>
           println(e.getMessage)
@@ -85,6 +90,7 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
       transferFromResources(inputPrefix, "somatic_normal/good", inputBucket)
       try {
         SomaticNormalImport(inputPrefix, Array())(conf)
+        fail("Expecting IllegalStateException")
       } catch {
         case e: IllegalStateException =>
           println(e.getMessage)
@@ -104,6 +110,7 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
 
       try {
         SomaticNormalImport(inputPrefix, Array())(conf)
+        fail("Expecting IllegalStateException")
       } catch {
         case e: IllegalStateException =>
           println(e.getMessage)
@@ -132,6 +139,7 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
 
       try {
         SomaticNormalImport(inputPrefix, Array())(conf)
+        fail("Expecting IllegalStateException")
       } catch {
         case e: IllegalStateException =>
           println(e.getMessage)

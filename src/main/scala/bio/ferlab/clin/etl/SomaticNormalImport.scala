@@ -1,33 +1,31 @@
 package bio.ferlab.clin.etl
 
-import bio.ferlab.clin.etl.conf.{AWSConf, Conf}
+import bio.ferlab.clin.etl.conf.Conf
 import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
 import bio.ferlab.clin.etl.fhir.FhirUtils
-import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.{ANALYSIS_TYPE, DR_CATEGORY, DR_FORMAT, DR_TYPE, EXPERIMENTAL_STRATEGY}
+import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.{ANALYSIS_TYPE, DR_CATEGORY, DR_FORMAT, DR_TYPE}
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.Extensions.{FULL_SIZE, SEQUENCING_EXPERIMENT, WORKFLOW}
 import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
 import bio.ferlab.clin.etl.scripts.SwitchSpecimenValues
 import bio.ferlab.clin.etl.task.fileimport.CheckS3Data
 import bio.ferlab.clin.etl.task.fileimport.CheckS3Data.attach
-import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, RawFileEntry, TBundle}
 import bio.ferlab.clin.etl.task.fileimport.model.TTask.{EXOME_GERMLINE_ANALYSIS, EXTUM_ANALYSIS, SOMATIC_NORMAL}
-import bio.ferlab.clin.etl.task.fileimport.validation.DocumentReferencesValidation.checkOptionalValidation
+import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, RawFileEntry, TBundle}
 import ca.uhn.fhir.rest.client.api.IGenericClient
-import cats.data.Validated.Valid
+import cats.data.Validated.{Invalid, Valid}
+import cats.implicits.catsSyntaxValidatedId
 import org.apache.commons.io.IOUtils
 import org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM
-import org.graalvm.compiler.nodeinfo.InputType
 import org.hl7.fhir.r4.model.Bundle.{BundleEntryComponent, SearchEntryMode}
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus
-import org.hl7.fhir.r4.model.Task.{ParameterComponent, TaskStatus}
+import org.hl7.fhir.r4.model.Task.TaskStatus
 import org.hl7.fhir.r4.model._
 import org.slf4j.{Logger, LoggerFactory}
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 
-import java.util.{Scanner, UUID}
 import java.util.zip.GZIPInputStream
-import scala.Seq
+import java.util.{Scanner, UUID}
 import scala.collection.JavaConverters.asScalaBufferConverter
 
 object SomaticNormalImport extends App {
@@ -67,7 +65,8 @@ object SomaticNormalImport extends App {
     var res: Seq[BundleEntryComponent] = Seq()
     var files : Seq[FileEntry] = Seq()
 
-    s3VCFFiles.foreach(s3VCF => {
+    val results = s3VCFFiles.map(s3VCF => {
+      try {
         // find associated TBI (is it optional? could be ... let make it mandatory for now)
         val s3VCFTbi = s3Files.find(f => f.filename.equals(s3VCF.filename+".tbi")).getOrElse(throw new IllegalStateException(s"Cant find TBI file for: ${s3VCF.key}"))
 
@@ -87,15 +86,27 @@ object SomaticNormalImport extends App {
           val task = buildTask(taskGermline, taskSomatic)
           res = res ++ FhirUtils.bundleCreate(Seq(documentReference, task))
         }
-      })
 
-    val bundle = TBundle(res.toList)
-    LOGGER.info("Request:\n" + bundle.print()(fhirClient))
+        s3VCF.key.valid
+      } catch {
+        // catch all errors
+        case e: Throwable => e.getMessage.invalid
+      }
+    })
 
-    if (dryRun) {
-      Valid(true)
+    if (results.exists(_.isInvalid)) {
+      val errorsList = results.filter(_.isInvalid).map(_.swap.getOrElse("")).mkString("\n")
+      throw new IllegalStateException(errorsList)
     } else {
-      submit(files, bundle)(s3Client, fhirClient, conf)
+
+      val bundle = TBundle(res.toList)
+      LOGGER.info("Request:\n" + bundle.print()(fhirClient))
+
+      if (dryRun) {
+        Valid(true)
+      } else {
+        submit(files, bundle)(s3Client, fhirClient, conf)
+      }
     }
   }
 
