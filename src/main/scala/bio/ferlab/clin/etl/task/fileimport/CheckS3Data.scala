@@ -131,7 +131,7 @@ object CheckS3Data {
 
   }
 
-  private def attach(f: String) = {
+  def attach(f: String) = {
     s"""attachment; filename="$f""""
   }
 

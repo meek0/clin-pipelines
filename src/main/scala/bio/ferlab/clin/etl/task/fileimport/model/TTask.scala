@@ -170,6 +170,6 @@ case class TTask(submissionSchema: Option[String], taskExtensions: TaskExtension
 object TTask {
   val EXOME_GERMLINE_ANALYSIS = "GEBA"
   val EXTUM_ANALYSIS = "TEBA"
-
+  val SOMATIC_NORMAL = "TNEBA"
   val ANALYSED_SAMPLE = "Analysed sample"
 }
