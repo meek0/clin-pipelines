@@ -83,7 +83,7 @@ object SomaticNormalImport extends App {
           files = files ++ Seq(copiedVCF, copiedTBI)
 
           val documentReference = buildDocumentReference(conf.ferload.cleanedUrl, taskGermline, taskSomatic, copiedVCF, copiedTBI)
-          val task = buildTask(taskGermline, taskSomatic)
+          val task = buildTask(batchId, taskGermline, taskSomatic)
           res = res ++ FhirUtils.bundleCreate(Seq(documentReference, task))
         }
 
@@ -185,7 +185,7 @@ object SomaticNormalImport extends App {
     doc
   }
 
-  private def buildTask(taskGermline: Task, taskSomatic: Task) = {
+  private def buildTask(batchId: String,taskGermline: Task, taskSomatic: Task) = {
 
     def addInput(task: Task, inputTask: Task, inputType: String) = {
       val i1 = task.addInput()
@@ -211,6 +211,7 @@ object SomaticNormalImport extends App {
     task.setFor(taskSomatic.getFor)
     task.setRequester(taskSomatic.getRequester)
     task.setOwner(taskSomatic.getOwner)
+    task.getGroupIdentifier.setValue(batchId)
     //task.setAuthoredOn(taskSomatic.getAuthoredOn)
     addInput(task, taskGermline, "Normal")
     addInput(task, taskSomatic, "Tumor")
