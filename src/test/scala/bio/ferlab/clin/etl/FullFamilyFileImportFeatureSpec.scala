@@ -167,6 +167,7 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
       sequencingServiceRequests.size shouldBe 2
       sequencingServiceRequests.foreach { r =>
         r.getBasedOnFirstRep.getReference shouldBe analysisServiceRequestId
+        r.getIdentifier.get(0).getValue shouldBe ldmServiceRequestId
         r.getCode.getCodingFirstRep.getSystem shouldBe CodingSystems.ANALYSIS_REQUEST_CODE
         r.getCode.getCodingFirstRep.getCode shouldBe "MMG"
         r.getCode.getCoding.get(1).getSystem shouldBe CodingSystems.SEQUENCING_REQUEST_CODE

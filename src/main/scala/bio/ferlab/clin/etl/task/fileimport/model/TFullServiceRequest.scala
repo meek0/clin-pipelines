@@ -98,7 +98,7 @@ case class TSequencingServiceRequest(submissionSchema: Option[String], analysis:
   sr.getMeta.addProfile(SEQUENCING_SERVICE_REQUEST)
   sr.setIntent(ServiceRequestIntent.ORDER)
   sr.setStatus(ServiceRequestStatus.COMPLETED)
-  sr.getCode.addCoding().setSystem(SR_IDENTIFIER).setCode(analysis.ldmServiceRequestId)
+  sr.getIdentifier.add(new Identifier().setSystem(SR_IDENTIFIER).setValue(analysis.ldmServiceRequestId))
   sr.setCode(new CodeableConcept().addCoding(new Coding().setSystem(ANALYSIS_REQUEST_CODE).setCode(analysis.getAnalysisCode())))
   if (GERMLINE_SCHEMA.equals(submissionSchema.orNull)) {
     sr.getCode().addCoding(new Coding().setSystem(SEQUENCING_REQUEST_CODE).setCode("75020"))
