@@ -116,6 +116,7 @@ class ExtumFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matc
         r.getSpecimen.asScala.map(_.getReference) should contain theSameElementsAs specimenIds
         r.getBasedOnFirstRep.getReference shouldBe analysisServiceRequestId
         r.getSubject.getReference shouldBe patientId
+        r.getIdentifier.get(0).getValue shouldBe ldmServiceRequestId
         r.getCode.getCodingFirstRep.getSystem shouldBe CodingSystems.ANALYSIS_REQUEST_CODE
         r.getCode.getCodingFirstRep.getCode shouldBe "MMG"
         r.getCode.getCoding.get(1).getSystem shouldBe CodingSystems.SEQUENCING_REQUEST_CODE
