@@ -20,7 +20,8 @@ object FhirExport extends App {
         }
 
         val files = fhirExporter.checkPollingStatus(url, 1.seconds, 600.seconds)
-        fhirExporter.uploadFiles(conf.aws.bucketName, files).validNel[String]
+        val savedFileKeys = fhirExporter.uploadFiles(conf.aws.bucketName, files)
+        fhirExporter.cleanUp(conf.aws.bucketName, savedFileKeys).validNel[String]
       }
     }
   }

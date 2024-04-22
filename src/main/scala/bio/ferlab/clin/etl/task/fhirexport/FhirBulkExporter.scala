@@ -6,12 +6,13 @@ import bio.ferlab.clin.etl.keycloak.Auth
 import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
 import bio.ferlab.clin.etl.task.fhirexport.FhirBulkExporter._
 import bio.ferlab.clin.etl.task.fhirexport.Poller.Task
+import bio.ferlab.clin.etl.task.fileimport.model.FileEntry
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.{DeleteObjectRequest, ListObjectsRequest, PutObjectRequest}
 import sttp.client3.{HttpURLConnectionBackend, basicRequest, _}
 import sttp.model.StatusCode
 
@@ -21,6 +22,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, DurationInt}
 
 object FhirBulkExporter {
+
+  val rawLandingFHIR = "raw/landing/fhir/"
 
   val ALL_ENTITIES: String =
     Set(
@@ -130,13 +133,15 @@ class FhirBulkExporter(authConfig: KeycloakConf,
     response.body.right.get
   }
 
-  override def uploadFiles(bucketName: String, files: List[(String, String)]): Unit = {
+  override def uploadFiles(bucketName: String, files: List[(String, String)]): Seq[String] = {
     val s3Client: S3Client = buildS3Client(storeConfig)
 
     val formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
     val timestamp = LocalDateTime.now().format(formatter)
 
     files.foreach(f=>LOGGER.info(f.toString()))
+
+    var fileKeys : Seq[String] = Seq()
 
     files
       .groupBy { case (entity, _) => entity }
@@ -145,11 +150,30 @@ class FhirBulkExporter(authConfig: KeycloakConf,
         case (_, filesWithIndex) =>
           filesWithIndex.foreach {
             case ((folderName, fileUrl), idx) =>
-              val filekey = s"raw/landing/fhir/$folderName/${folderName}_${idx}_$timestamp.json"
+              val filekey = s"$rawLandingFHIR$folderName/${folderName}_${idx}_$timestamp.json"
               LOGGER.info(s"upload object to: $bucketName/$filekey")
               val putObj = PutObjectRequest.builder().bucket(bucketName).key(filekey).build()
               s3Client.putObject(putObj, RequestBody.fromString(getFileContent(fileUrl)))
+              fileKeys = fileKeys ++ Seq(filekey)
           }
       }
+    fileKeys
+  }
+
+  override def cleanUp(bucketName: String,ignoreKeys: Seq[String]): Unit = {
+    val s3Client: S3Client = buildS3Client(storeConfig)
+
+    LOGGER.info(s"Clean up: $bucketName/$rawLandingFHIR")
+
+    val list = ListObjectsRequest.builder().bucket(bucketName).prefix(rawLandingFHIR).build()
+    s3Client.listObjects(list).contents().forEach(o => {
+      val key = o.key()
+      if (!ignoreKeys.contains(key)) {
+        LOGGER.info(s"Delete previous file: ${key}")
+        val del = DeleteObjectRequest.builder().bucket(bucketName).key(key).build()
+        s3Client.deleteObject(del)
+      }
+    })
+
   }
 }
