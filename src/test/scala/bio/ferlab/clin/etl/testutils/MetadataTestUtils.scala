@@ -17,7 +17,7 @@ object MetadataTestUtils {
                          ramq: Option[String] = Some("DOWJ1234"),
                          ndm: Option[String] = None,
                          ep: String = "CHUSJ",
-                         designFamily: String = "SOLO",
+                         designFamily: Option[String] = Some("SOLO"),
                          position: String = "PROB",
                          familyId: Option[String] = None,
                          status: String = "AFF",
