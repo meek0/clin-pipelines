@@ -169,7 +169,7 @@ case class FullPatient(
                         birthDate: String,
                         mrn: Option[String],
                         ep: String,
-                        designFamily: String,
+                        designFamily: Option[String],
                         familyMember: String,
                         familyId: Option[String],
                         status: String,
