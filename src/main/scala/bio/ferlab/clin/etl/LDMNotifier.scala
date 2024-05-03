@@ -15,7 +15,7 @@ import play.api.libs.json.Json
 object LDMNotifier extends App {
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
-  def sendEmails(runName: String,
+  def sendEmails(batchId: String,
                  mailerConf: MailerConf,
                  group: Map[(String, Seq[String]), Seq[ManifestRow]]
                 ): ValidationResult[List[Unit]] = {
@@ -34,7 +34,7 @@ object LDMNotifier extends App {
             bccs = blindCC,
             subject = "Nouvelles données du CQGC",
             bodyText = createMsgBody(),
-            attachments = Seq(createMetaDataAttachmentFile(runName, manifestRows))
+            attachments = Seq(createMetaDataAttachmentFile(batchId, manifestRows))
           ))
 
         val extraInfoIfAvailable = if (blindCC.isEmpty) "" else s"and ${blindCC.mkString(",")}"
@@ -47,14 +47,14 @@ object LDMNotifier extends App {
     withLog {
       withConf { conf =>
         if (args.length == 0) {
-          "first argument must be runName".invalidNel[Any]
+          "first argument must be batchId".invalidNel[Any]
         }
-        val runName = args(0)
+        val batchId = args(0)
 
         val auth = new Auth(conf.keycloak)
 
         val tasksE: Either[String, Seq[Task]] = for {
-          strResponseBody <- auth.withToken((_, rpt) => fetchTasksFromFhir(conf.fhir.url, rpt, runName).body)
+          strResponseBody <- auth.withToken((_, rpt) => fetchTasksFromFhir(conf.fhir.url, rpt, batchId).body)
           rawParsedResponse = Json.parse(strResponseBody)
           taskList <- checkIfGqlResponseHasData(rawParsedResponse)
         } yield taskList
@@ -63,7 +63,7 @@ object LDMNotifier extends App {
 
         tasksV.flatMap { tasks: Seq[Task] =>
           val ldmsToManifestRows = groupManifestRowsByLdm(conf.clin.url, tasks)
-          sendEmails(runName = runName, mailerConf = conf.mailer, group = ldmsToManifestRows)
+          sendEmails(batchId = batchId, mailerConf = conf.mailer, group = ldmsToManifestRows)
         }
       }
     }

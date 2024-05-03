@@ -12,11 +12,11 @@ object TasksGqlExtractor {
   // If the graphql query generates more results than this <upper bound> it will generate an error.
   val GQL_COUNT_UPPER_BOUND = 1000
 
-  def buildGqlTasksQueryHttpPostBody(runName: String): String = {
+  def buildGqlTasksQueryHttpPostBody(batchId: String): String = {
     val query =
       s"""
          |{
-         |  taskList: TaskList(run_name: "$runName") {
+         |  taskList: TaskList(group_identifier: "$batchId") {
          |    id
          |    focus @flatten {
          |      serviceRequestReference: reference
@@ -68,12 +68,12 @@ object TasksGqlExtractor {
     s"""{ "query": ${JsString(query)} }"""
   }
 
-  def fetchTasksFromFhir(baseUrl: String, token: String, runName: String): TasksResponse = {
+  def fetchTasksFromFhir(baseUrl: String, token: String, batchId: String): TasksResponse = {
     val backend = HttpURLConnectionBackend()
     val response = basicRequest
       .headers(Map("Authorization" -> s"Bearer $token"))
       .contentType(MediaType.ApplicationJson)
-      .body(buildGqlTasksQueryHttpPostBody(runName))
+      .body(buildGqlTasksQueryHttpPostBody(batchId))
       .post(uri"$baseUrl/${"$graphql"}?_count=$GQL_COUNT_UPPER_BOUND")
       .send(backend)
     backend.close

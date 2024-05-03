@@ -15,7 +15,7 @@ class TasksGqlExtractorSpec extends FlatSpec with GivenWhenThen {
 
   it should "parse valid response containing data" in {
     Given("a correctly parsed json containing 3 tasks")
-    val parsed = FhirTestUtils.parseJsonFromResource("task/graphql_http_resp_run_name_1.json")
+    val parsed = FhirTestUtils.parseJsonFromResource("task/graphql_http_resp_group_identifier_1.json")
     Then("the tasks should be extracted with no errors")
     val eitherErrorOrData = TasksGqlExtractor.checkIfGqlResponseHasData(parsed.get)
     eitherErrorOrData.isRight shouldBe true
