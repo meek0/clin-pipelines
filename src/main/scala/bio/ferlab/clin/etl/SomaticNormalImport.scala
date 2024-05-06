@@ -218,12 +218,12 @@ object SomaticNormalImport extends App {
     task
   }
 
-  private def validateTasks(s3VCF: RawFileEntry, taskGermline: Task, taskSomatic: Task) = {
+  private def validateTasks(s3VCF: RawFileEntry, taskGermline: Task, taskSomatic: Task): Unit = {
     val file = s3VCF.filename
     val aliquotIDGermline = extractAliquotID(taskGermline).get
     val aliquotIDSomatic = extractAliquotID(taskSomatic).get
 
-    if (!file.startsWith(s"T-$aliquotIDSomatic.N-$aliquotIDGermline")) {
+    if (!file.startsWith(s"$aliquotIDSomatic.$aliquotIDGermline")) {
       throw new IllegalStateException(s"$file file name doesn't match aliquot IDs inside")
     }
 
@@ -300,6 +300,7 @@ object SomaticNormalImport extends App {
       val line = vcfReader.nextLine();
       if (line.startsWith("#CHROM")) {
         aliquots = Some(line.replace("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t", "").split("\t"))
+        vcfInputStream.abort();
       }
     }
     IOUtils.closeQuietly(vcfReader, vcfInputStream)
