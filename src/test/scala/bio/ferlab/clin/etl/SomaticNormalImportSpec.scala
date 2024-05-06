@@ -114,7 +114,7 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
       } catch {
         case e: IllegalStateException =>
           println(e.getMessage)
-          assert(e.getMessage.equals("T-0000X.N-0000Y.somatic_tumor_normal.vcf.gz file name doesn't match aliquot IDs inside"))
+          assert(e.getMessage.equals("0000X.0000Y.somatic_tumor_normal.vcf.gz file name doesn't match aliquot IDs inside"))
       }
     }
   }
