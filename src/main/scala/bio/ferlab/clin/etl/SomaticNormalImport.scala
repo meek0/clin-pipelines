@@ -58,10 +58,6 @@ object SomaticNormalImport extends App {
       throw new IllegalStateException(s"No VCF files found in: $batchId")
     }
 
-    // we cant GET tasks by aliquot IDs so let's fetch them all with pagination
-    val allFHIRTasks = fetchFHIRTasks()(fhirClient)
-    LOGGER.info(s"Fetched FHIR Tasks: ${allFHIRTasks.size}")
-
     var res: Seq[BundleEntryComponent] = Seq()
     var files : Seq[FileEntry] = Seq()
 
@@ -73,7 +69,8 @@ object SomaticNormalImport extends App {
         val aliquotIDs = extractAliquotIDs(bucket, s3VCF.key)
         LOGGER.info(s"${s3VCF.filename} contains aliquot IDs: ${aliquotIDs.mkString(" ")}")
 
-        val (taskGermline, taskSomatic, existingTNBEATask) = findFhirTasks(allFHIRTasks, aliquotIDs)
+        val FHIRTasksByAliquotIDs = fetchFHIRTasksByAliquotIDs(aliquotIDs)(fhirClient)
+        val (taskGermline, taskSomatic, existingTNBEATask) = findFhirTasks(FHIRTasksByAliquotIDs, aliquotIDs)
 
         if (existingTNBEATask.isEmpty) {
 
@@ -241,21 +238,9 @@ object SomaticNormalImport extends App {
       .map(_.toString)
   }
 
-  private def fetchFHIRTasks()(fhirClient: IGenericClient) = {
-    def fetchTasks(offset: Int, count: Int = 100) = {
-      val res = fhirClient.search().forResource(classOf[Task]).count(count).offset(offset).returnBundle(classOf[Bundle]).execute()
-      res.getEntry.asScala.collect { case be if be.getSearch.getMode == SearchEntryMode.MATCH => be.getResource.asInstanceOf[Task] }
-    }
-    var currentOffset = 0
-    var searchCompleted = false
-    var allFHIRTasks: Seq[Task] = Seq()
-    while(!searchCompleted) {
-      val tasks = fetchTasks(currentOffset)
-      currentOffset += tasks.length
-      searchCompleted = tasks.isEmpty
-      allFHIRTasks = allFHIRTasks ++ tasks
-    }
-    allFHIRTasks
+  private def fetchFHIRTasksByAliquotIDs(aliquotIDs: Array[String])(implicit fhirClient: IGenericClient): Seq[Task] = {
+    val res = fhirClient.search.byUrl(s"Task?aliquotid=${aliquotIDs.mkString(",")}").returnBundle(classOf[Bundle]).execute
+    res.getEntry.asScala.collect { case be if be.getSearch.getMode == SearchEntryMode.MATCH => be.getResource.asInstanceOf[Task] }
   }
 
   private def findFhirTasks(allFHIRTasks: Seq[Task], aliquotIDs: Array[String]) = {

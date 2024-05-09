@@ -191,7 +191,8 @@ object FhirTestUtils {
       "profiles/StructureDefinition-cqgc-observation.json",
       "profiles/StructureDefinition-cqgc-sequencing-request.json",
       "profiles/StructureDefinition-cqgc-analysis-request.json",
-      "search/SearchParameter-run-name.json"
+      "search/SearchParameter-run-name.json",
+      "search/SearchParameter-aliquotid.json"
 
     ).foreach(downloadAndCreate)
 
