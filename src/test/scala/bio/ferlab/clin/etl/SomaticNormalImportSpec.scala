@@ -180,6 +180,8 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
       val allTasks = resultBundle.getEntry.asScala.collect { case be if be.getSearch.getMode == SearchEntryMode.MATCH => be.getResource.asInstanceOf[Task] }
       assert(allTasks.size == 3)
 
+      assert(allTasks.find(t => t.getCode.getCodingFirstRep.getCode == "TNEBA").get.getOutput.size() == 1)
+
       // TODO more validation on TNEBA task
     }
   }

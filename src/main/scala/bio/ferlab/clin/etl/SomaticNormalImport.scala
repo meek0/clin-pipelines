@@ -3,6 +3,7 @@ package bio.ferlab.clin.etl
 import bio.ferlab.clin.etl.conf.Conf
 import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
 import bio.ferlab.clin.etl.fhir.FhirUtils
+import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems.{ANALYSIS_TYPE, DR_CATEGORY, DR_FORMAT, DR_TYPE}
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.Extensions.{FULL_SIZE, SEQUENCING_EXPERIMENT, WORKFLOW}
 import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
@@ -15,6 +16,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.Validated.{Invalid, Valid}
 import cats.implicits.catsSyntaxValidatedId
 import org.apache.commons.io.IOUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM
 import org.hl7.fhir.r4.model.Bundle.{BundleEntryComponent, SearchEntryMode}
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus
@@ -80,7 +82,7 @@ object SomaticNormalImport extends App {
           files = files ++ Seq(copiedVCF, copiedTBI)
 
           val documentReference = buildDocumentReference(conf.ferload.cleanedUrl, taskGermline, taskSomatic, copiedVCF, copiedTBI)
-          val task = buildTask(batchId, taskGermline, taskSomatic)
+          val task = buildTask(batchId, taskGermline, taskSomatic, documentReference)
           res = res ++ FhirUtils.bundleCreate(Seq(documentReference, task))
         }
 
@@ -157,7 +159,7 @@ object SomaticNormalImport extends App {
       val attachment = new Attachment()
       attachment.addExtension(FULL_SIZE, new DecimalType(file.size))
       attachment.setContentType(APPLICATION_OCTET_STREAM.getMimeType)
-      attachment.setUrl(s"$ferloadURL/${file.id}")
+      attachment.setUrl(s"$ferloadURL/${file.id}".replaceAll("//", "/"))
       attachment.setTitle(file.filename)
       content.setAttachment(attachment)
       val format = new Coding()
@@ -182,7 +184,7 @@ object SomaticNormalImport extends App {
     doc
   }
 
-  private def buildTask(batchId: String,taskGermline: Task, taskSomatic: Task) = {
+  private def buildTask(batchId: String,taskGermline: Task, taskSomatic: Task, document: DocumentReference) = {
 
     def addInput(task: Task, inputTask: Task, inputType: String) = {
       val i1 = task.addInput()
@@ -193,6 +195,12 @@ object SomaticNormalImport extends App {
       val i2 = task.addInput()
       i2.setType(new CodeableConcept().setText(s"$inputType Exome Bioinformatic Analysis"))
       i2.setValue(new Reference().setReference(s"Task/${inputTask.getIdElement.getIdPart}"))
+    }
+
+    def addOutput(task: Task, document: DocumentReference) = {
+      val o1 = task.addOutput()
+      o1.getType.addCoding(document.getType.getCodingFirstRep)
+      o1.setValue(new Reference().setReference(document.getId))
     }
 
     val task = new Task()
@@ -212,6 +220,7 @@ object SomaticNormalImport extends App {
     //task.setAuthoredOn(taskSomatic.getAuthoredOn)
     addInput(task, taskGermline, "Normal")
     addInput(task, taskSomatic, "Tumor")
+    addOutput(task, document)
     task
   }
 
