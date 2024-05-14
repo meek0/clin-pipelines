@@ -217,7 +217,7 @@ object SomaticNormalImport extends App {
     task.setRequester(taskSomatic.getRequester)
     task.setOwner(taskSomatic.getOwner)
     task.getGroupIdentifier.setValue(batchId)
-    //task.setAuthoredOn(taskSomatic.getAuthoredOn)
+    task.setAuthoredOn(taskSomatic.getAuthoredOn)
     addInput(task, taskGermline, "Normal")
     addInput(task, taskSomatic, "Tumor")
     addOutput(task, document)

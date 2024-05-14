@@ -16,6 +16,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 
+import java.util.Date
 import scala.collection.JavaConverters._
 import scala.io.Source
 
@@ -180,7 +181,9 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
       val allTasks = resultBundle.getEntry.asScala.collect { case be if be.getSearch.getMode == SearchEntryMode.MATCH => be.getResource.asInstanceOf[Task] }
       assert(allTasks.size == 3)
 
-      assert(allTasks.find(t => t.getCode.getCodingFirstRep.getCode == "TNEBA").get.getOutput.size() == 1)
+      val taskTNEBA = allTasks.find(t => t.getCode.getCodingFirstRep.getCode == "TNEBA").get
+      assert(taskTNEBA.getOutput.size() == 1)
+      assert(taskTNEBA.getAuthoredOn.toString.equals(taskSomatic.getAuthoredOn.toString))
 
       // TODO more validation on TNEBA task
     }
@@ -205,6 +208,7 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
     taskSomatic.getCode.getCodingFirstRep.setCode(EXTUM_ANALYSIS)
     taskSomatic.addExtension().setUrl(SEQUENCING_EXPERIMENT).addExtension().setUrl("labAliquotId").setValue(new StringType("00001"))
     taskSomatic.getInputFirstRep.setValue(new Reference("Specimen/somatic").setDisplay("Submitter Sample ID: somatic_id"))
+    taskSomatic.setAuthoredOn(new Date())
 
     var patient:Patient = null
     if (withPatient){
