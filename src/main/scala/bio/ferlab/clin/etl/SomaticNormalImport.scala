@@ -27,7 +27,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 
 import java.util.zip.GZIPInputStream
-import java.util.{Scanner, UUID}
+import java.util.{Date, Scanner, UUID}
 import scala.collection.JavaConverters.asScalaBufferConverter
 
 object SomaticNormalImport extends App {
@@ -217,7 +217,7 @@ object SomaticNormalImport extends App {
     task.setRequester(taskSomatic.getRequester)
     task.setOwner(taskSomatic.getOwner)
     task.getGroupIdentifier.setValue(batchId)
-    //task.setAuthoredOn(taskSomatic.getAuthoredOn)
+    task.setAuthoredOn(new Date())
     addInput(task, taskGermline, "Normal")
     addInput(task, taskSomatic, "Tumor")
     addOutput(task, document)
