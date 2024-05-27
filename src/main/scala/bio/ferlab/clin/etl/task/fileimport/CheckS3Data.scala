@@ -26,7 +26,7 @@ object CheckS3Data {
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
   def ls(bucket: String, prefix: String, maxKeys: Int = 4500)(implicit s3Client: S3Client): List[RawFileEntry] = {
-    val lsRequest = ListObjectsV2Request.builder().bucket(bucket).maxKeys(maxKeys).prefix(prefix).build()
+    val lsRequest = ListObjectsV2Request.builder().bucket(bucket).maxKeys(maxKeys).prefix(prefix+"/").build()
 
     nextBatch(s3Client, s3Client.listObjectsV2(lsRequest), maxKeys)
   }
