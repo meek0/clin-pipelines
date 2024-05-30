@@ -212,6 +212,41 @@
             "fileType": "QC"
           }
         ]
+      },
+      {
+        "id": "Task/104716/_history/1",
+        "serviceRequestReference": "ServiceRequest/SR0124",
+        "requester": {
+          "id": "Organization/LDM-CHUSJ/_history/1",
+          "alias": "LDM-CHUSJ",
+          "email": ["clin_test+LDM-CHUSJ@ferlab.bio"]
+        },
+        "documents": {
+          "contentList": [
+            {
+              "attachment": {
+                "url": "https://ferload.qa.clin.ferlab.bio/blue/10b5c747-219c-4f7b-a0cf-e8dee3a22b61",
+                "hash64": "ZGQ5MjQ3ZWEyZTVjMjkzMTFiMWMyZTU2MTI4ZjFlMzU=",
+                "title": "16902.cram",
+                "size": 1024
+              },
+              "fileFormat": "CRAM"
+            },
+            {
+              "attachment": {
+                "url": "https://ferload.qa.clin.ferlab.bio/blue/10b5c747-219c-4f7b-a0cf-e8dee3a22b61.crai",
+                "title": "16902.cram.crai",
+                "size": 1024
+              },
+              "fileFormat": "CRAI"
+            }
+          ],
+          "sample": {
+            "sampleId": "NA12892_B"
+          },
+          "patientReference": "Patient/PA00123",
+          "fileType": "AR"
+        }
       }
     ]
   }
