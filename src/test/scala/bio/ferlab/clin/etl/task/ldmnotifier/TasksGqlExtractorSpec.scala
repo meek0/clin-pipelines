@@ -20,7 +20,8 @@ class TasksGqlExtractorSpec extends FlatSpec with GivenWhenThen {
     val eitherErrorOrData = TasksGqlExtractor.checkIfGqlResponseHasData(parsed.get)
     eitherErrorOrData.isRight shouldBe true
     And("the extraction should lead to the correct number of Task object")
-    eitherErrorOrData.right.get.size shouldBe 2
+    eitherErrorOrData.right.get.size shouldBe 3
   }
+
 }
 
