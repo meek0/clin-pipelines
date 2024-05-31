@@ -49,7 +49,7 @@ case object FhirServerContainer extends OurContainer {
       FhirTestUtils.init()
       initialized = true
       //Let Fhir ingest its data structure, specially search parameter
-      Thread.sleep(4000)
+      Thread.sleep(10000)
     }
   }
 

@@ -20,7 +20,7 @@ object SequencingServiceRequestValidation {
       .where(ServiceRequest.IDENTIFIER.exactly().systemAndCode(SR_IDENTIFIER, a.ldmServiceRequestId))
       .encodedJson
       .returnBundle(classOf[Bundle]).execute
-    if (results.getTotal > 0) {
+    if (results.hasEntry) {
       s"Service request ${a.ldmServiceRequestId} already exist".invalidNel[Unit]
     } else ().validNel
   }
