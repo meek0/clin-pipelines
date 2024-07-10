@@ -9,6 +9,7 @@ import bio.ferlab.clin.etl.task.fileimport.model.TDocumentAttachment.{idFromList
 import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.EXTUM_SCHEMA
 import bio.ferlab.clin.etl.task.fileimport.model.VariantCalling.{documentTypeGermline, documentTypeSomatic}
 import ca.uhn.fhir.rest.client.api.IGenericClient
+import cats.data.Validated.Valid
 import cats.implicits._
 import org.hl7.fhir.r4.model.DocumentReference.{DocumentReferenceContentComponent, DocumentReferenceContextComponent}
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus
@@ -201,6 +202,7 @@ object IgvTrack {
   implicit case object builder extends ToReference[IgvTrack] {
     override val label: String = IgvTrack.label
 
+    protected override def requiredAll: Boolean = false
     protected override def build(documents: Seq[TDocumentAttachment], schema: Option[String]): IgvTrack = IgvTrack(documents)
 
     override val attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]] = Seq(valid[SEG_BW], valid[HARD_FILTERED_BAF_BW], valid[ROH_BED], valid[HYPER_EXOME_HG38_BED])
@@ -267,26 +269,32 @@ trait ToReference[T <: TDocumentReference] {
 
   protected def build(documents: Seq[TDocumentAttachment], schema: Option[String]): T
 
+  protected def requiredAll = true
+
   def attachments: Seq[(Map[String, FileEntry], Analysis) => ValidationResult[TDocumentAttachment]]
 
   def attach(files: Map[String, FileEntry], a: Analysis): Seq[ValidationResult[TDocumentAttachment]] =
     attachments.map(v => v(files, a))
 
   def validate(files: Map[String, FileEntry], a: Analysis, schema: Option[String])(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = {
-    attach(files, a).toList.sequence
-      .andThen { attachments =>
-        val dr: T = build(attachments, schema)
-        val outcome = dr.validateBaseResource()
-        validateOutcomes(outcome, dr) { o =>
-          val diag = o.getDiagnostics
-          val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
-          s"File type=$label, specimen=${a.ldmSpecimenId}, sample=${a.ldmSampleId} : $loc - $diag"
-        }
-      }
-
+    val attachedFiles = attach(files, a).toList
+    if (!requiredAll && attachedFiles.exists(_.isValid)) {
+      val validAttachments = attachedFiles.collect { case Valid(v) => v } // as opposed to andThen bellow that would fail on the first invalid
+      validateAttachments(validAttachments, a, schema)
+    } else {
+      attachedFiles.sequence.andThen(validAttachments => validateAttachments(validAttachments, a, schema))
+    }
   }
 
-
+  private def validateAttachments(validAttachments: List[TDocumentAttachment], a: Analysis, schema: Option[String])(implicit client: IGenericClient, ferloadConf: FerloadConf): ValidationResult[T] = {
+    val dr: T = build(validAttachments, schema)
+    val outcome = dr.validateBaseResource()
+    validateOutcomes(outcome, dr) { o =>
+      val diag = o.getDiagnostics
+      val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
+      s"File type=$label, specimen=${a.ldmSpecimenId}, sample=${a.ldmSampleId} : $loc - $diag"
+    }
+  }
 }
 
 
