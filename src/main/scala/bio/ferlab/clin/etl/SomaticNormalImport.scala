@@ -26,6 +26,8 @@ import org.slf4j.{Logger, LoggerFactory}
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
 import java.util.{Date, Scanner, UUID}
 import scala.collection.JavaConverters.asScalaBufferConverter
@@ -247,8 +249,8 @@ object SomaticNormalImport extends App {
       .map(_.toString)
   }
 
-  private def fetchFHIRTasksByAliquotIDs(aliquotIDs: Array[String])(implicit fhirClient: IGenericClient): Seq[Task] = {
-    val res = fhirClient.search.byUrl(s"Task?aliquotid=${aliquotIDs.mkString(",")}").returnBundle(classOf[Bundle]).execute
+  def fetchFHIRTasksByAliquotIDs(aliquotIDs: Array[String])(implicit fhirClient: IGenericClient): Seq[Task] = {
+    val res = fhirClient.search.byUrl(s"Task?aliquotid=${URLEncoder.encode(aliquotIDs.mkString(","), StandardCharsets.UTF_8)}").returnBundle(classOf[Bundle]).execute
     res.getEntry.asScala.collect { case be if be.getSearch.getMode == SearchEntryMode.MATCH => be.getResource.asInstanceOf[Task] }
   }
 
