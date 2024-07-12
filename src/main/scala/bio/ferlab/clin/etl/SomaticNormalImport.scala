@@ -86,7 +86,7 @@ object SomaticNormalImport extends App {
           val documentReference = buildDocumentReference(conf.ferload.cleanedUrl, taskGermline, taskSomatic, copiedVCF, copiedTBI)
           val task = buildTask(batchId, taskGermline, taskSomatic, documentReference)
           res = res ++ FhirUtils.bundleCreate(Seq(documentReference, task))
-        }
+       }
 
         s3VCF.key.valid
       } catch {
@@ -141,11 +141,20 @@ object SomaticNormalImport extends App {
 
   private def prepareCopy(prefix: String, vcf: RawFileEntry, tbi: RawFileEntry) = {
     val uuid = UUID.randomUUID().toString
-    (FileEntry(vcf, s"$prefix/$uuid", None, APPLICATION_OCTET_STREAM.getMimeType, attach(vcf.filename)),
-      FileEntry(tbi, s"$prefix/$uuid.tbi", None, APPLICATION_OCTET_STREAM.getMimeType, attach(vcf.filename)))
+    val id = buildFileEntryID(prefix, uuid)
+    (FileEntry(vcf, id, None, APPLICATION_OCTET_STREAM.getMimeType, attach(vcf.filename)),
+      FileEntry(tbi, id+ ".tbi", None, APPLICATION_OCTET_STREAM.getMimeType, attach(vcf.filename)))
   }
 
-  private def formatDisplaySpecimen(specimen: Reference, displayType: String = "") = {
+  def buildFileEntryID(prefix: String, uuid: String) = {
+    if (StringUtils.isBlank(prefix)){
+      uuid
+    } else {
+      s"$prefix/$uuid"
+    }
+  }
+
+  def formatDisplaySpecimen(specimen: Reference, displayType: String = "") = {
     s"Submitter $displayType Sample ID: ${specimen.getDisplay.split(":")(1).trim}"
   }
 
@@ -161,7 +170,7 @@ object SomaticNormalImport extends App {
       val attachment = new Attachment()
       attachment.addExtension(FULL_SIZE, new DecimalType(file.size))
       attachment.setContentType(APPLICATION_OCTET_STREAM.getMimeType)
-      attachment.setUrl(s"$ferloadURL/${file.id}".replaceAll("//", "/"))
+      attachment.setUrl(s"$ferloadURL/${file.id}")
       attachment.setTitle(file.filename)
       content.setAttachment(attachment)
       val format = new Coding()
