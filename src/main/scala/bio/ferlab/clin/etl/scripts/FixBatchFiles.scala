@@ -90,7 +90,7 @@ case object FixBatchFiles {
               }
             })
           } else {
-            throw new IllegalStateException(s"Could not parse metadata for ${batchId}")
+            LOGGER.warn(s"Could not parse metadata for ${batchId}")
           }
         //}
         Valid(true)
