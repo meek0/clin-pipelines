@@ -47,6 +47,7 @@ case object FixFerloadURLs {
         var res: Seq[BundleEntryComponent] = Seq()
         results.getEntry.forEach(entry => {
           val doc = entry.getResource.asInstanceOf[DocumentReference]
+          var updated = false
           doc.getContent.forEach(c => {
             val attachment = c.getAttachment
             var url = attachment.getUrl
@@ -59,9 +60,12 @@ case object FixFerloadURLs {
             if (!attachment.getUrl.equals(url)) {
               LOGGER.info(s"Found broken URL for ${doc.getIdElement.getIdPart} : ${attachment.getUrl} => ${url}")
               attachment.setUrl(url)
-              res = res ++ FhirUtils.bundleUpdate(Seq(doc))
+              updated = true
             }
           })
+          if (updated){
+            res = res ++ FhirUtils.bundleUpdate(Seq(doc))
+          }
         })
         if (!dryRun && res.nonEmpty) {
           val bundle = TBundle(res.toList)
