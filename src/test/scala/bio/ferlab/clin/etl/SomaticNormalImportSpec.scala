@@ -24,7 +24,7 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
 
   val keycloakConf = KeycloakConf(null, null, null, null, null)
   val fhirConf = FhirConf(fhirBaseUrl)
-  val conf = new Conf(awsConf, keycloakConf, fhirConf, ferloadConf, null, null)
+  val conf = new Conf(awsConf, keycloakConf, fhirConf, ferloadConf, null, null, null)
 
   "list S3 VCFs" should "fail no VCF files found" in {
     withS3Objects { (inputPrefix, _) =>
