@@ -1,0 +1,177 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "data-type",
+  "url": "http://fhir.cqgc.ferlab.bio/CodeSystem/data-type",
+  "version": "0.1.0",
+  "name": "data-type",
+  "title": "Data types",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Ferlab.bio",
+  "description": "Data types",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 5,
+  "concept": [
+    {
+      "code": "ALIR",
+      "display": "Aligned Reads",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fragments alignés"
+        }
+      ]
+    },
+    {
+      "code": "SNV",
+      "display": "Germline SNV",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "SNV germinal"
+        }
+      ]
+    },
+    {
+      "code": "SSNV",
+      "display": "Somatic SNV",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "SNV somatic"
+        }
+      ]
+    },
+    {
+      "code": "GCNV",
+      "display": "Germline CNV",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "CNV germinal"
+        }
+      ]
+    },
+    {
+      "code": "SCNV",
+      "display": "Somatic CNV",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "CNV somatic"
+        }
+      ]
+    },
+    {
+      "code": "GSV",
+      "display": "Germline SV",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "SV germinal"
+        }
+      ]
+    },
+    {
+      "code": "SSV",
+      "display": "Somatic SV",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "SV somatic"
+        }
+      ]
+    },
+    {
+      "code": "SSUP",
+      "display": "Sequencing Data Supplement",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Données de séquençage supplémentaires"
+        }
+      ]
+    },
+    {
+      "code": "INDX",
+      "display": "Sequencing Data Index",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Index de données de séquençage"
+        }
+      ]
+    },
+    {
+      "code": "EXOMISER",
+      "display": "Exomiser Report",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Rapport Exomiser"
+        }
+      ]
+    },
+    {
+      "code": "IGV",
+      "display": "IGV Track",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Track IGV"
+        }
+      ]
+    },
+    {
+      "code": "CNVVIS",
+      "display": "CNV Visualization",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Visualization de CNVs"
+        }
+      ]
+    },
+    {
+      "code": "COVGENE",
+      "display": "Coverage by Gene Report",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Rapport de couverture par gène"
+        }
+      ]
+    },
+    {
+      "code": "OTHER",
+      "display": "Undefined Data Type",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Type de données indéfini"
+        }
+      ]
+    },
+    {
+      "code": "QCRUN",
+      "display": "Sequencing Run QC Report",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Rapport de controle de qualité de la run de séquençage"
+        }
+      ]
+    },
+    {
+      "code": "FUSG",
+      "display": "Gene fusion",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fusion de gènes"
+        }
+      ]
+    }
+  ]
+}

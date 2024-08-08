@@ -1,0 +1,245 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "workflow",
+  "url": "http://fhir.cqgc.ferlab.bio/StructureDefinition/workflow",
+  "version": "0.1.0",
+  "name": "Workflow",
+  "title": "Workflow Extension",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "type": "element",
+      "expression": "Task"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Workflow Extension",
+        "definition": "Workflow Extension",
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Extension.extension:workflowName",
+        "path": "Extension.extension",
+        "sliceName": "workflowName",
+        "short": "Workflow name",
+        "definition": "Workflow name",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:workflowName.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "workflowName"
+      },
+      {
+        "id": "Extension.extension:workflowName.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:workflowVersion",
+        "path": "Extension.extension",
+        "sliceName": "workflowVersion",
+        "short": "Workflow version",
+        "definition": "Workflow version",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:workflowVersion.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "workflowVersion"
+      },
+      {
+        "id": "Extension.extension:workflowVersion.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:genomeBuild",
+        "path": "Extension.extension",
+        "sliceName": "genomeBuild",
+        "short": "Genome build",
+        "definition": "Genome build",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:genomeBuild.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "genomeBuild"
+      },
+      {
+        "id": "Extension.extension:genomeBuild.valueCoding",
+        "path": "Extension.extension.valueCoding",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Coding"
+          }
+        ],
+        "binding": {
+          "strength": "required",
+          "description": "Genome build",
+          "valueSet": "http://fhir.cqgc.ferlab.bio/ValueSet/genome-build"
+        }
+      },
+      {
+        "id": "Extension.extension:genomeBuildVersion",
+        "path": "Extension.extension",
+        "sliceName": "genomeBuildVersion",
+        "short": "Genome Build Version",
+        "definition": "Genome Build Version",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:genomeBuildVersion.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "genomeBuildVersion"
+      },
+      {
+        "id": "Extension.extension:genomeBuildVersion.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:vepVersion",
+        "path": "Extension.extension",
+        "sliceName": "vepVersion",
+        "short": "VEP Version",
+        "definition": "Vep Version",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:vepVersion.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "gencodeVersion"
+      },
+      {
+        "id": "Extension.extension:vepVersion.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "http://fhir.cqgc.ferlab.bio/StructureDefinition/workflow"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "min": 0,
+        "max": "0"
+      }
+    ]
+  }
+}

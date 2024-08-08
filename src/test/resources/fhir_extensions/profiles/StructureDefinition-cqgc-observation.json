@@ -1,0 +1,93 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "cqgc-observation",
+  "url": "http://fhir.cqgc.ferlab.bio/StructureDefinition/cqgc-observation",
+  "version": "0.1.0",
+  "name": "cqgc-observation",
+  "title": "cqgc observation",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Observation",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Observation",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Observation",
+        "path": "Observation"
+      },
+      {
+        "id": "Observation.extension",
+        "path": "Observation.extension"
+      },
+      {
+        "id": "Observation.extension:age-at-onset",
+        "path": "Observation.extension",
+        "sliceName": "age-at-onset",
+        "sliceIsConstraining": false,
+        "label": "age_at_onset",
+        "short": "Age range during which the anomaly occurred",
+        "definition": "Period of life during which the clinical sign was noted.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": [
+              "http://fhir.cqgc.ferlab.bio/StructureDefinition/age-at-onset"
+            ]
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false
+      },
+      {
+        "id": "Observation.category",
+        "path": "Observation.category",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "min": 1,
+        "binding": {
+          "strength": "required",
+          "description": "Observations categories",
+          "valueSet": "http://fhir.cqgc.ferlab.bio/ValueSet/observation-category"
+        }
+      },
+      {
+        "id": "Observation.code",
+        "path": "Observation.code",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "required",
+          "description": "Observations codes",
+          "valueSet": "http://fhir.cqgc.ferlab.bio/ValueSet/observation-code"
+        }
+      },
+      {
+        "id": "Observation.value[x]",
+        "path": "Observation.value[x]",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          },
+          {
+            "code": "boolean"
+          },
+          {
+            "code": "string"
+          }
+        ]
+      }
+    ]
+  },
+  "date": "2020-08-12T13:19:14-04:00"
+}

@@ -1,0 +1,16 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "aliquotid",
+  "url": "http://fhir.cqgc.ferlab.bio/SearchParameter/aliquotid",
+  "version": "0.1.0",
+  "name": "aliquotid",
+  "status": "active",
+  "experimental": true,
+  "publisher": "Ferlab",
+  "description": "Searches Task by aliquot ID(s).",
+  "code": "aliquotid",
+  "base": [ "Task" ],
+  "type": "string",
+  "expression": "Task.extension.where(url='http://fhir.cqgc.ferlab.bio/StructureDefinition/sequencing-experiment').extension.where(url = 'labAliquotId').value",
+  "xpathUsage": "normal"
+}

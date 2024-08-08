@@ -1,0 +1,72 @@
+{
+    "resourceType": "CodeSystem",
+    "id": "specimen-type",
+    "url": "http://fhir.cqgc.ferlab.bio/CodeSystem/specimen-type",
+    "version": "0.1.0",
+    "name": "specimen-type",
+    "title": "Specimen types",
+    "status": "draft",
+    "experimental": false,
+    "publisher": "Ferlab.bio",
+    "description": "Specimen types",
+    "caseSensitive": true,
+    "content": "complete",
+    "count": 3,
+    "concept": [
+      {
+        "code": "DNA",
+        "display": "DNA Sample",
+        "definition":"DNA sample",
+        "designation":[
+          {
+            "language":"fr",
+            "value":"Échantillon d'ADN"
+          }
+        ]
+      },
+      {
+        "code": "RNA",
+        "display": "RNA Sample",
+        "definition":"RNA sample",
+        "designation":[
+          {
+            "language":"fr",
+            "value":"Échantillon d'ARN"
+          }
+        ]
+      },
+      {
+        "code": "NBL",
+        "display": "Normal Blood Specimen",
+        "definition":"Normal blood specimen",
+        "designation":[
+          {
+            "language":"fr",
+            "value":"Spécimen de sang normal"
+          }
+        ]
+      },
+      {
+        "code": "TUMOR",
+        "display": "Tumor Specimen",
+        "definition":"Tumor specimen",
+        "designation":[
+          {
+            "language":"fr",
+            "value":"Spécimen tumoral"
+          }
+        ]
+      }, 
+      {
+        "code": "NORMAL",
+        "display": "Normal Specimen",
+        "definition":"Normal specimen",
+        "designation":[
+          {
+            "language":"fr",
+            "value":"Spécimen de tissue normal"
+          }
+        ]
+      }
+    ]
+  }

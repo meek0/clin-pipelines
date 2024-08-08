@@ -1,0 +1,552 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "sequencing-experiment",
+  "url": "http://fhir.cqgc.ferlab.bio/StructureDefinition/sequencing-experiment",
+  "version": "0.1.0",
+  "name": "sequencing-experiment",
+  "title": "Sequencing expriment",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "type": "element",
+      "expression": "Task"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Sequencing experiment Extension",
+        "definition": "Sequencing experiment Extension",
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Extension.extension:platform",
+        "path": "Extension.extension",
+        "sliceName": "platform",
+        "short": "Platform",
+        "definition": "Platform",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:platform.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "platform"
+      },
+      {
+        "id": "Extension.extension:plateform.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:sequencerId",
+        "path": "Extension.extension",
+        "sliceName": "sequencerId",
+        "short": "Sequencer Id",
+        "definition": "Sequencer Id",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:sequencerId.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "sequencerId"
+      },
+      {
+        "id": "Extension.extension:sequencerId.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+
+      {
+        "id": "Extension.extension:runName",
+        "path": "Extension.extension",
+        "sliceName": "runName",
+        "short": "Run name",
+        "definition": "Run name",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:runName.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "runName"
+      },
+      {
+        "id": "Extension.extension:runName.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:runDate",
+        "path": "Extension.extension",
+        "sliceName": "runDate",
+        "short": "Run date",
+        "definition": "Run date",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:runDate.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "runDate"
+      },
+      {
+        "id": "Extension.extension:runDate.valueDateTime",
+        "path": "Extension.extension.valueDateTime",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:runAlias",
+        "path": "Extension.extension",
+        "sliceName": "runAlias",
+        "short": "Run alias",
+        "definition": "Run alias",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:runAlias.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "runAlias"
+      },
+      {
+        "id": "Extension.extension:runAlias.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:flowCellId",
+        "path": "Extension.extension",
+        "sliceName": "flowCellId",
+        "short": "Flow cell id",
+        "definition": "Flow cell id",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:flowCellId.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "flowCellId"
+      },
+      {
+        "id": "Extension.extension:flowCellId.valueInteger",
+        "path": "Extension.extension.valueInteger",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:isPairedEnd",
+        "path": "Extension.extension",
+        "sliceName": "isPairedEnd",
+        "short": "isPairedEnd",
+        "definition": "isPairedEnd",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:isPairedEnd.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "isPairedEnd"
+      },
+      {
+        "id": "Extension.extension:isPairedEnd.valueBoolean",
+        "path": "Extension.extension.valueBoolean",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "boolean"
+          }
+        ]
+      },
+
+      {
+        "id": "Extension.extension:fragmentSize",
+        "path": "Extension.extension",
+        "sliceName": "fragmentSize",
+        "short": "Fragment Size",
+        "definition": "Fragment Size",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:fragmentSize.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "fragmentSize"
+      },
+      {
+        "id": "Extension.extension:fragmentSize.valueInteger",
+        "path": "Extension.extension.valueInteger",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+
+      {
+        "id": "Extension.extension:experimentalStrategy",
+        "path": "Extension.extension",
+        "sliceName": "experimentalStrategy",
+        "short": "Experimental Strategy",
+        "definition": "Experimental Strategy",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:experimentalStrategy.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "experimentalStrategy"
+      },
+      {
+        "id": "Extension.extension:experimentalStrategy.valueCoding",
+        "path": "Extension.extension.valueCoding",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Coding"
+          }
+        ],
+        "binding": {
+          "strength": "required",
+          "description": "Experimental strategy",
+          "valueSet": "http://fhir.cqgc.ferlab.bio/ValueSet/experimental-strategy"
+        }
+      },
+      {
+        "id": "Extension.extension:labAliquotId",
+        "path": "Extension.extension",
+        "sliceName": "labAliquotId",
+        "short": "labAliquotId",
+        "definition": "labAliquotId",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:labAliquotId.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "labAliquotId"
+      },
+      {
+        "id": "Extension.extension:labAliquotId.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:captureKit",
+        "path": "Extension.extension",
+        "sliceName": "captureKit",
+        "short": "Capture Kit",
+        "definition": "Capture Kit",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:captureKit.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "captureKit"
+      },
+      {
+        "id": "Extension.extension:captureKit.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:baitDefinition",
+        "path": "Extension.extension",
+        "sliceName": "baitDefinition",
+        "short": "Bait Definition",
+        "definition": "Bait Definition",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:baitDefinition.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "baitDefinition"
+      },
+      {
+        "id": "Extension.extension:baitDefinition.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:protocol",
+        "path": "Extension.extension",
+        "sliceName": "protocol",
+        "short": "protocol",
+        "definition": "protocol",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:protocol.url",
+        "path": "Extension.extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "protocol"
+      },
+      {
+        "id": "Extension.extension:protocol.valueString",
+        "path": "Extension.extension.valueString",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "fixedUri": "http://fhir.cqgc.ferlab.bio/StructureDefinition/sequencing-experiment"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "min": 0,
+        "max": "0"
+      }
+    ]
+  }
+}
