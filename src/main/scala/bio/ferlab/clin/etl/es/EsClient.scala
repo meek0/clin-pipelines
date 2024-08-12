@@ -3,7 +3,7 @@ package bio.ferlab.clin.etl.es
 import bio.ferlab.clin.etl.conf.EsConf
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.HttpResponse
-import org.apache.http.client.methods.{HttpPost, HttpRequestBase}
+import org.apache.http.client.methods.{HttpPost, HttpPut, HttpRequestBase}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
@@ -17,8 +17,8 @@ class EsClient(conf: EsConf) {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
-  private val client = HttpClientBuilder.create().build()
-  private val charset = StandardCharsets.UTF_8.name()
+  val client = HttpClientBuilder.create().build()
+  val charset = StandardCharsets.UTF_8.name()
 
   def getHPOs(index: String, release: String): Seq[EsHPO] = {
     var allHPOs = Seq[EsHPO]()
@@ -93,7 +93,7 @@ class EsClient(conf: EsConf) {
     (lastId, hpos)
   }
 
-  private def executeHttpRequest(request: HttpRequestBase): (Option[String], Int) = {
+  def executeHttpRequest(request: HttpRequestBase): (Option[String], Int) = {
     addBasicAuthHeader(request)
     val response: HttpResponse = client.execute(request)
     val body = Option(response.getEntity).map(e => EntityUtils.toString(e, charset))

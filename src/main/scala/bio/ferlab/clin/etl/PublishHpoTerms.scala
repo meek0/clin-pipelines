@@ -6,6 +6,7 @@ import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.task.fileimport.model.TBundle
 import cats.data.Validated.Valid
+import org.apache.commons.lang3.StringUtils
 import org.hl7.fhir.r4.model.CodeSystem
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus
 import org.slf4j.{Logger, LoggerFactory}
@@ -28,12 +29,21 @@ object PublishHpoTerms extends App {
 
     val dryRun = params.contains("--dryrun")
 
+    if (StringUtils.isAnyBlank(index, release, alias)) {
+      throw new IllegalStateException("Expecting params: <index> <release> <alias>")
+    }
+
     LOGGER.info(s"Publish HPO terms to FHIR from index: ${index}_${release} and alias: $alias (dryrun = $dryRun)")
 
     val esClient = new EsClient(conf.es)
     val (_, fhirClient) = buildFhirClients(conf.fhir, conf.keycloak)
 
     val esHPOs = esClient.getHPOs(index, release)
+
+    if (esHPOs.isEmpty) {
+      throw new IllegalStateException(s"No HPOs found in ES for index: ${index}_${release}")
+    }
+
     LOGGER.info("Total ES HPOs available: " + esHPOs.size)
 
     if (!dryRun) {

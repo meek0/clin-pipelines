@@ -1,6 +1,6 @@
 package bio.ferlab.clin.etl
 
-import bio.ferlab.clin.etl.conf.{Conf, FerloadConf, FhirConf, KeycloakConf}
+import bio.ferlab.clin.etl.conf.{Conf, EsConf, FerloadConf, FhirConf, KeycloakConf}
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.CodingSystems
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.Extensions.SEQUENCING_EXPERIMENT
