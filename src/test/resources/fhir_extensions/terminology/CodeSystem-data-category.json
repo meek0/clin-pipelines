@@ -1,0 +1,27 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "data-category",
+  "url": "http://fhir.cqgc.ferlab.bio/CodeSystem/data-category",
+  "version": "0.1.0",
+  "name": "data-category",
+  "title": "Data categories",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Ferlab.bio",
+  "description": "Data categories",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 1,
+  "concept": [
+    {
+      "code": "GENO",
+      "display": "Genomics",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Génomique"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "resourceType" : "StructureDefinition",
+  "id" : "full-size",
+  "url" : "http://fhir.cqgc.ferlab.bio/StructureDefinition/full-size",
+  "version" : "4.0.1",
+  "name" : "full-size",
+  "title" : "Full Size",
+  "status" : "draft",
+  "description" : "Full size of an attachment. Existing size attribute is limited to integer which is not enough for big files (>3GB)",
+  "fhirVersion" : "4.0.1",
+  "kind" : "complex-type",
+  "abstract" : false,
+  "context" : [{
+    "type" : "element",
+    "expression" : "Attachment"
+  }],
+  "type" : "Extension",
+  "baseDefinition" : "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation" : "constraint",
+  "differential" : {
+    "element" : [{
+      "id" : "Extension",
+      "path" : "Extension",
+      "short" : "Full size of an attachment",
+      "definition" : "Full size of an attachment. Existing size attribute is limited to integer which is not enough for big files (>3GB)",
+      "min" : 0,
+      "max" : "1"
+    },
+      {
+        "id" : "Extension.extension",
+        "path" : "Extension.extension",
+        "max" : "0"
+      },
+      {
+        "id" : "Extension.url",
+        "path" : "Extension.url",
+        "fixedUri" : "http://fhir.cqgc.ferlab.bio/StructureDefinition/full-size"
+      },
+      {
+        "id" : "Extension.value[x]",
+        "path" : "Extension.value[x]",
+        "min" : 1,
+        "type" : [{
+          "code" : "decimal"
+        }]
+      }]
+  }
+}

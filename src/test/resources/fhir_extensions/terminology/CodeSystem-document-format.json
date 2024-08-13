@@ -1,0 +1,137 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "document-format",
+  "url": "http://fhir.cqgc.ferlab.bio/CodeSystem/document-format",
+  "version": "0.1.0",
+  "name": "document-format",
+  "title": "Document formats",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Ferlab.bio",
+  "description": "Document formats",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 5,
+  "concept": [
+    {
+      "code": "CRAM",
+      "display": "CRAM File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier CRAM"
+        }
+      ]
+    },
+    {
+      "code": "CRAI",
+      "display": "CRAI Index File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier d'index CRAI"
+        }
+      ]
+    },
+    {
+      "code": "VCF",
+      "display": "VCF File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier VCF"
+        }
+      ]
+    },
+    {
+      "code": "TBI",
+      "display": "TBI Index File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier d'index TBI"
+        }
+      ]
+    },
+    {
+      "code": "TGZ",
+      "display": "TGZ Archive File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier d'archive TGZ"
+        }
+      ]
+    },
+    {
+      "code": "JSON",
+      "display": "JSON File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier JSON"
+        }
+      ]
+    },
+    {
+      "code": "HTML",
+      "display": "HTML File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier HTML"
+        }
+      ]
+    },
+    {
+      "code": "TSV",
+      "display": "TSV File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier TSV"
+        }
+      ]
+    },
+    {
+      "code": "BW",
+      "display": "BW File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier BW"
+        }
+      ]
+    },
+    {
+      "code": "BED",
+      "display": "BED File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier BED"
+        }
+      ]
+    },
+    {
+      "code": "PNG",
+      "display": "PNG File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier PNG"
+        }
+      ]
+    },
+    {
+      "code": "CSV",
+      "display": "CSV File",
+      "designation": [
+        {
+          "language": "fr",
+          "value": "Fichier CSV"
+        }
+      ]
+    }
+  ]
+}

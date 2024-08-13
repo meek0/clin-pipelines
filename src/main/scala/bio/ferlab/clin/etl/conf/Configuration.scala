@@ -30,6 +30,8 @@ case class MailerConf(
 
 case class ClinConf(url: String)
 
+case class EsConf(url: String, user: String, password: String)
+
 case class Conf(
                  aws:
                  AWSConf,
@@ -37,7 +39,8 @@ case class Conf(
                  fhir: FhirConf,
                  ferload: FerloadConf,
                  mailer: MailerConf,
-                 clin: ClinConf
+                 clin: ClinConf,
+                 es: EsConf
                )
 
 object Conf {

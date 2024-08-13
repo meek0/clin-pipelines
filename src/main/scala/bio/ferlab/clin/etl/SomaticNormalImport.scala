@@ -47,7 +47,7 @@ object SomaticNormalImport extends App {
   }
 
   def apply(batchId: String, params : Array[String])(implicit conf: Conf): ValidationResult[Any] = {
-    val LOGGER: Logger = LoggerFactory.getLogger(SwitchSpecimenValues.getClass)
+    val LOGGER: Logger = LoggerFactory.getLogger(SomaticNormalImport.getClass)
 
     implicit val s3Client = buildS3Client(conf.aws)
     val (_, fhirClient) = buildFhirClients(conf.fhir, conf.keycloak)

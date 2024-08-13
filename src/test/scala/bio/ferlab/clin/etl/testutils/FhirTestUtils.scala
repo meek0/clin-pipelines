@@ -202,13 +202,15 @@ object FhirTestUtils {
   def downloadIfNotInResources(p: String): String = {
     val resourceUrl = getClass.getResource(s"/fhir_extensions/$p")
     if (resourceUrl == null) {
-      val remoteUrl = new URL(s"$ROOT_REMOTE_EXTENSION/$p")
+      // we cant download them now that the repos are private
+      throw new IllegalStateException("Please add the FHIR definition file: "+p+" into the test/resources/fhir_extensions folder")
+      /*val remoteUrl = new URL(s"$ROOT_REMOTE_EXTENSION/$p")
       val resourcePath = s"${getClass.getResource("/").getPath}/fhir_extensions/$p"
       FileUtils.copyURLToFile(remoteUrl, new File(resourcePath))
       val source = Source.fromFile(resourcePath)
       val content = source.mkString
       source.close()
-      content
+      content*/
     } else {
       val source = Source.fromURL(resourceUrl)
       val content = source.mkString

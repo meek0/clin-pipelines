@@ -1,12 +1,16 @@
 package bio.ferlab.clin.etl.testutils
 
-trait WholeStack extends MinioServer with FhirServer
+import bio.ferlab.clin.etl.testutils.containers.ElasticSearchContainer
 
-trait WholeStackSuite extends MinioServer with FhirServerSuite{
+trait WholeStack extends MinioServer with FhirServer with ElasticSearchServer {
 
 }
 
-object StartWholeStack extends App with MinioServer with FhirServer {
+trait WholeStackSuite extends MinioServer with FhirServerSuite with ElasticSearchServerSuite {
+
+}
+
+object StartWholeStack extends App with MinioServer with FhirServer with ElasticSearchServer {
   LOGGER.info("Whole stack is started")
   while (true) {
 
