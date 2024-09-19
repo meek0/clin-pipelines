@@ -162,9 +162,23 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
     }
   }
 
-  "findFhirTasks" should "create TNEBA task and copy S3 files" in {
+  "findFhirTasks" should "handle a missing display and log it" in {
     withS3Objects { (inputPrefix, _) =>
       // prepare S3
+      transferFromResources(inputPrefix, "somatic_normal/good", inputBucket)
+
+      // prepare FHIR
+      val (specimenGermline, specimenSomatic, taskGermline, taskSomatic, patient, _) = prepareFhir(withPatient = true, withMissingDisplay = true)
+      TBundle(FhirUtils.bundleCreate(Seq(specimenGermline, specimenSomatic, patient, taskGermline, taskSomatic)).toList).save()
+
+      SomaticNormalImport(inputPrefix, Array())(conf)
+    }
+  }
+
+  "findFhirTasks" should "create TNEBA task and copy S3 files" in {
+    withS3Objects { (inputPrefix, _) =>
+      // prepare S3 + full cleanup
+      deleteRecursively(outputBucket, "")
       transferFromResources(inputPrefix, "somatic_normal/good", inputBucket)
 
       // prepare FHIR
@@ -189,20 +203,23 @@ class SomaticNormalImportSpec extends FlatSpec with WholeStackSuite with Matcher
     }
   }
 
-  private def prepareFhir(withPatient: Boolean = false, withTNEBA: Boolean = false): (Specimen, Specimen, Task, Task, Patient, Task) = {
+  private def prepareFhir(withPatient: Boolean = false, withTNEBA: Boolean = false, withMissingDisplay: Boolean = false): (Specimen, Specimen, Task, Task, Patient, Task) = {
 
     FhirTestUtils.clearAll()
 
     val specimenGermline = new Specimen()
     specimenGermline.setId("germline")
+    specimenGermline.getAccessionIdentifier.setValue("germline_id")
 
     val specimenSomatic = new Specimen()
     specimenSomatic.setId("somatic")
+    specimenSomatic.getAccessionIdentifier.setValue("somatic_id")
 
     val taskGermline = new Task()
     taskGermline.getCode.getCodingFirstRep.setCode(EXOME_GERMLINE_ANALYSIS)
     taskGermline.addExtension().setUrl(SEQUENCING_EXPERIMENT).addExtension().setUrl("labAliquotId").setValue(new StringType("00002"))
-    taskGermline.getInputFirstRep.setValue(new Reference("Specimen/germline").setDisplay("Submitter Sample ID: germline_id"))
+    val germlineDisplay =  if (withMissingDisplay) null else "Submitter Sample ID: germline_id"
+    taskGermline.getInputFirstRep.setValue(new Reference("Specimen/germline").setDisplay(germlineDisplay))
 
     val taskSomatic = new Task()
     taskSomatic.getCode.getCodingFirstRep.setCode(EXTUM_ANALYSIS)

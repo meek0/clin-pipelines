@@ -137,11 +137,11 @@ case object FixBatchFiles {
                                         s3_seg_bw: Option[FileEntry],
                                         s3_baf_bw : Option[FileEntry],
                                         s3_roh_bed : Option[FileEntry],
-                                        s3_exome_bed: Option[FileEntry]) = {
+                                        s3_exome_bed: Option[FileEntry])(implicit fhirClient: IGenericClient) = {
 
     def addContext(doc: DocumentReference, task: Task) = {
       val specimen = task.getInputFirstRep.getValue.asInstanceOf[Reference]
-      doc.getContext.addRelated().setReference(specimen.getReference).setDisplay(formatDisplaySpecimen(specimen))
+      doc.getContext.addRelated().setReference(specimen.getReference).setDisplay(formatDisplaySpecimen(specimen)(fhirClient))
     }
 
     def addContent(doc: DocumentReference, file: FileEntry, formatType: String) = {
