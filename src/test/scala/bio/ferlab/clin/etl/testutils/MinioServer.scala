@@ -51,10 +51,10 @@ trait MinioServer {
     s3.listObjects(lsRequest).contents().asScala.map(_.key())
   }
 
-  private def deleteRecursively(bucket: String, prefix: String): Unit = {
+  def deleteRecursively(bucket: String, prefix: String): Unit = {
     val lsRequest = ListObjectsRequest.builder().bucket(bucket).prefix(prefix).build()
     s3.listObjects(lsRequest).contents().asScala.foreach { o =>
-      val del = DeleteObjectRequest.builder().bucket(bucket).key(prefix).build()
+      val del = DeleteObjectRequest.builder().bucket(bucket).key(o.key()).build()
       s3.deleteObject(del)
     }
   }

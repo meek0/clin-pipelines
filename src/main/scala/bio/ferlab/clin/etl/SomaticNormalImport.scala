@@ -83,8 +83,8 @@ object SomaticNormalImport extends App {
           val (copiedVCF, copiedTBI) = prepareCopy(bucketOutputPrefix, s3VCF, s3VCFTbi)
           files = files ++ Seq(copiedVCF, copiedTBI)
 
-          val documentReference = buildDocumentReference(conf.ferload.cleanedUrl, taskGermline, taskSomatic, copiedVCF, copiedTBI)
-          val task = buildTask(batchId, taskGermline, taskSomatic, documentReference)
+          val documentReference = buildDocumentReference(conf.ferload.cleanedUrl, taskGermline, taskSomatic, copiedVCF, copiedTBI)(fhirClient)
+          val task = buildTask(batchId, taskGermline, taskSomatic, documentReference)(fhirClient)
           res = res ++ FhirUtils.bundleCreate(Seq(documentReference, task))
        }
 
@@ -154,11 +154,17 @@ object SomaticNormalImport extends App {
     }
   }
 
-  def formatDisplaySpecimen(specimen: Reference, displayType: String = "") = {
-    s"Submitter $displayType Sample ID: ${specimen.getDisplay.split(":")(1).trim}"
+  def formatDisplaySpecimen(specimen: Reference, displayType: String = "")(implicit fhirClient: IGenericClient)  = {
+    if (StringUtils.contains(specimen.getDisplay, ":")) {
+      s"Submitter $displayType Sample ID: ${specimen.getDisplay.split(":")(1).trim}"
+    } else {
+      LOGGER.warn(s"Fallback for missing display in specimen reference of the task: ${specimen.getReference}");
+      val specimenRes = fhirClient.read().resource(classOf[Specimen]).withId(specimen.getReference).execute()
+      s"Submitter $displayType Sample ID: ${specimenRes.getAccessionIdentifier.getValue}"
+    }
   }
 
-  private def buildDocumentReference(ferloadURL: String, taskGermline: Task, taskSomatic: Task, copiedVCF: FileEntry, copiedTBI: FileEntry) = {
+  private def buildDocumentReference(ferloadURL: String, taskGermline: Task, taskSomatic: Task, copiedVCF: FileEntry, copiedTBI: FileEntry)(implicit fhirClient: IGenericClient) = {
 
     def addContext(doc: DocumentReference, task: Task, displayType: String) = {
       val specimen = task.getInputFirstRep.getValue.asInstanceOf[Reference]
@@ -195,13 +201,13 @@ object SomaticNormalImport extends App {
     doc
   }
 
-  private def buildTask(batchId: String,taskGermline: Task, taskSomatic: Task, document: DocumentReference) = {
+  private def buildTask(batchId: String,taskGermline: Task, taskSomatic: Task, document: DocumentReference)(implicit fhirClient: IGenericClient) = {
 
     def addInput(task: Task, inputTask: Task, inputType: String) = {
       val i1 = task.addInput()
       val specimen = inputTask.getInputFirstRep.getValue.asInstanceOf[Reference]
       i1.setType(new CodeableConcept().setText(s"Analysed ${inputType.toLowerCase} sample"))
-      i1.setValue(new Reference().setReference(specimen.getReference).setDisplay(formatDisplaySpecimen(specimen)))
+      i1.setValue(new Reference().setReference(specimen.getReference).setDisplay(formatDisplaySpecimen(specimen)(fhirClient)))
 
       val i2 = task.addInput()
       i2.setType(new CodeableConcept().setText(s"$inputType Exome Bioinformatic Analysis"))
