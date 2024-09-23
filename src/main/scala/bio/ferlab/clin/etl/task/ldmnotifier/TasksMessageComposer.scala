@@ -43,11 +43,13 @@ object TasksMessageComposer {
     attachmentFile
   }
 
-  def createMsgBody(): String = {
-    """
+  def createMsgBody(ldmPram: String, runNameParam: String): String = {
+    val validatedRunNameParam = Some(runNameParam).getOrElse("")
+    val urlRunNameParam = if (validatedRunNameParam.isBlank()) "" else s"&s=${runNameParam}"
+    s"""
       |Bonjour,
       |
-      |Les échantillons soumis récemment par votre laboratoire au CQGC ont été séquencés. Les variants associés sont disponibles pour l'interprétation dans le portail web QLIN (https://portail.cqgc.hsj.rtss.qc.ca/).
+      |Les échantillons soumis récemment par votre laboratoire au CQGC ont été séquencés. Les variants associés sont disponibles pour l'interprétation dans le portail web QLIN (https://portail.cqgc.hsj.rtss.qc.ca/prescription/search?tab=requests&ldm=${ldmPram}${urlRunNameParam}).
       |
       |L’ensemble des fichiers binaires et annexes relatifs au séquençage sont accessibles via la page « Archives » du portail web QLIN. Nous mettons également à votre disposition l’outil ferload-client de QLIN ainsi qu’un manifeste, disponible en pièce jointe, permettant un téléchargement en lot. Voir les instructions à GitHub - https://github.com/Ferlab-Ste-Justine/ferload-client-cli
       |

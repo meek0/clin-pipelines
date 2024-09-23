@@ -29,7 +29,7 @@ object Requester{
   implicit val reads: Reads[Requester] = Json.reads[Requester]
 }
 
-case class Task(id: String, requester: Requester, documents: Seq[Document], serviceRequestReference: String)
+case class Task(id: String, requester: Requester, documents: Seq[Document], serviceRequestReference: String, runName: String)
 object Task {
   // FHIR can return either a single document or a list of documents
   // explain the JSON parser how to manage this case
@@ -43,6 +43,7 @@ object Task {
     ((__ \ "id").read[String] and
       (__ \ "requester").read[Requester] and
       (__ \ "documents").read[Either[Seq[Document], Document]].map(e => e.fold(identity, Vector(_))) and
-      (__ \ "serviceRequestReference").read[String]
-      ) (Task(_, _, _, _))
+      (__ \ "serviceRequestReference").read[String] and
+      (__ \ "experiment" \ "name").readWithDefault[String]("")
+      ) (Task(_, _, _, _, _))
 }

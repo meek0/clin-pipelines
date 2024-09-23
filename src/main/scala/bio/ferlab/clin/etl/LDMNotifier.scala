@@ -16,13 +16,14 @@ object LDMNotifier extends App {
   val LOGGER: Logger = LoggerFactory.getLogger(getClass)
 
   def sendEmails(batchId: String,
+                 runName: String,
                  mailerConf: MailerConf,
                  group: Map[(String, Seq[String]), Seq[ManifestRow]]
                 ): ValidationResult[List[Unit]] = {
 
     val mailer = new MailerService(makeSmtpMailer(mailerConf))
 
-    group.toList.traverse { case ((_, email), manifestRows) =>
+    group.toList.traverse { case ((alias, email), manifestRows) =>
       val toLDM = email
       val blindCC = adjustBccType(mailerConf)
 
@@ -33,7 +34,7 @@ object LDMNotifier extends App {
             from = mailerConf.from,
             bccs = blindCC,
             subject = "Nouvelles données du CQGC",
-            bodyText = createMsgBody(),
+            bodyText = createMsgBody(ldmPram = alias, runNameParam = runName),
             attachments = Seq(createMetaDataAttachmentFile(batchId, manifestRows))
           ))
 
@@ -63,7 +64,7 @@ object LDMNotifier extends App {
 
         tasksV.flatMap { tasks: Seq[Task] =>
           val ldmsToManifestRows = groupManifestRowsByLdm(conf.clin.url, tasks)
-          sendEmails(batchId = batchId, mailerConf = conf.mailer, group = ldmsToManifestRows)
+          sendEmails(batchId = batchId, runName = tasks.head.runName, mailerConf = conf.mailer, group = ldmsToManifestRows)
         }
       }
     }
