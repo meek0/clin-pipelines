@@ -32,6 +32,9 @@ object TasksGqlExtractor {
          |        }
          |      }
          |    }
+         |    experiment: extension(url:"http://fhir.cqgc.ferlab.bio/StructureDefinition/sequencing-experiment") @first {
+         |      extension(url:"runName") @first @flatten { name: value }
+         |    }
          |    output @flatten {
          |	    valueReference @flatten {
          |		    documents: resource(type: DocumentReference) {
@@ -40,9 +43,9 @@ object TasksGqlExtractor {
          |						  url
          |              hash64: hash
          |              title
-         |              size: extension(url: "http://fhir.cqgc.ferlab.bio/StructureDefinition/full-size") @flatten @first { 
+         |              size: extension(url: "http://fhir.cqgc.ferlab.bio/StructureDefinition/full-size") @flatten @first {
          |                size: value
-         |              } 
+         |              }
          |		  		   }
          |             format @flatten {
          |              fileFormat: code

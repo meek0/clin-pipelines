@@ -37,7 +37,8 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
           patientReference = "Patient/1",
           fileType = "AR"
         )
-      )
+      ),
+      runName = ""
     )
     val Task2Ldm1 = Task(
       id = "task2",
@@ -69,7 +70,8 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
           patientReference = "Patient/2",
           fileType = "SNV"
         )
-      )
+      ),
+      runName = ""
     )
     val Task3Ldm2 = Task(
       id = "task3",
@@ -92,7 +94,8 @@ class TasksTransformerSpec extends FlatSpec with GivenWhenThen {
           patientReference = "Patient/3",
           fileType = "QC"
         )
-      )
+      ),
+      runName = ""
     )
     Seq(Task1Ldm1, Task2Ldm1, Task3Ldm2)
   }
