@@ -15,12 +15,12 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
 
     val files = Map(
       "file1.cram" -> fileEntry(key = "file1.cram"),
-      "file1.crai" -> fileEntry(key = "file1.crai"),
-      "file2.vcf" -> fileEntry(key = "file2.vcf"),
-      "file4.vcf" -> fileEntry(key = "file4.vcf"),
-      "file4.tbi" -> fileEntry(key = "file4.tbi"),
-      "file5.vcf" -> fileEntry(key = "file5.vcf"),
-      "file5.tbi" -> fileEntry(key = "file5.tbi"),
+      "file1.cram.crai" -> fileEntry(key = "file1.cram.crai"),
+      "file2.vcf.gz" -> fileEntry(key = "file2.vcf.gz"),
+      "file4.vcf.gz" -> fileEntry(key = "file4.vcf.gz"),
+      "file4.vcf.gz.tbi" -> fileEntry(key = "file4.vcf.gz.tbi"),
+      "file5.vcf.gz" -> fileEntry(key = "file5.vcf.gz"),
+      "file5.vcf.gz.tbi" -> fileEntry(key = "file5.vcf.gz.tbi"),
       "file6.html" -> fileEntry(key = "file6.html"),
       "file6.json" -> fileEntry(key = "file6.json"),
       "file6.variants.tsv" -> fileEntry(key = "file6.variants.tsv"),
@@ -34,7 +34,7 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
     )
     DocumentReferencesValidation.validateFiles(files, defaultAnalysis, Option(GERMLINE_SCHEMA)) shouldBe Invalid(
       NonEmptyList.of(
-        s"File file2.tbi does not exist : type=tbi, specimen=submitted_specimen_id, sample=submitted_sample_id",
+        s"File file2.vcf.gz.tbi does not exist : type=tbi, specimen=submitted_specimen_id, sample=submitted_sample_id",
         "File file3.tgz does not exist : type=supplement, specimen=submitted_specimen_id, sample=submitted_sample_id"
       )
     )
@@ -45,13 +45,13 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
 
     val files = Map(
       "file1.cram" -> fileEntry(key = "file1.cram"),
-      "file1.crai" -> fileEntry(key = "file1.crai"),
-      "file2.vcf" -> fileEntry(key = "file2.vcf"),
-      "file2.tbi" -> fileEntry(key = "file2.tbi"),
-      "file4.vcf" -> fileEntry(key = "file4.vcf"),
-      "file4.tbi" -> fileEntry(key = "file4.tbi"),
-      "file5.vcf" -> fileEntry(key = "file5.vcf"),
-      "file5.tbi" -> fileEntry(key = "file5.tbi"),
+      "file1.cram.crai" -> fileEntry(key = "file1.cram.crai"),
+      "file2.vcf.gz" -> fileEntry(key = "file2.vcf.gz"),
+      "file2.vcf.gz.tbi" -> fileEntry(key = "file2.vcf.gz.tbi"),
+      "file4.vcf.gz" -> fileEntry(key = "file4.vcf.gz"),
+      "file4.vcf.gz.tbi" -> fileEntry(key = "file4.vcf.gz.tbi"),
+      "file5.vcf.gz" -> fileEntry(key = "file5.vcf.gz"),
+      "file5.vcf.gz.tbi" -> fileEntry(key = "file5.vcf.gz.tbi"),
       "file3.tgz" -> fileEntry(key = "file3.tgz"),
       "file6.html" -> fileEntry(key = "file6.html"),
       "file6.json" -> fileEntry(key = "file6.json"),
@@ -66,10 +66,10 @@ class DocumentReferencesValidationSpec extends FlatSpec with Matchers with Given
     )
     DocumentReferencesValidation.validateFiles(files, defaultAnalysis, Option(GERMLINE_SCHEMA)) shouldBe Valid(
       TDocumentReferences(
-        SequencingAlignment(List(CRAM("id", "file1.cram", Some("md5"), 10, "application/octet-stream"), CRAI("id", "file1.crai", Some("md5"), 10, "application/octet-stream"))),
-        VariantCalling(List(SNV_VCF("id", "file2.vcf", Some("md5"), 10, "application/octet-stream"), SNV_TBI("id", "file2.tbi", Some("md5"), 10, "application/octet-stream")), Option(GERMLINE_SCHEMA)),
-        CopyNumberVariant(List(CNV_VCF("id", "file4.vcf", Some("md5"), 10, "application/octet-stream"), CNV_TBI("id", "file4.tbi", Some("md5"), 10, "application/octet-stream")), Option(GERMLINE_SCHEMA)),
-        Some(StructuralVariant(List(SV_VCF("id", "file5.vcf", Some("md5"), 10, "application/octet-stream"), SV_TBI("id", "file5.tbi", Some("md5"), 10, "application/octet-stream")), Option(GERMLINE_SCHEMA))),
+        SequencingAlignment(List(CRAM("id", "file1.cram", Some("md5"), 10, "application/octet-stream"), CRAI("id", "file1.cram.crai", Some("md5"), 10, "application/octet-stream"))),
+        VariantCalling(List(SNV_VCF("id", "file2.vcf.gz", Some("md5"), 10, "application/octet-stream"), SNV_TBI("id", "file2.vcf.gz.tbi", Some("md5"), 10, "application/octet-stream")), Option(GERMLINE_SCHEMA)),
+        CopyNumberVariant(List(CNV_VCF("id", "file4.vcf.gz", Some("md5"), 10, "application/octet-stream"), CNV_TBI("id", "file4.vcf.gz.tbi", Some("md5"), 10, "application/octet-stream")), Option(GERMLINE_SCHEMA)),
+        Some(StructuralVariant(List(SV_VCF("id", "file5.vcf.gz", Some("md5"), 10, "application/octet-stream"), SV_TBI("id", "file5.vcf.gz.tbi", Some("md5"), 10, "application/octet-stream")), Option(GERMLINE_SCHEMA))),
         SupplementDocument(List(Supplement("id", "file3.tgz", Some("md5"), 10, "application/octet-stream"))),
         Some(Exomiser(List(EXOMISER_HTML("id", "file6.html", Some("md5"), 10, "application/octet-stream"), EXOMISER_JSON("id", "file6.json", Some("md5"), 10, "application/octet-stream"), EXOMISER_VARIANTS_TSV("id", "file6.variants.tsv", Some("md5"), 10, "application/octet-stream")))),
         Some(IgvTrack(List(SEG_BW("id", "file7.seg.bw", Some("md5"), 10, "application/octet-stream"), HARD_FILTERED_BAF_BW("id", "file7.baf.bw", Some("md5"), 10, "application/octet-stream"), ROH_BED("id", "file7.roh.bed", Some("md5"), 10, "application/octet-stream"), HYPER_EXOME_HG38_BED("id", "file7.exome.bed", Some("md5"), 10, "application/octet-stream")))),

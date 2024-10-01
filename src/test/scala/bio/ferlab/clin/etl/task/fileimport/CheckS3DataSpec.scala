@@ -16,18 +16,18 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
       val fileEntries = CheckS3Data.loadRawFileEntries(inputBucket, prefix)
 
       val expected = List(
-        RawFileEntry(inputBucket, s"$prefix/file1.crai", 10),
+        RawFileEntry(inputBucket, s"$prefix/file1.cram.crai", 10),
         RawFileEntry(inputBucket, s"$prefix/file1.cram", 10),
         RawFileEntry(inputBucket, s"$prefix/file1.cram.md5sum", 13),
-        RawFileEntry(inputBucket, s"$prefix/file2.tbi", 9),
-        RawFileEntry(inputBucket, s"$prefix/file2.vcf", 9),
-        RawFileEntry(inputBucket, s"$prefix/file2.vcf.md5sum", 12),
-        RawFileEntry(inputBucket, s"$prefix/file4.tbi", 9),
-        RawFileEntry(inputBucket, s"$prefix/file4.vcf", 9),
-        RawFileEntry(inputBucket, s"$prefix/file4.vcf.md5sum", 12),
-        RawFileEntry(inputBucket, s"$prefix/file5.tbi", 9),
-        RawFileEntry(inputBucket, s"$prefix/file5.vcf", 9),
-        RawFileEntry(inputBucket, s"$prefix/file5.vcf.md5sum", 12),
+        RawFileEntry(inputBucket, s"$prefix/file2.vcf.gz.tbi", 9),
+        RawFileEntry(inputBucket, s"$prefix/file2.vcf.gz", 9),
+        RawFileEntry(inputBucket, s"$prefix/file2.vcf.gz.md5sum", 12),
+        RawFileEntry(inputBucket, s"$prefix/file4.vcf.gz.tbi", 9),
+        RawFileEntry(inputBucket, s"$prefix/file4.vcf.gz", 9),
+        RawFileEntry(inputBucket, s"$prefix/file4.vcf.gz.md5sum", 12),
+        RawFileEntry(inputBucket, s"$prefix/file5.vcf.gz.tbi", 9),
+        RawFileEntry(inputBucket, s"$prefix/file5.vcf.gz", 9),
+        RawFileEntry(inputBucket, s"$prefix/file5.vcf.gz.md5sum", 12),
         RawFileEntry(inputBucket, s"$prefix/file3.json", 8),
         RawFileEntry(inputBucket, s"$prefix/file6.html", 19),
         RawFileEntry(inputBucket, s"$prefix/file6.json", 19),
@@ -61,22 +61,22 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
 
   val files: Seq[FileEntry] = Seq(
     fileEntry(s"file1.cram", "abc", "file1.cram"),
-    fileEntry(s"file1.crai", "def", "file1.cram.crai"),
-    fileEntry(s"file2.vcf", "ghi", "file2.vcf.gz"),
-    fileEntry(s"file2.tbi", "jkl", "file2.vcf.gz.tbi"),
-    fileEntry(s"file3.tgz", "mno", "file3.gz")
+    fileEntry(s"file1.cram.crai", "def", "file1.cram.crai"),
+    fileEntry(s"file2.vcf.gz", "ghi", "file2.vcf.gz"),
+    fileEntry(s"file2.vcf.gz.tbi", "jkl", "file2.vcf.gz.tbi"),
+    fileEntry(s"file3.tgz", "mno", "file3.tgz")
   )
 
   "copyFiles" should "move files from one bucket to the other" in {
     withS3Objects { (inputPrefix, outputPrefix) =>
       transferFromResources(inputPrefix, "good")
       val files = Seq(
-        fileEntry(s"$inputPrefix/file1.cram", s"$outputPrefix/abc", "file1.cram"),
-        fileEntry(s"$inputPrefix/file1.crai", s"$outputPrefix/def", "file1.crai"),
-        fileEntry(s"$inputPrefix/file2.vcf", s"$outputPrefix/ghi", "file2.vcf")
+        fileEntry(s"$inputPrefix/file1.cram", s"$outputPrefix/abc.cram", "file1.cram"),
+        fileEntry(s"$inputPrefix/file1.cram.crai", s"$outputPrefix/def.cram.crai", "file1.cram.crai"),
+        fileEntry(s"$inputPrefix/file2.vcf.gz", s"$outputPrefix/ghi.vcf.gz", "file2.vcf.gz")
       )
       CheckS3Data.copyFiles(files, outputBucket)
-      list(outputBucket, outputPrefix) should contain theSameElementsAs Seq(s"$outputPrefix/abc", s"$outputPrefix/def", s"$outputPrefix/ghi")
+      list(outputBucket, outputPrefix) should contain theSameElementsAs Seq(s"$outputPrefix/abc.cram", s"$outputPrefix/def.cram.crai", s"$outputPrefix/ghi.vcf.gz")
     }
   }
 
@@ -84,9 +84,9 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
     withS3Objects { (inputPrefix, outputPrefix) =>
       transferFromResources(outputPrefix, "revert", outputBucket)
       val files = Seq(
-        fileEntry(s"$inputPrefix/file1.cram", s"$outputPrefix/file1", "file1.cram"),
-        fileEntry(s"$inputPrefix/file1.crai", s"$outputPrefix/file2", "file1.crai"),
-        fileEntry(s"$inputPrefix/file2.vcf", s"$outputPrefix/file3", "file2.vcf")
+        fileEntry(s"$inputPrefix/file1.cram", s"$outputPrefix/file1.cram", "file1.cram"),
+        fileEntry(s"$inputPrefix/file1.cram.crai", s"$outputPrefix/file2.cram.crai", "file1.cram.crai"),
+        fileEntry(s"$inputPrefix/file2.vcf.gz", s"$outputPrefix/file3.vcf.gz", "file2.vcf.gz")
       )
       CheckS3Data.revert(files, outputBucket)
       list(outputBucket, outputPrefix) shouldBe empty
@@ -96,10 +96,10 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
   val rawFiles: Seq[RawFileEntry] = Seq(
     rawFileEntry(s"file1.cram"),
     rawFileEntry(s"file1.cram.md5sum"),
-    rawFileEntry(s"file1.crai"),
-    rawFileEntry(s"file2.vcf"),
-    rawFileEntry(s"file1.vcf.md5sum"),
-    rawFileEntry(s"file2.tbi"),
+    rawFileEntry(s"file1.cram.crai"),
+    rawFileEntry(s"file2.vcf.gz"),
+    rawFileEntry(s"file1.vcf.gz.md5sum"),
+    rawFileEntry(s"file2.vcf.gz.tbi"),
     rawFileEntry(s"file3.tgz")
   )
   "validateFiles" should "return errors if input bucket contains files that are not present into metadata" in {
@@ -131,29 +131,29 @@ class CheckS3DataSpec extends FlatSpec with MinioServerSuite with Matchers {
       val rawFiles = Seq(
         rawFileEntry(s"$inputPrefix/file1.cram"),
         rawFileEntry(s"$inputPrefix/file1.cram.md5sum"),
-        rawFileEntry(s"$inputPrefix/file1.crai"),
-        rawFileEntry(s"$inputPrefix/file2.vcf"),
-        rawFileEntry(s"$inputPrefix/file2.vcf.md5sum"),
-        rawFileEntry(s"$inputPrefix/file2.tbi"),
-        rawFileEntry(s"$inputPrefix/file4.vcf"),
-        rawFileEntry(s"$inputPrefix/file4.vcf.md5sum"),
-        rawFileEntry(s"$inputPrefix/file4.tbi"),
-        rawFileEntry(s"$inputPrefix/file5.vcf"),
-        rawFileEntry(s"$inputPrefix/file5.vcf.md5sum"),
-        rawFileEntry(s"$inputPrefix/file5.tbi"),
+        rawFileEntry(s"$inputPrefix/file1.cram.crai"),
+        rawFileEntry(s"$inputPrefix/file2.vcf.gz"),
+        rawFileEntry(s"$inputPrefix/file2.vcf.gz.md5sum"),
+        rawFileEntry(s"$inputPrefix/file2.vcf.gz.tbi"),
+        rawFileEntry(s"$inputPrefix/file4.vcf.gz"),
+        rawFileEntry(s"$inputPrefix/file4.vcf.gz.md5sum"),
+        rawFileEntry(s"$inputPrefix/file4.vcf.gz.tbi"),
+        rawFileEntry(s"$inputPrefix/file5.vcf.gz"),
+        rawFileEntry(s"$inputPrefix/file5.vcf.gz.md5sum"),
+        rawFileEntry(s"$inputPrefix/file5.vcf.gz.tbi"),
         rawFileEntry(s"$inputPrefix/file3.tgz")
       )
 
       CheckS3Data.loadFileEntries(defaultMetadata, rawFiles, outputPrefix, generatorId) shouldBe Seq(
-        fileEntry(s"$inputPrefix/file1.cram", s"$outputPrefix/id_1", "file1.cram", Some("md5 cram file")),
-        fileEntry(s"$inputPrefix/file1.crai", s"$outputPrefix/id_1.crai", "file1.crai"),
-        fileEntry(s"$inputPrefix/file2.vcf", s"$outputPrefix/id_2", "file2.vcf", Some("md5 vcf file")),
-        fileEntry(s"$inputPrefix/file2.tbi", s"$outputPrefix/id_2.tbi", "file2.tbi"),
-        fileEntry(s"$inputPrefix/file4.vcf", s"$outputPrefix/id_3", "file4.vcf", Some("md5 vcf file")),
-        fileEntry(s"$inputPrefix/file4.tbi", s"$outputPrefix/id_3.tbi", "file4.tbi"),
-        fileEntry(s"$inputPrefix/file5.vcf", s"$outputPrefix/id_4", "file5.vcf", Some("md5 vcf file")),
-        fileEntry(s"$inputPrefix/file5.tbi", s"$outputPrefix/id_4.tbi", "file5.tbi"),
-        fileEntry(s"$inputPrefix/file3.tgz", s"$outputPrefix/id_5", "file3.tgz")
+        fileEntry(s"$inputPrefix/file1.cram", s"$outputPrefix/id_1.cram", "file1.cram", Some("md5 cram file")),
+        fileEntry(s"$inputPrefix/file1.cram.crai", s"$outputPrefix/id_1.cram.crai", "file1.cram.crai"),
+        fileEntry(s"$inputPrefix/file2.vcf.gz", s"$outputPrefix/id_2.vcf.gz", "file2.vcf.gz", Some("md5 vcf file")),
+        fileEntry(s"$inputPrefix/file2.vcf.gz.tbi", s"$outputPrefix/id_2.vcf.gz.tbi", "file2.vcf.gz.tbi"),
+        fileEntry(s"$inputPrefix/file4.vcf.gz", s"$outputPrefix/id_3.vcf.gz", "file4.vcf.gz", Some("md5 vcf file")),
+        fileEntry(s"$inputPrefix/file4.vcf.gz.tbi", s"$outputPrefix/id_3.vcf.gz.tbi", "file4.vcf.gz.tbi"),
+        fileEntry(s"$inputPrefix/file5.vcf.gz", s"$outputPrefix/id_4.vcf.gz", "file5.vcf.gz", Some("md5 vcf file")),
+        fileEntry(s"$inputPrefix/file5.vcf.gz.tbi", s"$outputPrefix/id_4.vcf.gz.tbi", "file5.vcf.gz.tbi"),
+        fileEntry(s"$inputPrefix/file3.tgz", s"$outputPrefix/id_5.tgz", "file3.tgz")
       )
     }
   }

@@ -205,7 +205,7 @@ class FullFamilyFileImportFeatureSpec extends FlatSpec with WholeStackSuite with
       }
 
       //Expected title
-      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file3.json")
+      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.cram.crai", "file2.vcf.gz", "file2.vcf.gz.tbi", "file4.vcf.gz", "file4.vcf.gz.tbi", "file3.json")
       //Expected code systems
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getSystem)) should contain only CodingSystems.DR_TYPE
       documentReferences.flatMap(d => d.getType.getCoding.asScala.map(_.getCode)) should contain only("ALIR", "SNV", "GCNV", "SSUP")

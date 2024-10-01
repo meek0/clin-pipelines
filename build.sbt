@@ -24,8 +24,8 @@ libraryDependencies ++= Seq(
   "org.keycloak" % "keycloak-authz-client" % "12.0.3",
   "com.softwaremill.sttp.client3" %% "core" % "3.1.0",
   "org.scalatest" %% "scalatest" % "3.0.8" % Test,
-  "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.40.17" % Test,
-  "com.dimafeng" %% "testcontainers-scala-localstack" % "0.40.17" % Test,
+  "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.41.4" % Test,
+  "com.dimafeng" %% "testcontainers-scala-localstack" % "0.41.4" % Test,
   "com.typesafe.play" %% "play-mailer" % "8.0.1"
 )
 excludeDependencies ++= Seq(

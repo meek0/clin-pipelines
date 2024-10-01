@@ -145,7 +145,7 @@ class FullFileImportFeatureSpec extends FlatSpec with WholeStackSuite with Match
         }
       }
       //Expected title
-      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.crai", "file2.vcf", "file2.tbi", "file4.vcf", "file4.tbi", "file5.vcf", "file5.tbi", "file3.json",
+      documentReferences.flatMap(d => d.getContent.asScala.map(_.getAttachment.getTitle)) should contain only("file1.cram", "file1.cram.crai", "file2.vcf.gz", "file2.vcf.gz.tbi", "file4.vcf.gz", "file4.vcf.gz.tbi", "file5.vcf.gz", "file5.vcf.gz.tbi", "file3.json",
         "file6.html","file6.json","file6.variants.tsv","file7.seg.bw","file7.baf.bw","file7.roh.bed","file7.exome.bed","file8.png","file9.csv","file10.json")
 
       //Expected code systems

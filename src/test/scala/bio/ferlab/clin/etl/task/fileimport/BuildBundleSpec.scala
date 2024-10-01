@@ -19,25 +19,25 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       defaultAnalysis.copy(patient = defaultPatient(ptId), clinServiceRequestId = serviceRequestId, ldm = organizationAlias)
     ))
     val files = Seq(
-      FileEntry("bucket", "file1.cram", Some("md5"), 10, "1", "application/octet-stream", ""),
-      FileEntry("bucket", "file1.crai", Some("md5"), 10, "1.crai", "application/octet-stream", ""),
-      FileEntry("bucket", "file2.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
-      FileEntry("bucket", "file2.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
-      FileEntry("bucket", "file4.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
-      FileEntry("bucket", "file4.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
-      FileEntry("bucket", "file5.vcf", Some("md5"), 10, "3", "application/octet-stream", ""),
-      FileEntry("bucket", "file5.tbi", Some("md5"), 10, "3.tbi", "application/octet-stream", ""),
-      FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket", "file6.html", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket", "file6.json", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket", "file6.variants.tsv", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket", "file7.seg.bw", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket", "file7.baf.bw", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket", "file7.roh.bed", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket", "file7.exome.bed", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket", "file8.png", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket", "file9.csv", Some("md5"), 10, "4", "application/octet-stream", ""),
-      FileEntry("bucket", "file10.json", Some("md5"), 10, "4", "application/octet-stream", ""),
+      FileEntry("bucket", "file1.cram", Some("md5"), 10, "1.cram", "application/octet-stream", ""),
+      FileEntry("bucket", "file1.cram.crai", Some("md5"), 10, "1.cram.crai", "application/octet-stream", ""),
+      FileEntry("bucket", "file2.vcf.gz", Some("md5"), 10, "2.vcf.gz", "application/octet-stream", ""),
+      FileEntry("bucket", "file2.vcf.gz.tbi", Some("md5"), 10, "2.vcf.gz.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file4.vcf.gz", Some("md5"), 10, "2.vcf.gz", "application/octet-stream", ""),
+      FileEntry("bucket", "file4.vcf.gz.tbi", Some("md5"), 10, "2.vcf.gz.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file5.vcf.gz", Some("md5"), 10, "3.vcf.gz", "application/octet-stream", ""),
+      FileEntry("bucket", "file5.vcf.gz.tbi", Some("md5"), 10, "3.vcf.gz.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4.tgz", "application/octet-stream", ""),
+      FileEntry("bucket", "file6.html", Some("md5"), 10, "4.html", "application/octet-stream", ""),
+      FileEntry("bucket", "file6.json", Some("md5"), 10, "4.json", "application/octet-stream", ""),
+      FileEntry("bucket", "file6.variants.tsv", Some("md5"), 10, "4.variants.tsv", "application/octet-stream", ""),
+      FileEntry("bucket", "file7.seg.bw", Some("md5"), 10, "4.seg.bw", "application/octet-stream", ""),
+      FileEntry("bucket", "file7.baf.bw", Some("md5"), 10, "4.baf.bw", "application/octet-stream", ""),
+      FileEntry("bucket", "file7.roh.bed", Some("md5"), 10, "4.roh.bed", "application/octet-stream", ""),
+      FileEntry("bucket", "file7.exome.bed", Some("md5"), 10, "4.exome.bed", "application/octet-stream", ""),
+      FileEntry("bucket", "file8.png", Some("md5"), 10, "4.png", "application/octet-stream", ""),
+      FileEntry("bucket", "file9.csv", Some("md5"), 10, "4.csv", "application/octet-stream", ""),
+      FileEntry("bucket", "file10.json", Some("md5"), 10, "4.json", "application/octet-stream", ""),
     )
     val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files, "BAT1")
     println(result)
@@ -53,15 +53,15 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       defaultAnalysisWithOptionals.copy(patient = defaultPatient(ptId), clinServiceRequestId = serviceRequestId, ldm = organizationAlias)
     ))
     val files = Seq(
-      FileEntry("bucket", "file1.cram", Some("md5"), 10, "1", "application/octet-stream", ""),
-      FileEntry("bucket", "file1.crai", Some("md5"), 10, "1.crai", "application/octet-stream", ""),
-      FileEntry("bucket", "file2.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
-      FileEntry("bucket", "file2.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
-      FileEntry("bucket", "file4.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
-      FileEntry("bucket", "file4.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
-      FileEntry("bucket", "file5.vcf", Some("md5"), 10, "3", "application/octet-stream", ""),
-      FileEntry("bucket", "file5.tbi", Some("md5"), 10, "3.tbi", "application/octet-stream", ""),
-      FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4", "application/octet-stream", "")
+      FileEntry("bucket", "file1.cram", Some("md5"), 10, "1.cram", "application/octet-stream", ""),
+      FileEntry("bucket", "file1.cram.crai", Some("md5"), 10, "1.cram.crai", "application/octet-stream", ""),
+      FileEntry("bucket", "file2.vcf.gz", Some("md5"), 10, "2.vcf.gz", "application/octet-stream", ""),
+      FileEntry("bucket", "file2.vcf.gz.tbi", Some("md5"), 10, "2.vcf.gz.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file4.vcf.gz", Some("md5"), 10, "2.vcf.gz", "application/octet-stream", ""),
+      FileEntry("bucket", "file4.vcf.gz.tbi", Some("md5"), 10, "2.vcf.gz.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file5.vcf.gz", Some("md5"), 10, "3.vcf.gz", "application/octet-stream", ""),
+      FileEntry("bucket", "file5.vcf.gz.tbi", Some("md5"), 10, "3.vcf.gz.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4.tgz", "application/octet-stream", "")
     )
     val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files, "BAT1")
     println(result)
@@ -77,15 +77,15 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       defaultAnalysisWithOptionals.copy(patient = defaultPatient(ptId), clinServiceRequestId = serviceRequestId, ldm = organizationAlias)
     ))
     val files = Seq(
-      FileEntry("bucket", "file1.cram", Some("md5"), 10, "1", "application/octet-stream", ""),
-      FileEntry("bucket", "file1.crai", Some("md5"), 10, "1.crai", "application/octet-stream", ""),
-      FileEntry("bucket", "file2.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
-      FileEntry("bucket", "file2.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
-      FileEntry("bucket", "file4.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
-      FileEntry("bucket", "file4.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
-      //FileEntry("bucket", "file5.vcf", Some("md5"), 10, "3", "application/octet-stream", ""),
-      //FileEntry("bucket", "file5.tbi", Some("md5"), 10, "3.tbi", "application/octet-stream", ""),
-      FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4", "application/octet-stream", "")
+      FileEntry("bucket", "file1.cram", Some("md5"), 10, "1.cram", "application/octet-stream", ""),
+      FileEntry("bucket", "file1.cram.crai", Some("md5"), 10, "1.cram.crai", "application/octet-stream", ""),
+      FileEntry("bucket", "file2.vcf.gz", Some("md5"), 10, "2.vcf.gz", "application/octet-stream", ""),
+      FileEntry("bucket", "file2.vcf.gz.tbi", Some("md5"), 10, "2.vcf.gz.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file4.vcf.gz", Some("md5"), 10, "2.vcf.gz", "application/octet-stream", ""),
+      FileEntry("bucket", "file4.vcf.gz.tbi", Some("md5"), 10, "2.vcf.gz.tbi", "application/octet-stream", ""),
+      //FileEntry("bucket", "file5.vcf.gz", Some("md5"), 10, "3.vcf.gz", "application/octet-stream", ""),
+      //FileEntry("bucket", "file5.vcf.gz.tbi", Some("md5"), 10, "3.vcf.gz.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4.tgz", "application/octet-stream", "")
     )
     val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files, "BAT1")
     println(result)
@@ -94,7 +94,7 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       case Invalid(NonEmptyList(h, _)) => h
       case Valid(_) => ""
     }
-    assert(error.equals("File file5.vcf does not exist : type=vcf, specimen=submitted_specimen_id, sample=submitted_sample_id"))
+    assert(error.equals("File file5.vcf.gz does not exist : type=vcf, specimen=submitted_specimen_id, sample=submitted_sample_id"))
   }
 
   "it" should "Failed (Unsupported metadata)" in {
@@ -106,15 +106,15 @@ class BuildBundleSpec extends FlatSpec with Matchers with GivenWhenThen with Fhi
       defaultAnalysisWithOptionals.copy(patient = defaultPatient(ptId), clinServiceRequestId = serviceRequestId, ldm = organizationAlias)
     ))
     val files = Seq(
-      FileEntry("bucket", "file1.cram", Some("md5"), 10, "1", "application/octet-stream", ""),
-      FileEntry("bucket", "file1.crai", Some("md5"), 10, "1.crai", "application/octet-stream", ""),
-      FileEntry("bucket", "file2.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
-      FileEntry("bucket", "file2.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
-      FileEntry("bucket", "file4.vcf", Some("md5"), 10, "2", "application/octet-stream", ""),
-      FileEntry("bucket", "file4.tbi", Some("md5"), 10, "2.tbi", "application/octet-stream", ""),
-      FileEntry("bucket", "file5.vcf", Some("md5"), 10, "3", "application/octet-stream", ""),
-      FileEntry("bucket", "file5.tbi", Some("md5"), 10, "3.tbi", "application/octet-stream", ""),
-      FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4", "application/octet-stream", "")
+      FileEntry("bucket", "file1.cram", Some("md5"), 10, "1.cram", "application/octet-stream", ""),
+      FileEntry("bucket", "file1.crai", Some("md5"), 10, "1.cram.crai", "application/octet-stream", ""),
+      FileEntry("bucket", "file2.vcf.gz", Some("md5"), 10, "2.vcf.gz", "application/octet-stream", ""),
+      FileEntry("bucket", "file2.tbi", Some("md5"), 10, "2.vcf.gz.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file4.vcf.gz", Some("md5"), 10, "2.vcf.gz", "application/octet-stream", ""),
+      FileEntry("bucket", "file4.tbi", Some("md5"), 10, "2.vcf.gz.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file5.vcf.gz", Some("md5"), 10, "3.vcf.gz", "application/octet-stream", ""),
+      FileEntry("bucket", "file5.tbi", Some("md5"), 10, "3.vcf.gz.tbi", "application/octet-stream", ""),
+      FileEntry("bucket", "file3.tgz", Some("md5"), 10, "4.tgz", "application/octet-stream", "")
     )
     val result: ValidationResult[TBundle] = BuildBundle.validate(meta, files, "BAT1")
     println(result)

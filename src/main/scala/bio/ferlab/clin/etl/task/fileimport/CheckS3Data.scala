@@ -70,15 +70,15 @@ object CheckS3Data {
   def loadFileEntries(m: Metadata, fileEntries: Seq[RawFileEntry], outputPrefix: String, generateId: () => String = () => UUID.randomUUID().toString)(implicit s3Client: S3Client): Seq[FileEntry] = {
     val (checksums, files) = fileEntries.partition(_.isChecksum)
     val mapOfIds = m.analyses.flatMap { a =>
-      val cramId: String = idForPrefix(outputPrefix,generateId())
+      val cramId: String = s"${idForPrefix(outputPrefix,generateId())}.cram"
       val craiId: String = s"$cramId.crai"
-      val snvVcfId: String = idForPrefix(outputPrefix,generateId())
+      val snvVcfId: String = s"${idForPrefix(outputPrefix,generateId())}.vcf.gz"
       val snvTbiId: String = s"$snvVcfId.tbi"
-      val cnvVcfId: String = idForPrefix(outputPrefix,generateId())
+      val cnvVcfId: String = s"${idForPrefix(outputPrefix,generateId())}.vcf.gz"
       val cnvTbiId: String = s"$cnvVcfId.tbi"
-      val svVcfId: String = idForPrefix(outputPrefix,generateId())
+      val svVcfId: String = s"${idForPrefix(outputPrefix,generateId())}.vcf.gz"
       val svTbiId: String = s"$svVcfId.tbi"
-      val qcId: String = idForPrefix(outputPrefix,generateId())
+      val qcId: String = s"${idForPrefix(outputPrefix,generateId())}.tgz"
       ///exomiser
       val exomiserId: String = idForPrefix(outputPrefix,generateId())
       val exomiserHtmlId: String =s"$exomiserId.html"
@@ -91,10 +91,10 @@ object CheckS3Data {
       val rohBed: String = s"$igvTrackId.roh.bed"
       val hyperExomeHg38Bed: String = s"$igvTrackId.exome.bed"
 
-      val cnvCallsPng: String = idForPrefix(outputPrefix,generateId())
-      val coverageByGeneCsv: String = idForPrefix(outputPrefix,generateId())
-      val qcMetrics: String = idForPrefix(outputPrefix,generateId())
-      val qcMetricsTsv: String = idForPrefix(outputPrefix,generateId())
+      val cnvCallsPng: String = s"${idForPrefix(outputPrefix,generateId())}.png"
+      val coverageByGeneCsv: String = s"${idForPrefix(outputPrefix,generateId())}.csv"
+      val qcMetrics: String = s"${idForPrefix(outputPrefix,generateId())}.json"
+      val qcMetricsTsv: String = idForPrefix(outputPrefix,generateId()) // Kept for backward compatibility
 
       Seq(
         a.files.cram -> (cramId, APPLICATION_OCTET_STREAM.getMimeType, attach(a.files.cram)),
