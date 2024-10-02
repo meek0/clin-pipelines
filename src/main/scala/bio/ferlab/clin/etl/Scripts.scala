@@ -1,9 +1,8 @@
 package bio.ferlab.clin.etl
 
-import bio.ferlab.clin.etl.FileImport.args
 import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
 import bio.ferlab.clin.etl.s3.S3Utils.buildS3Client
-import bio.ferlab.clin.etl.scripts.{AddGroupIdentifierTask, DeleteBatchByDate, FixBatchFiles, FixFerloadURLs, MigrateMetadata, MigrateServiceRequest, SwitchSpecimenValues}
+import bio.ferlab.clin.etl.scripts._
 
 object Scripts extends App {
   withSystemExit {
@@ -23,6 +22,7 @@ object Scripts extends App {
             case "DeleteBatchByDate" => DeleteBatchByDate(fhirClient, params)
             case "FixBatchFiles" => FixBatchFiles(conf,params)(fhirClient, s3Client)
             case "FixFerloadURLs" => FixFerloadURLs(conf,params)(fhirClient)
+            case "AddMissingFileExtensions" => AddMissingFileExtensions(conf, params)(fhirClient, s3Client)
             case s: String => throw new IllegalArgumentException(s"unknown script: $s")
           }
         }

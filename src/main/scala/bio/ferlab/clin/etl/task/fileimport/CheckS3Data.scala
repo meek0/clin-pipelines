@@ -9,7 +9,7 @@ import cats.data.ValidatedNel
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM
 import org.slf4j.{Logger, LoggerFactory}
-import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.{S3AsyncClient, S3Client}
 import software.amazon.awssdk.services.s3.model._
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import software.amazon.awssdk.transfer.s3.model.{CompletedCopy, CopyRequest}
@@ -155,6 +155,13 @@ object CheckS3Data {
       .build()
   }
 
+  private def buildDeleteObjectRequest(f: FileEntry) = {
+    DeleteObjectRequest.builder()
+      .bucket(f.bucket)
+      .key(f.key)
+      .build()
+  }
+
   def copyFiles(files: Seq[FileEntry], bucketDest: String)(implicit s3Client: S3Client): Unit = {
     LOGGER.info("################# Copy Files ##################")
     files.foreach { f =>
@@ -178,5 +185,45 @@ object CheckS3Data {
     }.toList
     CompletableFuture.allOf(copies: _*).join()
     transferManager.close()
+  }
+
+  def moveFiles(files: Seq[FileEntry], bucketDest: String)(implicit s3Client: S3Client): Unit = {
+    LOGGER.info("################# Move Files ##################")
+    files.foreach { f =>
+      val cp = buildCopyObjectRequest(f, bucketDest)
+      val rm = buildDeleteObjectRequest(f)
+      s3Client.copyObject(cp)
+      s3Client.deleteObject(rm)
+    }
+  }
+
+  def moveFilesAsync(files: Seq[FileEntry], bucketDest: String)(implicit s3Client: S3AsyncClient): Unit = {
+    LOGGER.info("################# Move Files ##################")
+    val transferManager = S3TransferManager.builder()
+      .s3Client(s3Client)
+      .executor(Executors.newCachedThreadPool()).build()
+    val copies = files.map { f =>
+      val cp = buildCopyObjectRequest(f, bucketDest)
+      val copyRequest = CopyRequest.builder()
+        .copyObjectRequest(cp)
+        .build()
+      transferManager.copy(copyRequest).completionFuture()
+    }.toList
+    CompletableFuture.allOf(copies: _*).join()
+    transferManager.close()
+
+    val deletes = files.map { f =>
+      ObjectIdentifier.builder()
+        .key(f.key)
+        .build()
+    }
+    val batchDelete = Delete.builder()
+      .objects(deletes: _*)
+      .build()
+    val batchDeleteRequest = DeleteObjectsRequest.builder()
+      .bucket(files.head.bucket) // Assumes all files are from same bucket
+      .delete(batchDelete)
+      .build()
+    s3Client.deleteObjects(batchDeleteRequest).join()
   }
 }
