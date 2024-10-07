@@ -19,7 +19,7 @@ import scala.annotation.tailrec
 case object AddMissingFileExtensions {
 
   val LOGGER: Logger = LoggerFactory.getLogger(FixFerloadURLs.getClass)
-  final val UrlRegex: String = "(https?:\\/\\/)([^\\/]+)"
+  final val UrlRegex: String = "(https?:\\/\\/)([^\\/]+)(\\/)"
 
   def apply(conf: Conf, params: Array[String])(implicit fhirClient: IGenericClient, s3Client: S3Client): ValidationResult[Boolean] = {
 
