@@ -82,7 +82,9 @@ case object AddMissingFileExtensions {
             fhirRessources = fhirRessources ++ FhirUtils.bundleUpdate(Seq(doc))
           }
         })
+        var nextOffset = offset + size
         if (!dryRun && fhirRessources.nonEmpty) {
+          nextOffset = 0  // about to perform an update, reset offset
           // Update FHIR documents
           val bundle = TBundle(fhirRessources.toList)
           LOGGER.info("FHIR Request:\n" + bundle.print())
@@ -97,7 +99,7 @@ case object AddMissingFileExtensions {
           }
         }
         Thread.sleep(1000L) // don't spam FHIR too much, we have time
-        addMissingFileExtensions(offset + size, size)
+        addMissingFileExtensions(nextOffset, size)
       }
     }
 
@@ -123,6 +125,9 @@ case object AddMissingFileExtensions {
       .build()
 
     val objectMetadata = s3Client.headObject(headRequest)
+    if (objectMetadata.contentLength() == 0) {
+      throw new IllegalStateException(s"File $sourceKey is empty")
+    }
     FileEntry(bucket, key = sourceKey, md5 = None, size = objectMetadata.contentLength(), id = destinationKey,
       contentType = objectMetadata.contentType(), contentDisposition = objectMetadata.contentDisposition())
   }
