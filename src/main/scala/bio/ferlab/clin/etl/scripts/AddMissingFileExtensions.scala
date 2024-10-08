@@ -8,7 +8,6 @@ import bio.ferlab.clin.etl.task.fileimport.CheckS3Data
 import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, TBundle}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.Validated.Valid
-import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
 import org.hl7.fhir.r4.model.{Bundle, DocumentReference}
 import org.slf4j.{Logger, LoggerFactory}
@@ -125,9 +124,6 @@ case object AddMissingFileExtensions {
       .build()
 
     val objectMetadata = s3Client.headObject(headRequest)
-    if (objectMetadata.contentLength() == 0) {
-      throw new IllegalStateException(s"File $sourceKey is empty")
-    }
     FileEntry(bucket, key = sourceKey, md5 = None, size = objectMetadata.contentLength(), id = destinationKey,
       contentType = objectMetadata.contentType(), contentDisposition = objectMetadata.contentDisposition())
   }
