@@ -41,6 +41,7 @@ case object AddMissingFileExtensions {
       val results: Bundle = fhirClient.search().forResource(classOf[DocumentReference])
         .offset(offset)
         .count(size)
+        .sort().ascending(DocumentReference.SUBJECT)
         .encodedJson()
         .returnBundle(classOf[Bundle]).execute()
 
