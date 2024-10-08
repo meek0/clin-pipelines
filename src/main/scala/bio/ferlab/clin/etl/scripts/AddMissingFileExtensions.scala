@@ -8,6 +8,7 @@ import bio.ferlab.clin.etl.task.fileimport.CheckS3Data
 import bio.ferlab.clin.etl.task.fileimport.model.{FileEntry, TBundle}
 import ca.uhn.fhir.rest.client.api.IGenericClient
 import cats.data.Validated.Valid
+import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
 import org.hl7.fhir.r4.model.{Bundle, DocumentReference}
 import org.slf4j.{Logger, LoggerFactory}
@@ -41,6 +42,7 @@ case object AddMissingFileExtensions {
       val results: Bundle = fhirClient.search().forResource(classOf[DocumentReference])
         .offset(offset)
         .count(size)
+        .sort().ascending(DocumentReference.SUBJECT)
         .encodedJson()
         .returnBundle(classOf[Bundle]).execute()
 
@@ -82,9 +84,7 @@ case object AddMissingFileExtensions {
             fhirRessources = fhirRessources ++ FhirUtils.bundleUpdate(Seq(doc))
           }
         })
-        var nextOffset = offset + size
         if (!dryRun && fhirRessources.nonEmpty) {
-          nextOffset = 0  // about to perform an update, reset offset
           // Update FHIR documents
           val bundle = TBundle(fhirRessources.toList)
           LOGGER.info("FHIR Request:\n" + bundle.print())
@@ -99,7 +99,7 @@ case object AddMissingFileExtensions {
           }
         }
         Thread.sleep(1000L) // don't spam FHIR too much, we have time
-        addMissingFileExtensions(nextOffset, size)
+        addMissingFileExtensions(offset + size, size)
       }
     }
 
