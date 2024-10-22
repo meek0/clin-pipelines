@@ -38,21 +38,16 @@ object FixSpecimenToTaskRef {
         task.getInput.forEach(input => {
           val taskSpecimenRef = input.getValue.asInstanceOf[Reference].getReference
           val specimen = fhirClient.read().resource(classOf[Specimen]).withId(taskSpecimenRef).encodedJson().execute()
-          val specimenServiceRequestId = specimen.getRequestFirstRep.getReference
-          if (!taskServiceRequestId.equals(specimenServiceRequestId)) {
-            LOGGER.info(s"Task: ${task.getIdElement.getIdPart} and Specimen: ${specimen.getIdElement.getIdPart} ServiceRequest is different: $taskServiceRequestId != $specimenServiceRequestId")
-            try {
-              // validate the service request is indeed missing
-              fhirClient.read().resource(classOf[ServiceRequest]).withId(specimenServiceRequestId).encodedJson().execute()
-              LOGGER.warn(s"ServiceRequest: $specimenServiceRequestId found (The script doesn't handle such situation)")
-            } catch {
-              case e: ResourceGoneException =>
-                LOGGER.error(s"ServiceRequest: $specimenServiceRequestId confirmed deleted at some point in time")
-                specimen.getRequestFirstRep.setReference(taskServiceRequestId)
-                res = res ++ FhirUtils.bundleUpdate(Seq(specimen))
+          if (checkSpecimen(taskServiceRequestId, task, specimen)(fhirClient)) {
+            res = res ++ FhirUtils.bundleUpdate(Seq(specimen))
+          }
+          if (specimen.hasParent) {
+            val parentSpecimenRef = specimen.getParentFirstRep.getReference
+            LOGGER.info(s"Specimen: ${specimen.getIdElement.getIdPart} has a parent: $parentSpecimenRef")
+            val parentSpecimen = fhirClient.read().resource(classOf[Specimen]).withId(parentSpecimenRef).encodedJson().execute()
+            if (checkSpecimen(taskServiceRequestId, task, parentSpecimen)(fhirClient)) {
+              res = res ++ FhirUtils.bundleUpdate(Seq(parentSpecimen))
             }
-          } else {
-            LOGGER.info(s"Task: ${task.getIdElement.getIdPart} and Specimen: ${specimen.getIdElement.getIdPart} ServiceRequest is the same : $taskServiceRequestId")
           }
         })
       })
@@ -70,4 +65,25 @@ object FixSpecimenToTaskRef {
     }
   }
 
+  private def checkSpecimen(taskServiceRequestId: String, task: Task, specimen: Specimen)(implicit fhirClient: IGenericClient): Boolean = {
+    val specimenServiceRequestId = specimen.getRequestFirstRep.getReference
+    if (!taskServiceRequestId.equals(specimenServiceRequestId)) {
+      LOGGER.info(s"Task: ${task.getIdElement.getIdPart} and Specimen: ${specimen.getIdElement.getIdPart} ServiceRequest is different: $taskServiceRequestId != $specimenServiceRequestId")
+      try {
+        // validate the service request is indeed missing
+        fhirClient.read().resource(classOf[ServiceRequest]).withId(specimenServiceRequestId).encodedJson().execute()
+        throw new IllegalArgumentException(s"ServiceRequest: $specimenServiceRequestId found (The script doesn't handle such situation)")
+      } catch {
+        case e: ResourceGoneException =>
+          LOGGER.error(s"ServiceRequest: $specimenServiceRequestId confirmed deleted at some point in time")
+          specimen.getRequestFirstRep.setReference(taskServiceRequestId)
+          return true
+        case e: Exception =>
+          throw e
+      }
+    } else {
+      LOGGER.info(s"Task: ${task.getIdElement.getIdPart} and Specimen: ${specimen.getIdElement.getIdPart} ServiceRequest is the same : $taskServiceRequestId")
+    }
+    false
+  }
 }

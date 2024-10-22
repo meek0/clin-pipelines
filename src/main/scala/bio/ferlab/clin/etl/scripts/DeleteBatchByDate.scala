@@ -72,8 +72,6 @@ object DeleteBatchByDate {
     } else {
       val result = bundle.save()(fhirClient)
       LOGGER.info("Response :\n" + FhirUtils.toJson(result.toList.head)(fhirClient))
-      // Fix Specimen and Task sequencing reference
-      FixSpecimenToTaskRef(fhirClient, Array(expectedBatchId))
       Valid(result.isValid)
     }
   }
