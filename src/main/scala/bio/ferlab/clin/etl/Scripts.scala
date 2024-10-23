@@ -23,6 +23,7 @@ object Scripts extends App {
             case "FixBatchFiles" => FixBatchFiles(conf,params)(fhirClient, s3Client)
             case "FixFerloadURLs" => FixFerloadURLs(conf,params)(fhirClient)
             case "AddMissingFileExtensions" => AddMissingFileExtensions(conf, params)(fhirClient, s3Client)
+            case "FixSpecimenToTaskRef" => FixSpecimenToTaskRef(fhirClient, params)
             case s: String => throw new IllegalArgumentException(s"unknown script: $s")
           }
         }

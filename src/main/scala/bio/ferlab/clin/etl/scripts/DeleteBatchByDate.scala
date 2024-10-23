@@ -12,10 +12,8 @@ import org.hl7.fhir.r4.model.Bundle.SearchEntryMode
 import org.hl7.fhir.r4.model._
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import scala.collection.JavaConverters.asScalaBufferConverter
 
 object DeleteBatchByDate {
