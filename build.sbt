@@ -8,6 +8,7 @@ scalacOptions += "-Ypartial-unification"
 
 val awssdkVersion = "2.24.7"
 libraryDependencies ++= Seq(
+  "org.postgresql" % "postgresql" % "42.7.4",
   "software.amazon.awssdk" % "s3" % awssdkVersion,
   "software.amazon.awssdk" % "apache-client" % awssdkVersion,
   "software.amazon.awssdk" % "s3-transfer-manager" % awssdkVersion,

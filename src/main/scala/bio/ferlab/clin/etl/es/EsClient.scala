@@ -93,6 +93,44 @@ class EsClient(conf: EsConf) {
     (lastId, hpos)
   }
 
+  private def parseCNVs(body: String): (String, Seq[EsCNV]) = {
+    var cnvs = Seq[EsCNV]()
+    var lastId = ""
+    if (StringUtils.isNotBlank(body)) {
+      val json = new JSONObject(body)
+      val hits = json.getJSONObject("hits").getJSONArray("hits")
+      hits.forEach(hit => {
+        lastId = hit.asInstanceOf[JSONObject].getString("_id")
+        val source = hit.asInstanceOf[JSONObject].getJSONObject("_source")
+        val cnv = EsCNV(source.getString("name"),source.getString("aliquot_id"),source.getString("alternate"),source.getString("service_request_id"),source.getString("hash"))
+        cnvs :+= cnv
+      })
+    }
+    (lastId, cnvs)
+  }
+
+  def getCNVsWithPagination(index: String, from: String = "", size: Int = 1000): (String, Seq[EsCNV]) = {
+    val request = new HttpPost(s"${conf.url}/${index}/_search")
+    request.setEntity(new StringEntity(
+      """
+          {
+              "size": {size},
+              "_source": ["name", "aliquot_id", "alternate", "service_request_id", "hash"],
+              "search_after": [ "{from}" ],
+              "sort": [
+                  {"_id": "asc"}
+              ]
+          }
+          """.replace("{size}", String.valueOf(size)).replace("{from}", from)
+    ))
+    request.addHeader("Content-Type", "application/json")
+    val (body, status) = executeHttpRequest(request)
+    status match {
+      case 200 => parseCNVs(body.getOrElse(""))
+      case _ => throw new IllegalStateException(s"Failed to get CNVs from ES: ${status}\n${body.getOrElse("")}")
+    }
+  }
+
   def executeHttpRequest(request: HttpRequestBase): (Option[String], Int) = {
     addBasicAuthHeader(request)
     val response: HttpResponse = client.execute(request)
