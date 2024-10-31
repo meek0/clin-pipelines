@@ -9,7 +9,7 @@ class PublishHpoTermsTest  extends FlatSpec with WholeStackSuite with Matchers {
 
   val keycloakConf = KeycloakConf(null, null, null, null, null)
   val fhirConf = FhirConf(fhirBaseUrl)
-  val conf = new Conf(awsConf, keycloakConf, fhirConf, ferloadConf, null, null, esConf)
+  val conf = new Conf(awsConf, keycloakConf, fhirConf, ferloadConf, null, null, esConf, null)
 
   "PublishHpoTerms" should "failed if missing params" in {
       try {

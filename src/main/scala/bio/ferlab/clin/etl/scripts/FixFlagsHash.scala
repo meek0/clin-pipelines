@@ -29,6 +29,9 @@ object FixFlagsHash {
     val dbClient = new UsersDbClient(conf.usersDb)
 
     val variants = dbClient.findVariants()   // no pagination but we wont have much in theory
+    if (variants.isEmpty) {
+      throw new IllegalStateException("No variants found in users-db")
+    }
     LOGGER.info(s"Found ${variants.size} variants in users-db")
 
     var lastId = ""
@@ -40,8 +43,7 @@ object FixFlagsHash {
       cnvs.foreach(cnv => {
         val oldFashionHash = sha1(s"${cnv.name}-${cnv.aliquotId}-${cnv.alternate}")
         val newFashionHash = sha1(s"${cnv.name}-${cnv.serviceRequestId}")
-        if (newFashionHash.equals(cnv.hash) && !oldFashionHash.equals(cnv.hash)) {
-
+        if (newFashionHash.equals(cnv.hash) && !oldFashionHash.equals(newFashionHash)) {
           val variant = variants.find(v => v.uniqueId.equals(oldFashionHash)).orNull
           if (variant != null) {
             LOGGER.info(s"Updating hash for ${cnv.name}-${cnv.aliquotId}-${cnv.alternate} from ${oldFashionHash} to ${cnv.hash}")
