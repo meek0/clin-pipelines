@@ -48,9 +48,9 @@ object FixFlagHashes {
           val variant = variants.find(v => v.uniqueId.equals(oldUniqueId)).orNull
           if (variant != null) {
             val newUniqueId = formatCNVUniqueId(newFashionHash, cnv)
-            LOGGER.info(s"Updating hash for ${cnv.name} from $oldUniqueId to $newUniqueId")
+            LOGGER.info(s"Updating hash for $cnv from $oldUniqueId to $newUniqueId")
             if (!dryRun) {
-              if (dbClient.updateVariant(variant.id, newFashionHash) != 1) {
+              if (dbClient.updateVariant(variant.id, newUniqueId) != 1) {
                 throw new IllegalStateException(s"Failed to update variant ${variant.id}")
               }
             }
