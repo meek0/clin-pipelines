@@ -32,6 +32,8 @@ case class ClinConf(url: String)
 
 case class EsConf(url: String, user: String, password: String)
 
+case class UsersDbConf(user: String, password: String, db : String, host: String, port : Int, ssl: String, sslMode: String, sslRootCert: String)
+
 case class Conf(
                  aws:
                  AWSConf,
@@ -40,7 +42,8 @@ case class Conf(
                  ferload: FerloadConf,
                  mailer: MailerConf,
                  clin: ClinConf,
-                 es: EsConf
+                 es: EsConf,
+                 usersDb: UsersDbConf
                )
 
 object Conf {
