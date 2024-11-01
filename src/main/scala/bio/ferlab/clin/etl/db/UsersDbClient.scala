@@ -37,7 +37,7 @@ class UsersDbClient(conf: UsersDbConf) {
 
   def updateVariant(id: String, uniqueId: String): Int = {
     val stmt = conn.createStatement()
-    val count = stmt.executeUpdate(s"UPDATE variants SET unique_id = '$uniqueId' WHERE id = '$id'", 1)
+    val count = stmt.executeUpdate(s"UPDATE variants SET unique_id = '$uniqueId' WHERE id = '$id'")
     stmt.close()
     count
   }

@@ -11,7 +11,9 @@ import org.json.JSONObject
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.nio.charset.StandardCharsets
+import java.util
 import java.util.Base64
+import scala.collection.JavaConverters.iterableAsScalaIterableConverter
 
 class EsClient(conf: EsConf) {
 
@@ -102,7 +104,9 @@ class EsClient(conf: EsConf) {
       hits.forEach(hit => {
         lastId = hit.asInstanceOf[JSONObject].getString("_id")
         val source = hit.asInstanceOf[JSONObject].getJSONObject("_source")
-        val cnv = EsCNV(source.getString("name"),source.getString("aliquot_id"),source.getString("alternate"),source.getString("service_request_id"),source.getString("hash"))
+        val cnv = EsCNV(source.getString("name"), source.getString("aliquot_id"), source.getString("alternate"),
+          source.getString("service_request_id"), source.getString("hash"),
+          source.getString("analysis_service_request_id"), source.getString("patient_id"))
         cnvs :+= cnv
       })
     }
@@ -115,7 +119,7 @@ class EsClient(conf: EsConf) {
       """
           {
               "size": {size},
-              "_source": ["name", "aliquot_id", "alternate", "service_request_id", "hash"],
+              "_source": ["name", "aliquot_id", "alternate", "service_request_id", "hash", "analysis_service_request_id", "patient_id"],
               "search_after": [ "{from}" ],
               "sort": [
                   {"_id": "asc"}

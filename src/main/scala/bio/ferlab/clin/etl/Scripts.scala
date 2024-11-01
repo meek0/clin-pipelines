@@ -24,7 +24,7 @@ object Scripts extends App {
             case "FixFerloadURLs" => FixFerloadURLs(conf,params)(fhirClient)
             case "AddMissingFileExtensions" => AddMissingFileExtensions(conf, params)(fhirClient, s3Client)
             case "FixSpecimenToTaskRef" => FixSpecimenToTaskRef(fhirClient, params)
-            case "FixFlagsHash" => FixFlagsHash(conf, params)
+            case "FixFlagHashes" => FixFlagHashes(conf, params)
             case s: String => throw new IllegalArgumentException(s"unknown script: $s")
           }
         }
