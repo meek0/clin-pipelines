@@ -45,16 +45,15 @@ object FixFlagHashes {
         val newFashionHash = sha1(s"${cnv.name}-${cnv.serviceRequestId}")
         if (newFashionHash.equals(cnv.hash) && !oldFashionHash.equals(newFashionHash)) {
           val oldUniqueId = formatCNVUniqueId(oldFashionHash, cnv)
-          val variant = variants.find(v => v.uniqueId.equals(oldUniqueId)).orNull
-          if (variant != null) {
+          variants.filter(v => v.uniqueId.equals(oldUniqueId)).foreach(variant => {
             val newUniqueId = formatCNVUniqueId(newFashionHash, cnv)
-            LOGGER.info(s"Updating hash for $cnv from $oldUniqueId to $newUniqueId")
+            LOGGER.info(s"Updating hash for CNV: $cnv Flags: $variant from $oldUniqueId to $newUniqueId")
             if (!dryRun) {
               if (dbClient.updateVariant(variant.id, newUniqueId) != 1) {
                 throw new IllegalStateException(s"Failed to update variant ${variant.id}")
               }
             }
-          }
+          })
         }
       })
       lastId = currentLastId
