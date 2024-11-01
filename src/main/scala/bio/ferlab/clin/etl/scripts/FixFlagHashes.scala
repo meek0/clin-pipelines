@@ -12,7 +12,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import java.math.BigInteger
 import java.security.MessageDigest
 
-object FixFlagsHashes {
+object FixFlagHashes {
 
   val LOGGER: Logger = LoggerFactory.getLogger(FixFerloadURLs.getClass)
 
