@@ -32,7 +32,11 @@ object FixFlagHashes {
     if (variants.isEmpty) {
       throw new IllegalStateException("No variants found in users-db")
     }
+    if (!variants.exists(v => v.uniqueId.endsWith("_cnv"))) {
+      throw new IllegalStateException("No CNVs found in users-db")
+    }
     LOGGER.info(s"Found ${variants.size} variants in users-db")
+    variants.foreach(v => LOGGER.info(s"=> $v"))
 
     var lastId = ""
     var cnvCount = 0
@@ -42,7 +46,7 @@ object FixFlagHashes {
       val (currentLastId, cnvs) = esClient.getCNVsWithPagination(cnvIndex, lastId, size)
       cnvs.foreach(cnv => {
         val oldFashionHash = sha1(s"${cnv.name}-${cnv.aliquotId}-${cnv.alternate}")
-        val newFashionHash = sha1(s"${cnv.name}-${cnv.serviceRequestId}")
+        val newFashionHash = sha1(s"${cnv.name}-${cnv.alternate}-${cnv.serviceRequestId}")
         if (newFashionHash.equals(cnv.hash) && !oldFashionHash.equals(newFashionHash)) {
           val oldUniqueId = formatCNVUniqueId(oldFashionHash, cnv)
           val newUniqueId = formatCNVUniqueId(newFashionHash, cnv)
