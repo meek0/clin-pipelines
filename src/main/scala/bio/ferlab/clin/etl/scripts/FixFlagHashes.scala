@@ -45,12 +45,17 @@ object FixFlagHashes {
       LOGGER.info(s"Fetch CNVs from ES from: ${cnvCount} size: $size")
       val (currentLastId, cnvs) = esClient.getCNVsWithPagination(cnvIndex, lastId, size)
       cnvs.foreach(cnv => {
-        val oldFashionHash = sha1(s"${cnv.name}-${cnv.aliquotId}-${cnv.alternate}")
+
         val newFashionHash = sha1(s"${cnv.name}-${cnv.alternate}-${cnv.serviceRequestId}")
-        if (newFashionHash.equals(cnv.hash) && !oldFashionHash.equals(newFashionHash)) {
-          val oldUniqueId = formatCNVUniqueId(oldFashionHash, cnv)
+        if (newFashionHash.equals(cnv.hash)) {
+          // all possible previous hashes for this CNV
+          val oldFashionHash01 = sha1(s"${cnv.name}-${cnv.aliquotId}-${cnv.alternate}")
+          val oldFashionHash02 = sha1(s"${cnv.name}-${cnv.serviceRequestId}")
+          val oldUniqueId01 = formatCNVUniqueId(oldFashionHash01, cnv)
+          val oldUniqueId02 = formatCNVUniqueId(oldFashionHash02, cnv)
+
           val newUniqueId = formatCNVUniqueId(newFashionHash, cnv)
-          variants.filter(v => v.uniqueId.equals(oldUniqueId)).foreach(variant => {
+          variants.filter(v => List(oldUniqueId01, oldUniqueId02).contains(v.uniqueId)).foreach(variant => {
             LOGGER.info(s"Updating CNV: $cnv Variant: $variant")
             if (!dryRun) {
               if (dbClient.updateVariant(variant.id, newUniqueId) != 1) {
