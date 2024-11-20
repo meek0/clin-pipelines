@@ -41,7 +41,6 @@ case object AddMissingFileExtensions {
       val results: Bundle = fhirClient.search().forResource(classOf[DocumentReference])
         .offset(offset)
         .count(size)
-        .sort().ascending(DocumentReference.SUBJECT)
         .encodedJson()
         .returnBundle(classOf[Bundle]).execute()
 
@@ -83,6 +82,7 @@ case object AddMissingFileExtensions {
             fhirRessources = fhirRessources ++ FhirUtils.bundleUpdate(Seq(doc))
           }
         })
+        Thread.sleep(1000L) // don't spam FHIR too much, we have time
         if (!dryRun && fhirRessources.nonEmpty) {
           // Update FHIR documents
           val bundle = TBundle(fhirRessources.toList)
@@ -96,9 +96,10 @@ case object AddMissingFileExtensions {
             case Some(client) => CheckS3Data.moveFilesAsync(s3Files, bucket)(client)
             case None => CheckS3Data.moveFiles(s3Files, bucket)
           }
+          addMissingFileExtensions(0, size) // restart from the beginning
+        } else {
+          addMissingFileExtensions(offset + size, size)
         }
-        Thread.sleep(1000L) // don't spam FHIR too much, we have time
-        addMissingFileExtensions(offset + size, size)
       }
     }
 
