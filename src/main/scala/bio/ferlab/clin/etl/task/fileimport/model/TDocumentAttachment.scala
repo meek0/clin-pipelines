@@ -18,6 +18,7 @@ object TDocumentAttachment {
   def valid[T <: TDocumentAttachment](files: Map[String, FileEntry], a: Analysis)(implicit toAttachment: ToAttachment[T]): ValidatedNel[String, T] = toAttachment.validateFile(files, a)
 
   def idFromList[T <: TDocumentAttachment : Manifest](attachments: Seq[TDocumentAttachment]): String = attachments.collectFirst { case a: T => a.objectStoreId }.get
+  def firstIdFromList(attachments: Seq[TDocumentAttachment]): String = attachments.collectFirst { case a => a.objectStoreId }.get
 }
 
 trait ToAttachment[T <: TDocumentAttachment] {

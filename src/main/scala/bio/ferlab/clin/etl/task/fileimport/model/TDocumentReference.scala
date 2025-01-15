@@ -5,7 +5,7 @@ import bio.ferlab.clin.etl.conf.FerloadConf
 import bio.ferlab.clin.etl.fhir.FhirUtils
 import bio.ferlab.clin.etl.fhir.FhirUtils.Constants.{CodingSystems, Extensions}
 import bio.ferlab.clin.etl.fhir.FhirUtils.validateOutcomes
-import bio.ferlab.clin.etl.task.fileimport.model.TDocumentAttachment.{idFromList, valid}
+import bio.ferlab.clin.etl.task.fileimport.model.TDocumentAttachment.{firstIdFromList, idFromList, valid}
 import bio.ferlab.clin.etl.task.fileimport.model.TFullServiceRequest.EXTUM_SCHEMA
 import bio.ferlab.clin.etl.task.fileimport.model.VariantCalling.{documentTypeGermline, documentTypeSomatic}
 import ca.uhn.fhir.rest.client.api.IGenericClient
@@ -193,7 +193,7 @@ object Exomiser {
 
 case class IgvTrack(document: Seq[TDocumentAttachment]) extends TDocumentReference {
   override val documentType: String = IgvTrack.documentType
-  override val id: String = idFromList[SEG_BW](document)
+  override val id: String = firstIdFromList(document)
 }
 
 object IgvTrack {
