@@ -37,7 +37,8 @@ object FhirBulkExporter {
       "ServiceRequest",
       "Specimen",
       "Task",
-      "DocumentReference"
+      "DocumentReference",
+      "CodeSystem"
     )
       .mkString(",")
 
