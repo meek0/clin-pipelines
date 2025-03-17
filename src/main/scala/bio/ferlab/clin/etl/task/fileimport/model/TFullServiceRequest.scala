@@ -24,10 +24,7 @@ object TFullServiceRequest {
     val outcomes = FhirUtils.validateResource(sr)
     sr.setSubject(null)
     outcomes
-
   }
-
-
 }
 
 case class TAnalysisServiceRequest(submissionSchema: Option[String], analysis: FullAnalysis) {
@@ -35,6 +32,7 @@ case class TAnalysisServiceRequest(submissionSchema: Option[String], analysis: F
     sr.setId(id)
     sr.setSubject(patient)
     sr.addPerformer(ldm)
+    sr.setPriority(analysis.getPriority)
     familyExtensions.foreach { fel =>
       val extensions: Seq[Extension] = fel.map { familyExtension =>
         val ext = new Extension("http://fhir.cqgc.ferlab.bio/StructureDefinition/family-member")
@@ -76,9 +74,7 @@ case class TAnalysisServiceRequest(submissionSchema: Option[String], analysis: F
       val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
       s"Analysis Service Request for patient ${analysis.patient.firstName} ${analysis.patient.lastName}  : $loc - $diag"
     }
-
   }
-
 }
 
 case class TSequencingServiceRequest(submissionSchema: Option[String], analysis: FullAnalysis) {
@@ -89,6 +85,7 @@ case class TSequencingServiceRequest(submissionSchema: Option[String], analysis:
     sr.addPerformer(ldm)
     sr.addSpecimen(sample)
     sr.setSubject(patient)
+    sr.setPriority(analysis.getPriority)
     sr
   }
 
@@ -119,7 +116,5 @@ case class TSequencingServiceRequest(submissionSchema: Option[String], analysis:
       val loc = o.getLocation.asScala.headOption.map(_.getValueNotNull).getOrElse("")
       s"Sequencing Service Request ${analysis.ldmServiceRequestId} : $loc - $diag"
     }
-
   }
-
 }

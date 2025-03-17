@@ -43,6 +43,7 @@ case class OldMetadata(submissionSchema: Option[String], experiment: Experiment,
         a.sampleType,
         a.ldmServiceRequestId,
         a.labAliquotId,
+        a.priority,
         a.patient,
         a.files,
         Some(a.panelCode),
@@ -65,6 +66,7 @@ case class OldAnalysis(
                         ldmServiceRequestId: String,
                         labAliquotId: String,
                         patient: FullPatient,
+                        priority: Option[AnalysisPriority.Value],
                         files: FilesAnalysis,
                         panelCode: String
                       )

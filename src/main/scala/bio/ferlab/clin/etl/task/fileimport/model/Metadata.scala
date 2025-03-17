@@ -2,7 +2,8 @@ package bio.ferlab.clin.etl.task.fileimport.model
 
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.implicits.catsSyntaxValidatedId
-import play.api.libs.json.{JsError, JsSuccess, Json, Reads, Writes}
+import org.hl7.fhir.r4.model.ServiceRequest
+import play.api.libs.json.{Format, JsError, JsResult, JsSuccess, JsValue, Json, Reads, Writes}
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 
@@ -80,6 +81,17 @@ object Workflow {
   implicit val writes: Writes[Workflow] = Json.writes[Workflow]
 }
 
+object AnalysisPriority extends Enumeration {
+  private type AnalysisPriority = Value
+
+  val ROUTINE: Value = Value("ROUTINE")
+  val URGENT: Value = Value("URGENT")
+  val ASAP: Value = Value("ASAP")
+  val STAT: Value = Value("STAT")
+
+  implicit val format: Format[AnalysisPriority] = Json.formatEnum(this)
+}
+
 sealed trait Analysis {
 
   val ldm: String
@@ -88,14 +100,24 @@ sealed trait Analysis {
   val specimenType: String
   val sampleType: Option[String]
   val labAliquotId: String
+  val priority: Option[AnalysisPriority.Value]
   val patient: InputPatient
   val files: FilesAnalysis
 
   def experiment: Experiment
 
   def workflow: Workflow
-}
 
+  def getPriority: ServiceRequest.ServiceRequestPriority  = {
+    priority match {
+      case Some(AnalysisPriority.ROUTINE) => ServiceRequest.ServiceRequestPriority.ROUTINE
+      case Some(AnalysisPriority.URGENT) => ServiceRequest.ServiceRequestPriority.URGENT
+      case Some(AnalysisPriority.ASAP) => ServiceRequest.ServiceRequestPriority.ASAP
+      case Some(AnalysisPriority.STAT) => ServiceRequest.ServiceRequestPriority.STAT
+      case None => ServiceRequest.ServiceRequestPriority.ROUTINE
+    }
+  }
+}
 
 case class SimpleAnalysis(
                            ldm: String,
@@ -105,6 +127,7 @@ case class SimpleAnalysis(
                            sampleType: Option[String],
                            clinServiceRequestId: String,
                            labAliquotId: String,
+                           priority: Option[AnalysisPriority.Value],
                            patient: SimplePatient,
                            files: FilesAnalysis,
                            experiment: Experiment,
@@ -124,6 +147,7 @@ case class FullAnalysis(
                          sampleType: Option[String],
                          ldmServiceRequestId: String,
                          labAliquotId: String,
+                         priority: Option[AnalysisPriority.Value],
                          patient: FullPatient,
                          files: FilesAnalysis,
                          panelCode: Option[String],

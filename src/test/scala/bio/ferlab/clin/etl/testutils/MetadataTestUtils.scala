@@ -55,6 +55,7 @@ object MetadataTestUtils {
     sampleType = Some("DNA"),
     ldmServiceRequestId = "clin_prescription_id",
     labAliquotId = "nanuq_sample_id",
+    priority = None,
     panelCode = None,
     analysisCode = Some("MMG"),
     files = defaultFilesAnalysis,
@@ -114,6 +115,7 @@ object MetadataTestUtils {
     sampleType = Some("DNA"),
     clinServiceRequestId = "clin_prescription_id",
     labAliquotId = "nanuq_sample_id",
+    priority = None,
     files = defaultFilesAnalysis,
     experiment = defaultExperiment,
     workflow = defaultWorkflow
@@ -127,6 +129,7 @@ object MetadataTestUtils {
     sampleType = Some("DNA"),
     clinServiceRequestId = "clin_prescription_id",
     labAliquotId = "nanuq_sample_id",
+    priority = None,
     files = defaultFilesAnalysisWithOptionals,
     experiment = defaultExperiment,
     workflow = defaultWorkflow

@@ -28,7 +28,7 @@ object MigrateMetadata {
       val newMetadata = m.toNewMetadata
       val json = Json.prettyPrint(Json.toJson(newMetadata))
       val s3Path = s"$prefix/metadata.json"
-      LOGGER.info(s"Write content into bucker $bucket at path $s3Path with content: $json")
+      LOGGER.info(s"Write content into bucket $bucket at path $s3Path with content: $json")
       S3Utils.writeContent(bucket, s3Path, json)
       json.validNel[String]
     }
