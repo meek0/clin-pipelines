@@ -1,6 +1,8 @@
 package bio.ferlab.clin.etl.task.ldmnotifier
 
+import bio.ferlab.clin.etl.fhir.IClinFhirClient
 import bio.ferlab.clin.etl.task.ldmnotifier.model.{Document, ManifestRow, Task}
+import org.hl7.fhir.r4.model.{IdType, ServiceRequest}
 
 import java.net.URI
 import java.util.Base64
@@ -64,5 +66,13 @@ object TasksTransformer {
     )
       .groupBy(_._1)
       .mapValues(listOfKeysToRows => listOfKeysToRows.flatMap(keysToRows => keysToRows._2))
+  }
+
+  def hasStatPriority(tasks: Seq[Task])(implicit client: IClinFhirClient): Boolean = {
+    tasks.foreach(task => {
+      val serviceRequest = client.getServiceRequestById(new IdType(removePrefix(serviceRequestReferencePrefix, task.serviceRequestReference)))
+      if (serviceRequest.getPriority.equals(ServiceRequest.ServiceRequestPriority.STAT)) return true
+    })
+    false
   }
 }

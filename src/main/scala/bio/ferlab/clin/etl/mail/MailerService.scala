@@ -21,7 +21,7 @@ class MailerService (mailerClient: MailerClient) {
       from = params.from,
       to = params.to,
       attachments = params.attachments,
-      bodyText = Some(params.bodyText),
+      bodyHtml = Some(params.bodyText),
       bcc = params.bccs
     ))
   }
