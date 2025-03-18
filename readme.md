@@ -62,6 +62,12 @@ sbt test
 Because starting and initializing FHIR containers takes time, it's also possible to start containers aside and run test. To start a container you can start main application in one of those class :
    - [MinioServer](src/test/scala/bio/ferlab/clin/etl/fhir/testutils/MinioServer.scala) : Start a minio server
    - [FhirServer](src/test/scala/bio/ferlab/clin/etl/fhir/testutils/FhirServer.scala) : Start a fhir server
-   - [WholeStack](src/test/scala/bio/ferlab/clin/etl/fhir/testutils/WholeStack.scala) : Start a fhir server + a minio server
+   - [ElasticSearchServer](src/test/scala/bio/ferlab/clin/etl/fhir/testutils/FhirServer.scala) : Start an elasticsearch server
+   - [WholeStack](src/test/scala/bio/ferlab/clin/etl/fhir/testutils/WholeStack.scala) : Start the whole stack
+
+> Note : FhirServer waits 120 seconds to init. The stack is ready when you see the message "Whole stack is started" in the logs.
+
+Then, you can run tests from sbt : 
+```
  
 After each test execution, data created by tests is cleaned up, but containers are kept up and running. 
