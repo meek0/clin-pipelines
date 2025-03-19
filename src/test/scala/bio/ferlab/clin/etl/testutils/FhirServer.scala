@@ -21,6 +21,8 @@ trait FhirServer {
   val fhirContext: FhirContext = FhirContext.forR4()
   fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING)
   fhirContext.getRestfulClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER)
+  fhirContext.getRestfulClientFactory.setConnectTimeout(60 * 1000)
+  fhirContext.getRestfulClientFactory.setSocketTimeout(60 * 1000)
   val parser: IParser = fhirContext.newJsonParser().setPrettyPrint(true)
 
   implicit val clinClient: IClinFhirClient = fhirContext.newRestfulClient(classOf[IClinFhirClient], fhirBaseUrl)

@@ -133,9 +133,8 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
       val fileCSV = s"$reportPath/files.csv"
       assert(S3Utils.exists(inputBucket, fileCSV), s"File CSV $fileCSV does not exist")
     }
-
-
   }
+
   it should "return errors" in {
     withS3Objects { (inputPrefix, outputPrefix) =>
       transferFromResources(inputPrefix, "bad")
@@ -147,6 +146,4 @@ class FileImportFeatureSpec extends FlatSpec with WholeStackSuite with Matchers 
 
     }
   }
-
-
 }
