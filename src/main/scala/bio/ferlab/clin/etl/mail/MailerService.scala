@@ -34,6 +34,8 @@ object MailerService {
     mailerConf.ssl,
     mailerConf.tls,
     mailerConf.tlsRequired,
+    mailerConf.user,
+    mailerConf.password,
   ))
 
   def adjustBccType(mailerConf: MailerConf): Seq[String] =

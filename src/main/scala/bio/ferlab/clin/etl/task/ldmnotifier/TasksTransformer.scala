@@ -71,7 +71,7 @@ object TasksTransformer {
   def hasStatPriority(tasks: Seq[Task])(implicit client: IClinFhirClient): Boolean = {
     tasks.foreach(task => {
       val serviceRequest = client.getServiceRequestById(new IdType(removePrefix(serviceRequestReferencePrefix, task.serviceRequestReference)))
-      if (serviceRequest.getPriority.equals(ServiceRequest.ServiceRequestPriority.STAT)) return true
+      if (serviceRequest.hasPriority && serviceRequest.getPriority.equals(ServiceRequest.ServiceRequestPriority.STAT)) return true
     })
     false
   }

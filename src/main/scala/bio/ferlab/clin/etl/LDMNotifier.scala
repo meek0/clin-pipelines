@@ -20,7 +20,8 @@ object LDMNotifier extends App {
                  runName: String,
                  mailerConf: MailerConf,
                  group: Map[(String, Seq[String]), Seq[ManifestRow]],
-                 hasStatPriority: Boolean
+                 hasStatPriority: Boolean,
+                 clinUrl: String = "https://portail.cqgc.hsj.rtss.qc.ca"
                 ): ValidationResult[List[Unit]] = {
 
     val mailer = new MailerService(makeSmtpMailer(mailerConf))
@@ -36,7 +37,7 @@ object LDMNotifier extends App {
             from = mailerConf.from,
             bccs = blindCC,
             subject = "Nouvelles données du CQGC",
-            bodyText = createMsgBody(ldmPram = alias, runNameParam = runName, hasStatPriority),
+            bodyText = createMsgBody(ldmPram = alias, runNameParam = runName, hasStatPriority, clinUrl),
             attachments = Seq(createMetaDataAttachmentFile(batchId, manifestRows))
           ))
 
@@ -68,7 +69,7 @@ object LDMNotifier extends App {
         tasksV.flatMap { tasks: Seq[Task] =>
           val ldmsToManifestRows = groupManifestRowsByLdm(conf.clin.url, tasks)
           val statPriority = hasStatPriority(tasks)(clinClient)
-          sendEmails(batchId = batchId, runName = tasks.head.runName, mailerConf = conf.mailer, group = ldmsToManifestRows, statPriority)
+          sendEmails(batchId = batchId, runName = tasks.head.runName, mailerConf = conf.mailer, group = ldmsToManifestRows, statPriority, conf.clin.url)
         }
       }
     }
