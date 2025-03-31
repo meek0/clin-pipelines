@@ -21,7 +21,7 @@ class MailerService (mailerClient: MailerClient) {
       from = params.from,
       to = params.to,
       attachments = params.attachments,
-      bodyText = Some(params.bodyText),
+      bodyHtml = Some(params.bodyText),
       bcc = params.bccs
     ))
   }
@@ -34,6 +34,8 @@ object MailerService {
     mailerConf.ssl,
     mailerConf.tls,
     mailerConf.tlsRequired,
+    mailerConf.user,
+    mailerConf.password,
   ))
 
   def adjustBccType(mailerConf: MailerConf): Seq[String] =

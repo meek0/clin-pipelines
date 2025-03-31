@@ -1,12 +1,13 @@
 package bio.ferlab.clin.etl
 
 import bio.ferlab.clin.etl.conf.MailerConf
+import bio.ferlab.clin.etl.fhir.FhirClient.buildFhirClients
 import bio.ferlab.clin.etl.keycloak.Auth
 import bio.ferlab.clin.etl.mail.MailerService.{adjustBccType, makeSmtpMailer}
 import bio.ferlab.clin.etl.mail.{EmailParams, MailerService}
 import bio.ferlab.clin.etl.task.ldmnotifier.TasksGqlExtractor.{checkIfGqlResponseHasData, fetchTasksFromFhir}
 import bio.ferlab.clin.etl.task.ldmnotifier.TasksMessageComposer.{createMetaDataAttachmentFile, createMsgBody}
-import bio.ferlab.clin.etl.task.ldmnotifier.TasksTransformer.groupManifestRowsByLdm
+import bio.ferlab.clin.etl.task.ldmnotifier.TasksTransformer.{groupManifestRowsByLdm, hasStatPriority}
 import bio.ferlab.clin.etl.task.ldmnotifier.model.{ManifestRow, Task}
 import cats.implicits._
 import org.slf4j.{Logger, LoggerFactory}
@@ -18,7 +19,9 @@ object LDMNotifier extends App {
   def sendEmails(batchId: String,
                  runName: String,
                  mailerConf: MailerConf,
-                 group: Map[(String, Seq[String]), Seq[ManifestRow]]
+                 group: Map[(String, Seq[String]), Seq[ManifestRow]],
+                 hasStatPriority: Boolean,
+                 clinUrl: String = "https://portail.cqgc.hsj.rtss.qc.ca"
                 ): ValidationResult[List[Unit]] = {
 
     val mailer = new MailerService(makeSmtpMailer(mailerConf))
@@ -34,7 +37,7 @@ object LDMNotifier extends App {
             from = mailerConf.from,
             bccs = blindCC,
             subject = "Nouvelles données du CQGC",
-            bodyText = createMsgBody(ldmPram = alias, runNameParam = runName),
+            bodyText = createMsgBody(ldmPram = alias, runNameParam = runName, hasStatPriority, clinUrl),
             attachments = Seq(createMetaDataAttachmentFile(batchId, manifestRows))
           ))
 
@@ -62,9 +65,11 @@ object LDMNotifier extends App {
 
         val tasksV: ValidationResult[Seq[Task]] = tasksE.toValidatedNel
 
+        val (clinClient, client) = buildFhirClients(conf.fhir, conf.keycloak)
         tasksV.flatMap { tasks: Seq[Task] =>
           val ldmsToManifestRows = groupManifestRowsByLdm(conf.clin.url, tasks)
-          sendEmails(batchId = batchId, runName = tasks.head.runName, mailerConf = conf.mailer, group = ldmsToManifestRows)
+          val statPriority = hasStatPriority(tasks)(clinClient)
+          sendEmails(batchId = batchId, runName = tasks.head.runName, mailerConf = conf.mailer, group = ldmsToManifestRows, statPriority, conf.clin.url)
         }
       }
     }

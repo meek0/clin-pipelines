@@ -69,5 +69,23 @@ Because starting and initializing FHIR containers takes time, it's also possible
 
 Then, you can run tests from sbt : 
 ```
+sbt test
+# or
+sbt testOnly FileImportSpec
+```
  
 After each test execution, data created by tests is cleaned up, but containers are kept up and running. 
+
+### Test emails
+
+Email sending can be tested with the provided test configs (IntelliJ): 
+- localstack: "Test LDMNotifier email sending".  
+- QA: "Test LDMNotifier email sending QA" (update config to set the keycloak client secret, but don't commit it).
+
+
+An email will be send to the Ethereal service allowing to simulate an SMTP server.  
+Emails can be viewed at https://ethereal.email/messages with credentials:  
+- usernme: meta.boyer3@ethereal.email
+- password: JhBu3TSbaFCAQdHgey  
+
+(this is just a testing service, emails are not sent to real recipients, and message are deleted after 24h)
